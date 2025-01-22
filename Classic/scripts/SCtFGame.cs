@@ -577,7 +577,7 @@ function SCtFGame::playerLostFlagTarget(%game, %player)
 function SCtFGame::updateFlagTransform(%game, %flag)
 {
    %flag.setTransform(%flag.getTransform());
-   %game.updateFlagThread[%flag] = %game.schedule(256, "updateFlagTransform", %flag);
+   %game.updateFlagThread[%flag] = %game.schedule(100, "updateFlagTransform", %flag);
 }
 
 function SCtFGame::playerDroppedFlag(%game, %player)

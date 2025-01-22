@@ -1731,7 +1731,7 @@ function LakRabbitGame::onClientKilled(%game, %clVictim, %clKiller, %damageType,
 function LakRabbitGame::updateFlagTransform(%game, %flag)
 {
    %flag.setTransform(%flag.getTransform());
-   %game.updateFlagThread[%flag] = %game.schedule(256, "updateFlagTransform", %flag);
+   %game.updateFlagThread[%flag] = %game.schedule(100, "updateFlagTransform", %flag);
 }
 
 function LakRabbitGame::playerDroppedFlag(%game, %player)
