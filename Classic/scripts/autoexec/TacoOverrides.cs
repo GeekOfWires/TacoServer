@@ -77,7 +77,7 @@ function VehicleData::onDestroyed(%data, %obj, %prevState)
       //%data.schedule(500, 'onAvoidCollisions', %obj);
 
 	  //Transfer the vehicle far away
-      %obj.schedule(1, "setPosition", vectorAdd(%obj.getPosition(), "40 -27 10000")); //Lowered: was 500
+      %obj.schedule(128, "setPosition", vectorAdd(%obj.getPosition(), "40 -27 10000")); //Lowered: was 500
    }
    else if(%data.getName() $="BomberFlyer" || %data.getName() $="MobileBaseVehicle")
    {
@@ -86,7 +86,7 @@ function VehicleData::onDestroyed(%data, %obj, %prevState)
       //%data.schedule(500, 'onAvoidCollisions', %obj);
 
 	  //Transfer the vehicle far away
-      %obj.schedule(100, "setPosition", vectorAdd(%obj.getPosition(), "40 -27 10000")); //Lowered: was 500
+      %obj.schedule(128, "setPosition", vectorAdd(%obj.getPosition(), "40 -27 10000")); //Lowered: was 500
    }
    else
    {
