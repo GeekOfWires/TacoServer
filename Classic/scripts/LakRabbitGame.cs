@@ -1731,7 +1731,7 @@ function LakRabbitGame::onClientKilled(%game, %clVictim, %clKiller, %damageType,
 function LakRabbitGame::updateFlagTransform(%game, %flag)
 {
    %flag.setTransform(%flag.getTransform());
-   %game.updateFlagThread[%flag] = %game.schedule(256, "updateFlagTransform", %flag);
+   %game.updateFlagThread[%flag] = %game.schedule(100, "updateFlagTransform", %flag);
 }
 
 function LakRabbitGame::playerDroppedFlag(%game, %player)
@@ -2188,8 +2188,16 @@ function plzBounceOffGrid(%obj, %bounceForce, %count)
 		%vec = VectorNormalize(%vec);
 		%vec = VectorScale(%vec, 25);
 	}
-	else if (%oldSpeed < 60) //Max speed a boost gets applied to a bounce: Added so runners cant abuse
-		%vec = VectorScale(%vec, 1.15);
+	else if (%oldSpeed < 75) //Max speed a boost gets applied to a bounce: Added so runners cant abuse //was 60
+		%vec = VectorScale(%vec, 0.95); //was 1.15
+	else if (%oldSpeed < 100) //Slow down runners
+		%vec = VectorScale(%vec, 0.85);
+	else if (%oldSpeed < 125) //Slow down runners
+		%vec = VectorScale(%vec, 0.75);
+	else if (%oldSpeed < 150) //Slow down runners
+		%vec = VectorScale(%vec, 0.65);
+	else if (%oldSpeed > 175) //Slow down runners
+		%vec = VectorScale(%vec, 0.55);
 
 	// apply the impulse to the object
 	//%obj.applyImpulse(%obj.getWorldBoxCenter(), %vec);

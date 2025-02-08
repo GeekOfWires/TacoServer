@@ -373,6 +373,8 @@ addRotationMap("WhiteDwarfDeluxe",			    "CTF",1,0,-1,14);
 addRotationMap("SmallSpit",					    "CTF",1,1,-1,20);
 addRotationMap("MisadventureV2",			    "CTF",1,1,12,28);
 addRotationMap("El_Fin",					    "CTF",1,1,-1,14);
+addRotationMap("HogansRun24",					"CTF",1,0,-1,14);
+addRotationMap("SignalDX",						"CTF",1,0,8,24);
 
 //  _           _              _     _     _ _
 // | |         | |            | |   | |   (_) |
@@ -530,6 +532,7 @@ addRotationMap("SuperiorWaterworks",			"LCTF",1,0,-1,12);
 addRotationMap("FrozenForgeLT",					"LCTF",1,1,-1,20);
 addRotationMap("TWL2_CelerityLT",				"LCTF",1,1,-1,20);
 addRotationMap("El_Fin",					    "LCTF",1,1,-1,14);
+addRotationMap("CapriLT",					    "LCTF",1,1,-1,14);
 
 
 //  _____             _   _                     _       _

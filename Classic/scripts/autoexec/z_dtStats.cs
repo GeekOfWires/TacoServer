@@ -1,3 +1,4 @@
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	Stats system for classic and base
 //	Script BY: DarkTiger
@@ -9,14 +10,15 @@
 //	Version 6.0 - Lan & Bot Support / Leaderboard / Stats Storage Overhaul / Optimization / Fixes
 //	Version 7.0 - Code refactor / Heavy Optimization / Map Stats / Server Stats / Fixes / Misc other features
 //	Version 8.0 - More Stats / Fixes / Server Event Log
-//	Version 9.0 - Misc Fixes / Map Stats Removed
-//	Version 10.0 - Final Code refactor / Optimizing / New Features
+//	Version 9.0 - Misc Fixes / Map Stats Removed 
+//	Version 10.0 - Final Code refactor / Optimizing / New Features  
 // Note See bottom of file for full log
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //-----------Settings-----------
-$dtStats::version = 10.3;
+$dtStats::version = 10.47;
 //disable stats system
 $dtStats::Enable = $Host::dtStatsEnable $= "" ? ($Host::dtStatsEnable = 1) : $Host::dtStatsEnable;
+if(!$dtStats::Enable){ return;}// so it disables with a restart
 //set max number of individual game to record
 //Note only tested to 100 games, hard cap at 300
 $dtStats::MaxNumOfGames = 100;
@@ -24,19 +26,22 @@ $dtStats::MaxNumOfGames = 100;
 //how high the player has to be off the ground before it will count
 $dtStats::midAirHeight = 10;
 
-//only enable if evo system is not available
+//only enable if evo system is not available 
 $dtStats::midAirMessage =  $Host::dtStatsMidAirMessage $= "" ? ($Host::dtStatsMidAirMessage = 1) : $Host::dtStatsMidAirMessage;
 
 //capture best cap times restart required if changed
-//only enable if evo system is not available
+//only enable if evo system is not available 
 $dtStats::ctfTimes =  $Host::dtStatsCTFTimes $= "" ? ($Host::dtStatsCTFTimes = 1) : $Host::dtStatsCTFTimes;
 //number of players before it starts counting captimes
 $dtStats::ctfTimesPlayerLimit =  $Host::dtStatsCTFTimesPlayerLimit $= "" ? ($Host::dtStatsCTFTimesPlayerLimit = 8) : $Host::dtStatsCTFTimesPlayerLimit;
 
 //converts the debrief into easer to read teams for ctf and lctf
 $dtStats::teamDebrief = $Host::dtStatsTeamDebrief $= "" ? ($Host::dtStatsTeamDebrief = 1) : $Host::dtStatsTeamDebrief;
-//extends the debrief with extra stats done in the evo style
+//extends the debrief with extra stats done in the evo style 
 $dtStats::evoStyleDebrief = $Host::dtStatsEvoStyleDebrief $= "" ? ($Host::dtStatsEvoStyleDebrief = 1) : $Host::dtStatsEvoStyleDebrief ;
+
+//extends the debrief with extra stats done in the evo style 
+$dtStats::arenaKDRStats = $Host::dtStatsArenaKDRStats $= "" ? ($Host::dtStatsArenaKDRStats = 1) : $Host::dtStatsArenaKDRStats ;
 
 // 30 sec min after not making an action reset
 $dtStats::returnToMenuTimer = (60*1000);
@@ -45,15 +50,15 @@ $dtStats::returnToMenuTimer = (60*1000);
 $dtStats::saveTime = 64;
 
 //auto compiles tournament stats with main stats'
-//Note atm tournament stats is hard coded and setup only for CTF
-//outputs a ppm image in serverStats/statsImg this can be open/converted with most editors
+//Note atm tournament stats is hard coded and setup only for CTF 
+//outputs a ppm image in serverStats/statsImg this can be open/converted with most editors 
 $dtStats::tmModeCompile = 1;
-
+$dtStats::tmMode = 0;
 
 //minimum number avg data to  consider for leaderboards
 $dtStats::minAvg = 8;
 //minimum  number of games for leaderboards
-$dtStats::minGame = 2;
+$dtStats::minGame = 1;
 
 //sorting speed
 $dtStats::sortSpeed = 64;
@@ -66,25 +71,24 @@ $dtStats::buildSetTime = $Host::dtStatsBuildSetTime $= "" ? ($Host::dtStatsBuild
 // top 15 players per cat, best not to change
 $dtStats::topAmount = 15;
 
-$dtStats::joinHist = 144;//51 per page
+$dtStats::joinHist = 144;//51 per page 
 $dtStats::BanListFile = $Host::dtStatsBanListFile $= "" ? ($Host::dtStatsBanListFile = "prefs/dtBanlist.cs") : $Host::dtStatsBanListFile;
 $dtStats::IPBanListFile = $Host::dtStatsIPBanListFile $= "" ? ($Host::dtStatsIPBanListFile = "prefs/ipList.txt") : $Host::dtStatsIPBanListFile;
 $dtStats::WhtListFile = $Host::dtStatsWhtListFile $= "" ? ($Host::dtStatsWhtListFile = "prefs/whtList.cs") : $Host::dtStatsWhtListFile;
 
 
-
 //File maintainers to deletes old files
 $dtStats::fm  = 1;
 //Set 2 or more to enable, this also contorls how much history you want, best to keep this count low
-$dtStats::day = 0;//-365
-$dtStats::week = 0;//~53
-$dtStats::month = 3; //-12
-$dtStats::quarter = 0;//-4
-$dtStats::year = 0;// number of years
+$dtStats::day = 0;//not used
+$dtStats::week = 12;//~53
+$dtStats::month = 4; //-12
+$dtStats::quarter = 0;//not used
+$dtStats::year = 0;//not used
 // you gain extra days based on time played extra days = gameCount * expireFactor;
 // example being 100 games * factor of 0.596 = will gain you 60 extra days but if its over the 90 day max it will be deleted
 $dtStats::expireMax = 90;
-$dtStats::expireMin = 15;
+$dtStats::expireMin = 15; 
 $dtStats::expireFactor["CTFGame"] = 0.596;
 $dtStats::expireFactor["LakRabbitGame"] = 2;
 $dtStats::expireFactor["DMGame"] = 6;
@@ -94,15 +98,11 @@ $dtStats::expireFactor["ArenaGame"] = 2;
 $dtStats::expireFactor["SiegeGame"] = 10;
 
 //debug stuff
+$dtStats::dev = isFile("scripts/autoexec/dev.cs");
 $Host::ShowIngamePlayerScores  = 1;
 $dtStats::enableRefresh = 0;// keep off unless testing, auto updates the score hud when open
-$dtStats::debugEchos = 0;// echos function calls
-//$dtStats::returnToMenuTimer = (60*1000);
-$pref::NoClearConsole = 1;
-//setLogMode(1);
-//$AIDisableChat = 1;
-//dbgSetParameters(6060,"password");
-
+$dtStats::debugEchos = $dtStats::dev;// echos function calls
+$dtStats::returnToMenuTimer = ($dtStats::dev == 1) ?  ((60*1000) * 30) : ((60*1000)* 2);
 
 //---------------------------------
 //  Torque Markup Language - TML
@@ -153,25 +153,29 @@ $dtStats::gameType[0] = "CTFGame";
 $dtStats::gameType[1] = "LakRabbitGame";
 $dtStats::gameType[2] = "DMGame";
 $dtStats::gameType[3] = "LCTFGame";
-$dtStats::gameType[4] = "ArenaGame";
-$dtStats::gameType[5] = "SCtFGame";
+$dtStats::gameType[4] = "SCtFGame";
+$dtStats::gameType[5] = "ArenaGame";
 //$dtStats::gameType[5] = "SiegeGame";
-$dtStats::gameTypeCount = 5;
+$dtStats::gameTypeCount = 6;
 //short hand name
 $dtStats::gtNameShort["CTFGame"] = "CTF";
 $dtStats::gtNameShort["LakRabbitGame"] = "LakRabbit";
 $dtStats::gtNameShort["DMGame"] = "DM";
 $dtStats::gtNameShort["LCTFGame"] = "LCTF";
-$dtStats::gtNameShort["ArenaGame"] = "Arena";
 $dtStats::gtNameShort["SCtFGame"] = "LCTF";
+$dtStats::gtNameShort["ArenaGame"] = "Arena";
 //$dtStats::gtNameShort["SiegeGame"] = "Siege";
+
+$dtStats::gtNameType["CTF"] = "CTFGame";
+$dtStats::gtNameType["LCTF"] = "SCtFGame";
+$dtStats::gtNameType["Arena"] = "ArenaGame";
 //Display name
 $dtStats::gtNameLong["CTFGame"] = "Capture the Flag";
 $dtStats::gtNameLong["LakRabbitGame"] = "LakRabbit";
 $dtStats::gtNameLong["DMGame"] = "Deathmatch";
 $dtStats::gtNameLong["LCTFGame"] = "Light CTF";
-$dtStats::gtNameLong["ArenaGame"] = "Arena";
 $dtStats::gtNameLong["SCtFGame"] = "Light CTF";
+$dtStats::gtNameLong["ArenaGame"] = "Arena";
 //$dtStats::gtNameLong["SiegeGame"] = "Siege";
 
 //varTypes
@@ -184,7 +188,7 @@ $dtStats::varType[5] = "Avg"; //Average value
 $dtStats::varType[6] = "AvgI";//Average value sorted inverse
 $dtStats::varTypeCount = 7;
 
-function dtStatsResetGobals(){
+function dtStatsResetGobals(){ 
    for(%v = 0; %v < $dtStats::varTypeCount; %v++){
       %varType = $dtStats::varType[%v];
       $dtStats::FC[%varType] = 0;
@@ -531,7 +535,7 @@ $dtStats::FV[$dtStats::FC["SCtFGame","TG"]++,"SCtFGame","TG"] = "flagTimeMin";
 ///////////////////////////////////////////////////////////////////////////////
 //                            	 LakRabbit
 ///////////////////////////////////////////////////////////////////////////////
-//Game type values - out of LakRabbitGame.cs
+//Game type values - out of LakRabbitGame.cs      %client.dtStats.stat["score"] = %client.score;
 $dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "score";
 $dtStats::FVG[$dtStats::FCG["LakRabbitGame","Avg"]++,"LakRabbitGame","Avg"] = "score";
 $dtStats::FVG[$dtStats::FCG["LakRabbitGame","Max"]++,"LakRabbitGame","Max"] = "score";
@@ -543,18 +547,17 @@ $dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "mor
 $dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "mas";
 $dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "MidairflagGrabs";
 $dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "MidairflagGrabPoints";
+$dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "flagTimeMS";
+$dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "totalChainAccuracy";
+$dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "totalChainHits";
+$dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "totalSnipeHits";
+$dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "totalSnipes";
+$dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "totalSpeed";
+$dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "totalDistance";
+$dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "totalShockHits";
+$dtStats::FVG[$dtStats::FCG["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "totalShocks";
 
 $dtStats::FV[$dtStats::FC["LakRabbitGame","TG"]++,"LakRabbitGame","TG"] = "flagTimeMin";
-
-$dtStats::uGFV[$dtStats::uGFC["LakRabbitGame"]++,"LakRabbitGame"] = "flagTimeMS";
-$dtStats::uGFV[$dtStats::uGFC["LakRabbitGame"]++,"LakRabbitGame"] = "totalChainAccuracy";
-$dtStats::uGFV[$dtStats::uGFC["LakRabbitGame"]++,"LakRabbitGame"] = "totalChainHits";
-$dtStats::uGFV[$dtStats::uGFC["LakRabbitGame"]++,"LakRabbitGame"] = "totalSnipeHits";
-$dtStats::uGFV[$dtStats::uGFC["LakRabbitGame"]++,"LakRabbitGame"] = "totalSnipes";
-$dtStats::uGFV[$dtStats::uGFC["LakRabbitGame"]++,"LakRabbitGame"] = "totalSpeed";
-$dtStats::uGFV[$dtStats::uGFC["LakRabbitGame"]++,"LakRabbitGame"] = "totalDistance";
-$dtStats::uGFV[$dtStats::uGFC["LakRabbitGame"]++,"LakRabbitGame"] = "totalShockHits";
-$dtStats::uGFV[$dtStats::uGFC["LakRabbitGame"]++,"LakRabbitGame"] = "totalShocks";
 ///////////////////////////////////////////////////////////////////////////////
 //                            	 DMGame
 ///////////////////////////////////////////////////////////////////////////////
@@ -592,6 +595,14 @@ $dtStats::FV[$dtStats::FC["ArenaGame","TG"]++,"ArenaGame","TG"] = "timeOnTeamZer
 $dtStats::FV[$dtStats::FC["ArenaGame","TG"]++,"ArenaGame","TG"] = "timeOnTeamOne";
 $dtStats::FV[$dtStats::FC["ArenaGame","TG"]++,"ArenaGame","TG"] = "timeOnTeamTwo";
 $dtStats::FV[$dtStats::FC["ArenaGame","TG"]++,"ArenaGame","TG"] = "matchRunTime";
+$dtStats::FV[$dtStats::FC["ArenaGame","AVG"]++,"ArenaGame","AVG"] = "WLR";
+$dtStats::FV[$dtStats::FC["ArenaGame","AVG"]++,"ArenaGame","AVG"] = "discMARatio";
+$dtStats::FV[$dtStats::FC["ArenaGame","AVG"]++,"ArenaGame","AVG"] = "plasmaMARatio";
+$dtStats::FV[$dtStats::FC["ArenaGame","AVG"]++,"ArenaGame","AVG"] = "laserMARatio";
+$dtStats::FV[$dtStats::FC["ArenaGame","AVG"]++,"ArenaGame","AVG"] = "grenadeMARatio";
+$dtStats::FV[$dtStats::FC["ArenaGame","AVG"]++,"ArenaGame","AVG"] = "shockMARatio";
+$dtStats::FV[$dtStats::FC["ArenaGame","AVG"]++,"ArenaGame","AVG"] = "blasterMARatio";
+
 ///////////////////////////////////////////////////////////////////////////////
 //                            	 SiegeGame
 ///////////////////////////////////////////////////////////////////////////////
@@ -653,9 +664,6 @@ $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "forceFieldPowerUpKills";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "crashKills";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "nexusCampingKills";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "inventoryKills";
-
-
-
 
 
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "cgDeaths";
@@ -809,7 +817,7 @@ $dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "deadDist";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "missileTK";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "inventoryDeaths";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "repairEnemy";
-
+$dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "revenge";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "shieldPackDmg";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "cloakerKills";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "cloakersKilled";
@@ -823,6 +831,7 @@ $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "flareKill";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "flareHit";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "discJump";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "killerDiscJump";
+$dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "discKillGround";
 
 // nongame
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "leavemissionareaCount";
@@ -914,17 +923,7 @@ $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "mineCom";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "shockCom";
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "satchelCom";
 
- //source kill velocity  - note no mine
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "cgKillSV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "discKillSV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "grenadeKillSV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "laserKillSV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "mortarKillSV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "shockKillSV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "plasmaKillSV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "blasterKillSV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "hGrenadeKillSV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "missileKillSV";
+
 
  //source hit velocity - note no mine
 $dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "cgHitSV";
@@ -938,19 +937,8 @@ $dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "blasterHitSV";
 $dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "hGrenadeHitSV";
 $dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "missileHitSV";
 
- //victim velocity
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "cgKillVV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "discKillVV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "grenadeKillVV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "laserKillVV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "mortarKillVV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "shockKillVV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "plasmaKillVV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "blasterKillVV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "hGrenadeKillVV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "mineKillVV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "missileKillVV";
-$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "satchelKillVV";
+$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "mineHitVV";
+$dtStats::FV[$dtStats::FC["Max"]++,"Max"] = "satchelHitVV";
 
 
 //midairs
@@ -1031,7 +1019,7 @@ $dtStats::FV[$dtStats::FC["Avg"]++,"Avg"] = "mortarDmgACC";
 
 
 
-$dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "null";//rng number for testing
+$dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "null";//rng number for testing 
 ////////////////////////////////////////////////////////////////////////////////
 //Unused vars that are not tracked but used for other things and need to be reset every round
 
@@ -1043,7 +1031,7 @@ $dtStats::unused[$dtStats::unusedCount++] = "ksCounter";
 
 
 
-// varable name  = Full Name  TAB Var Type
+// varable name  = Full Name  TAB Var Type 
 $statsName["scoreAvg"] = "Score Avg" TAB "Avg";
 $statsName["scoreMax"] = "Max Score" TAB "Max";
 $statsName["masTG"] = "Total MidAirs" TAB "Total";
@@ -1139,7 +1127,7 @@ $statsName["discKillsTG"] = "Spinfusor Kills" TAB "Total";
 $statsName["discDeathsTG"] = "Spinfusor Deaths" TAB "Total";
 $statsName["grenadeKillsTG"] = "Grenade L Kills" TAB "Total";
 $statsName["grenadeDeathsTG"] = "Grenade L Deaths" TAB "Total";
-$statsName["hGrenadeKillsTG"] = "HGrenade Kills" TAB "Total";
+$statsName["hGrenadeKillsTG"] = "Hand Grenade Kills" TAB "Total";
 $statsName["hGrenadeDeathsTG"] = "HGrenade Deaths" TAB "Total";
 $statsName["laserKillsTG"] = "Laser Rifle Kills" TAB "Total";
 $statsName["laserDeathsTG"] = "Laser Rifle Deaths" TAB "Total";
@@ -1403,30 +1391,6 @@ $statsName["maHitVVMax"] = "Rabbit Hunter" TAB "Kmh";
 $statsName["killStreakMax"] = "Highest Kill Streak" TAB "Max";
 $statsName["maxSpeedMax"] = "Highest Speed" TAB "Total Kmh";
 $statsName["deadDistMax"] = "Dead Distance" TAB "Total Meters";
-$statsName["cgKillSVMax"] = "Chaingun Kill Speed Max" TAB "Kmh";
-$statsName["discKillSVMax"] = "Disc Kill Speed Max" TAB "Kmh";
-$statsName["grenadeKillSVMax"] = "Grenade Kill Speed Max" TAB "Kmh";
-$statsName["laserKillSVMax"] = "Laser Kill Speed Max" TAB "Kmh";
-$statsName["mortarKillSVMax"] = "Mortar Kill Speed Max" TAB "Kmh";
-$statsName["shockKillSVMax"] = "Shocklance Kill Speed Max" TAB "Kmh";
-$statsName["plasmaKillSVMax"] = "Plasma Kill Speed Max" TAB "Kmh";
-$statsName["blasterKillSVMax"] = "Blaster Kill Speed Max" TAB "Kmh";
-$statsName["hGrenadeKillSVMax"] = "Hand Grenade Kill Speed Max" TAB "Kmh";
-$statsName["missileKillSVMax"] = "Missile Kill Speed Max" TAB "Kmh";
-
-$statsName["cgKillVVMax"] = "Chaingun Kill Vertical Velocity Max" TAB "Kmh";
-$statsName["discKillVVMax"] = "Disc Kill Vertical Velocity Max" TAB "Kmh";
-$statsName["grenadeKillVVMax"] = "Grenade Kill Vertical Velocity Max" TAB "Kmh";
-$statsName["laserKillVVMax"] = "Laser Kill Vertical Velocity Max" TAB "Kmh";
-$statsName["mortarKillVVMax"] = "Mortar Kill Vertical Velocity Max" TAB "Kmh";
-$statsName["shockKillVVMax"] = "Shocklance Kill Vertical Velocity Max" TAB "Kmh";
-$statsName["plasmaKillVVMax"] = "Plasma Kill Vertical Velocity Max" TAB "Kmh";
-$statsName["blasterKillVVMax"] = "Blaster Kill Vertical Velocity Max" TAB "Kmh";
-$statsName["hGrenadeKillVVMax"] = "Hand Grenade Kill Vertical Velocity Max" TAB "Kmh";
-$statsName["mineKillVVMax"] = "Mine Kill Vertical Velocity Max" TAB "Kmh";
-$statsName["missileKillVVMax"] = "Missile Kill Vertical Velocity Max" TAB "Kmh";
-$statsName["satchelKillVVMax"] = "Satchel Kill Vertical Velocity Max" TAB "Kmh";
-
 
 $statsName["cgMAHitDistMax"] = "Chaingun MA Dist Max" TAB "Meters";
 $statsName["discMAHitDistMax"] = "Spinfusor MA Dist" TAB "Meters";
@@ -1503,33 +1467,36 @@ $statsName["MPBDesTG"] = "MPB Destroyed" TAB "Total";
 $statsName["turbogravDesTG"] = "Shrikes Destroyed" TAB "Total";
 $statsName["bomberDesTG"] = "Bombers Destroyed" TAB "Total";
 $statsName["heavyTransportDesTG"] = "HAVOCs Destroyed" TAB "Total";
-
+$statsName["discKillGroundTG"] = "Ground Disc Kills" TAB "Total";
+$statsName["WLRAvg"] = "Win Loss Ratio" TAB "Average";
+$statsName["roundsWonTG"] = "Rounds Won"  TAB "Total";
+$statsName["hatTricksTG"] = "Hat Tricks"  TAB "Total";
 
 $panelCount = 0;
 $upperWepPanel[$panelCount, "CTFGame"] = "discMAHitDistMax";     $upperWepPanel[$panelCount++, "CTFGame"] = "plasmaMAHitDistMax";$upperWepPanel[$panelCount++, "CTFGame"] = "blasterMAHitDistMax";
-$upperWepPanel[$panelCount++, "CTFGame"] = "grenadeMAHitDistMax";$upperWepPanel[$panelCount++, "CTFGame"] = "elfShotsFiredTG";  $upperWepPanel[$panelCount++, "CTFGame"] = "totalWepDmgTG";
-$upperWepPanel[$panelCount++, "CTFGame"] = "maxSpeedMax";        $upperWepPanel[$panelCount++, "CTFGame"] = "shotsFiredTG";      $upperWepPanel[$panelCount++, "CTFGame"] = "concussHitTG";
+$upperWepPanel[$panelCount++, "CTFGame"] = "grenadeMAHitDistMax";$upperWepPanel[$panelCount++, "CTFGame"] = "elfShotsFiredTG";  $upperWepPanel[$panelCount++, "CTFGame"] = "totalWepDmgTG";   
+$upperWepPanel[$panelCount++, "CTFGame"] = "maxSpeedMax";        $upperWepPanel[$panelCount++, "CTFGame"] = "shotsFiredTG";      $upperWepPanel[$panelCount++, "CTFGame"] = "concussHitTG";    
 $upperWepPanel[$panelCount++, "CTFGame"] = "comboCountTG";       $upperWepPanel[$panelCount++, "CTFGame"] = "doubleKillTG";      $upperWepPanel[$panelCount++, "CTFGame"] = "tripleKillTG";
-$panelCount++;
+$upperWepPanelCount["CTFGame"]  = $panelCount++;
 
 $panelCount = 0;
-$wepGrid[$panelCount, "CTFGame"] = "blasterKillsTG";        $wepGrid[$panelCount++, "CTFGame"] = "blasterMATG";      $wepGrid[$panelCount++, "CTFGame"] = "blasterHitDistMax";
-$wepGrid[$panelCount++, "CTFGame"] = "blasterDmgTG";        $wepGrid[$panelCount++, "CTFGame"] = "plasmaKillsTG";    $wepGrid[$panelCount++, "CTFGame"] = "plasmaMATG";
-$wepGrid[$panelCount++, "CTFGame"] = "plasmaHitDistMax";    $wepGrid[$panelCount++, "CTFGame"] = "plasmaDmgTG";      $wepGrid[$panelCount++, "CTFGame"] = "cgKillsTG";
+$wepGrid[$panelCount, "CTFGame"] = "blasterKillsTG";        $wepGrid[$panelCount++, "CTFGame"] = "blasterMATG";      $wepGrid[$panelCount++, "CTFGame"] = "blasterHitDistMax";   
+$wepGrid[$panelCount++, "CTFGame"] = "blasterDmgTG";        $wepGrid[$panelCount++, "CTFGame"] = "plasmaKillsTG";    $wepGrid[$panelCount++, "CTFGame"] = "plasmaMATG";    
+$wepGrid[$panelCount++, "CTFGame"] = "plasmaHitDistMax";    $wepGrid[$panelCount++, "CTFGame"] = "plasmaDmgTG";      $wepGrid[$panelCount++, "CTFGame"] = "cgKillsTG";        
 $wepGrid[$panelCount++, "CTFGame"] = "cgMATG";              $wepGrid[$panelCount++, "CTFGame"] = "cgHitDistMax";     $wepGrid[$panelCount++, "CTFGame"] = "cgDmgTG";
-$wepGrid[$panelCount++, "CTFGame"] = "discKillsTG";         $wepGrid[$panelCount++, "CTFGame"] = "discMATG";         $wepGrid[$panelCount++, "CTFGame"] = "discHitDistMax";
-$wepGrid[$panelCount++, "CTFGame"] = "discDmgTG";           $wepGrid[$panelCount++, "CTFGame"] = "grenadeKillsTG";   $wepGrid[$panelCount++, "CTFGame"] = "grenadeMATG";
-$wepGrid[$panelCount++, "CTFGame"] = "grenadeHitDistMax";   $wepGrid[$panelCount++, "CTFGame"] = "grenadeDmgTG";     $wepGrid[$panelCount++, "CTFGame"] = "laserKillsTG";
+$wepGrid[$panelCount++, "CTFGame"] = "discKillsTG";         $wepGrid[$panelCount++, "CTFGame"] = "discMATG";         $wepGrid[$panelCount++, "CTFGame"] = "discHitDistMax";      
+$wepGrid[$panelCount++, "CTFGame"] = "discDmgTG";           $wepGrid[$panelCount++, "CTFGame"] = "grenadeKillsTG";   $wepGrid[$panelCount++, "CTFGame"] = "grenadeMATG";   
+$wepGrid[$panelCount++, "CTFGame"] = "grenadeHitDistMax";   $wepGrid[$panelCount++, "CTFGame"] = "grenadeDmgTG";     $wepGrid[$panelCount++, "CTFGame"] = "laserKillsTG";     
 $wepGrid[$panelCount++, "CTFGame"] = "laserMATG";           $wepGrid[$panelCount++, "CTFGame"] = "laserHitDistMax";  $wepGrid[$panelCount++, "CTFGame"] = "laserDmgTG";
-$wepGrid[$panelCount++, "CTFGame"] = "mortarKillsTG";       $wepGrid[$panelCount++, "CTFGame"] = "mortarMATG";       $wepGrid[$panelCount++, "CTFGame"] = "mortarHitDistMax";
-$wepGrid[$panelCount++, "CTFGame"] = "mortarDmgTG";         $wepGrid[$panelCount++, "CTFGame"] = "missileKillsTG";   $wepGrid[$panelCount++, "CTFGame"] = "missileMATG";
-$wepGrid[$panelCount++, "CTFGame"] = "missileHitDistMax";   $wepGrid[$panelCount++, "CTFGame"] = "missileDmgTG";     $wepGrid[$panelCount++, "CTFGame"] = "shockKillsTG";
+$wepGrid[$panelCount++, "CTFGame"] = "mortarKillsTG";       $wepGrid[$panelCount++, "CTFGame"] = "mortarMATG";       $wepGrid[$panelCount++, "CTFGame"] = "mortarHitDistMax";    
+$wepGrid[$panelCount++, "CTFGame"] = "mortarDmgTG";         $wepGrid[$panelCount++, "CTFGame"] = "missileKillsTG";   $wepGrid[$panelCount++, "CTFGame"] = "missileMATG";   
+$wepGrid[$panelCount++, "CTFGame"] = "missileHitDistMax";   $wepGrid[$panelCount++, "CTFGame"] = "missileDmgTG";     $wepGrid[$panelCount++, "CTFGame"] = "shockKillsTG";     
 $wepGrid[$panelCount++, "CTFGame"] = "shockMATG";           $wepGrid[$panelCount++, "CTFGame"] = "shockHitDistMax";  $wepGrid[$panelCount++, "CTFGame"] = "shockDmgTG";
-$wepGrid[$panelCount++, "CTFGame"] = "mineKillsTG";         $wepGrid[$panelCount++, "CTFGame"] = "mineMATG";         $wepGrid[$panelCount++, "CTFGame"] = "mineHitDistMax";
-$wepGrid[$panelCount++, "CTFGame"] = "mineDmgTG";           $wepGrid[$panelCount++, "CTFGame"] = "hGrenadeKillsTG";  $wepGrid[$panelCount++, "CTFGame"] = "hGrenadeMATG";
-$wepGrid[$panelCount++, "CTFGame"] = "hGrenadeHitDistMax";  $wepGrid[$panelCount++, "CTFGame"] = "hGrenadeDmgTG";    $wepGrid[$panelCount++, "CTFGame"] = "satchelKillsTG";
+$wepGrid[$panelCount++, "CTFGame"] = "mineKillsTG";         $wepGrid[$panelCount++, "CTFGame"] = "mineMATG";         $wepGrid[$panelCount++, "CTFGame"] = "mineHitDistMax";      
+$wepGrid[$panelCount++, "CTFGame"] = "mineDmgTG";           $wepGrid[$panelCount++, "CTFGame"] = "hGrenadeKillsTG";  $wepGrid[$panelCount++, "CTFGame"] = "hGrenadeMATG";  
+$wepGrid[$panelCount++, "CTFGame"] = "hGrenadeHitDistMax";  $wepGrid[$panelCount++, "CTFGame"] = "hGrenadeDmgTG";    $wepGrid[$panelCount++, "CTFGame"] = "satchelKillsTG";   
 $wepGrid[$panelCount++, "CTFGame"] = "satchelMATG";         $wepGrid[$panelCount++, "CTFGame"] = "satchelHitDistMax";$wepGrid[$panelCount++, "CTFGame"] = "satchelDmgTG";
-$panelCount++;
+$wepGridCount["CTFGame"]  = $panelCount++;
 
 $panelCount = 0;
 $panelThree[$panelCount, "CTFGame"] = "ctrlKKillsTG";          $panelThree[$panelCount++, "CTFGame"] = "flareKillTG";         $panelThree[$panelCount++, "CTFGame"] = "deathKillsTG";
@@ -1548,19 +1515,19 @@ $panelThree[$panelCount++, "CTFGame"] = "genDefendsTG";        $panelThree[$pane
 $panelThree[$panelCount++, "CTFGame"] = "flagCatchTG";         $panelThree[$panelCount++, "CTFGame"] = "flagCatchSpeedMax";   $panelThree[$panelCount++, "CTFGame"] = "flagTossTG";
 $panelThree[$panelCount++, "CTFGame"] = "maFlagCatchTG";       $panelThree[$panelCount++, "CTFGame"] = "maFlagCatchSpeedMax"; $panelThree[$panelCount++, "CTFGame"] = "flagTossCatchTG";
 $panelThree[$panelCount++, "CTFGame"] = "interceptedFlagTG";   $panelThree[$panelCount++, "CTFGame"] = "maInterceptedFlagTG"; $panelThree[$panelCount++, "CTFGame"] = "interceptSpeedMax";
-$panelCount++;
+$panelThreeCount["CTFGame"]  = $panelCount++;  
 
 
 $panelCount = 0;
-$smallPanel[$panelCount, "CTFGame"] = "flagCapsTG";            $smallPanel[$panelCount++, "CTFGame"] = "flagGrabsTG";         $smallPanel[$panelCount++, "CTFGame"] = "flagReturnsTG";
-$smallPanel[$panelCount++, "CTFGame"] = "carrierKillsTG";      $smallPanel[$panelCount++, "CTFGame"] = "grabSpeedAvg";        $smallPanel[$panelCount++, "CTFGame"] = "lagSpikesTG";
-$smallPanel[$panelCount++, "CTFGame"] = "escortAssistsTG";     $smallPanel[$panelCount++, "CTFGame"] = "distMovTG";           $smallPanel[$panelCount++, "CTFGame"] = "roadKillsTG";
+$smallPanel[$panelCount, "CTFGame"] = "flagCapsTG";            $smallPanel[$panelCount++, "CTFGame"] = "flagGrabsTG";         $smallPanel[$panelCount++, "CTFGame"] = "flagReturnsTG";             
+$smallPanel[$panelCount++, "CTFGame"] = "carrierKillsTG";      $smallPanel[$panelCount++, "CTFGame"] = "grabSpeedAvg";        $smallPanel[$panelCount++, "CTFGame"] = "lagSpikesTG";      
+$smallPanel[$panelCount++, "CTFGame"] = "escortAssistsTG";     $smallPanel[$panelCount++, "CTFGame"] = "distMovTG";           $smallPanel[$panelCount++, "CTFGame"] = "roadKillsTG";           
 $smallPanel[$panelCount++, "CTFGame"] = "shrikeBlasterKillsTG";$smallPanel[$panelCount++, "CTFGame"] = "defenseScoreTG";       $smallPanel[$panelCount++, "CTFGame"] = "repairsTG";
-$smallPanel[$panelCount++, "CTFGame"] = "discMATG";            $smallPanel[$panelCount++, "CTFGame"] = "discKillsTG";         $smallPanel[$panelCount++, "CTFGame"] = "offenseScoreTG";
-$smallPanel[$panelCount++, "CTFGame"] = "shockKillsTG";        $smallPanel[$panelCount++, "CTFGame"] = "shockRearShotTG";     $smallPanel[$panelCount++, "CTFGame"] = "cgKillsTG";
-$smallPanel[$panelCount++, "CTFGame"] = "totalTimeTG";         $smallPanel[$panelCount++, "CTFGame"] = "flagDefendsTG";       $smallPanel[$panelCount++, "CTFGame"] = "laserKillsTG";
+$smallPanel[$panelCount++, "CTFGame"] = "discMATG";            $smallPanel[$panelCount++, "CTFGame"] = "discKillsTG";         $smallPanel[$panelCount++, "CTFGame"] = "offenseScoreTG";            
+$smallPanel[$panelCount++, "CTFGame"] = "shockKillsTG";        $smallPanel[$panelCount++, "CTFGame"] = "shockRearShotTG";     $smallPanel[$panelCount++, "CTFGame"] = "cgKillsTG";           
+$smallPanel[$panelCount++, "CTFGame"] = "totalTimeTG";         $smallPanel[$panelCount++, "CTFGame"] = "flagDefendsTG";       $smallPanel[$panelCount++, "CTFGame"] = "laserKillsTG";         
 $smallPanel[$panelCount++, "CTFGame"] = "laserHeadShotTG";     $smallPanel[$panelCount++, "CTFGame"] = "minePlusDiscTG";      $smallPanel[$panelCount++, "CTFGame"] = "mortarKillsTG";
-$panelCount++;
+$smallPanelCount["CTFGame"] = $panelCount++;
 
 
 $panelCount = 0;
@@ -1572,18 +1539,18 @@ $upperWepPanel[$panelCount++,"LCTFGame"] = "mineShotsFiredTG";     $upperWepPane
 $upperWepPanel[$panelCount++,"LCTFGame"] = "hGrenadeDeathsTG";     $upperWepPanel[$panelCount++,"LCTFGame"] = "doubleChainKillTG";    $upperWepPanel[$panelCount++,"LCTFGame"] = "tripleChainKillTG";
 $upperWepPanel[$panelCount++,"LCTFGame"] = "quadrupleChainKillTG"; $upperWepPanel[$panelCount++,"LCTFGame"] = "quintupleChainKillTG"; $upperWepPanel[$panelCount++,"LCTFGame"] = "sextupleChainKillTG";
 $upperWepPanel[$panelCount++,"LCTFGame"] = "septupleChainKillTG";  $upperWepPanel[$panelCount++,"LCTFGame"] = "octupleChainKillTG";   $upperWepPanel[$panelCount++,"LCTFGame"] = "nonupleChainKillTG";
-$panelCount++;
+$upperWepPanelCount["LCTFGame"] = $panelCount++;
 
 $panelCount = 0;
-$wepGrid[$panelCount, "LCTFGame"] = "blasterKillsTG";     $wepGrid[$panelCount++, "LCTFGame"] = "blasterMATG";  $wepGrid[$panelCount++, "LCTFGame"] = "blasterHitDistMax";   $wepGrid[$panelCount++, "LCTFGame"] = "blasterDmgTG";
-$wepGrid[$panelCount++, "LCTFGame"] = "plasmaKillsTG";    $wepGrid[$panelCount++, "LCTFGame"] = "plasmaMATG";    $wepGrid[$panelCount++, "LCTFGame"] = "plasmaHitDistMax";    $wepGrid[$panelCount++, "LCTFGame"] = "plasmaDmgTG";
+$wepGrid[$panelCount, "LCTFGame"] = "blasterKillsTG";     $wepGrid[$panelCount++, "LCTFGame"] = "blasterMATG";  $wepGrid[$panelCount++, "LCTFGame"] = "blasterHitDistMax";   $wepGrid[$panelCount++, "LCTFGame"] = "blasterDmgTG";        
+$wepGrid[$panelCount++, "LCTFGame"] = "plasmaKillsTG";    $wepGrid[$panelCount++, "LCTFGame"] = "plasmaMATG";    $wepGrid[$panelCount++, "LCTFGame"] = "plasmaHitDistMax";    $wepGrid[$panelCount++, "LCTFGame"] = "plasmaDmgTG";      
 $wepGrid[$panelCount++, "LCTFGame"] = "cgKillsTG";        $wepGrid[$panelCount++, "LCTFGame"] = "cgMATG";        $wepGrid[$panelCount++, "LCTFGame"] = "cgHitDistMax";        $wepGrid[$panelCount++, "LCTFGame"] = "cgDmgTG";
-$wepGrid[$panelCount++, "LCTFGame"] = "discKillsTG";      $wepGrid[$panelCount++, "LCTFGame"] = "discMATG";      $wepGrid[$panelCount++, "LCTFGame"] = "discHitDistMax";      $wepGrid[$panelCount++, "LCTFGame"] = "discDmgTG";
-$wepGrid[$panelCount++, "LCTFGame"] = "grenadeKillsTG";   $wepGrid[$panelCount++, "LCTFGame"] = "grenadeMATG";   $wepGrid[$panelCount++, "LCTFGame"] = "grenadeHitDistMax";   $wepGrid[$panelCount++, "LCTFGame"] = "grenadeDmgTG";
-$wepGrid[$panelCount++, "LCTFGame"] = "shockKillsTG";     $wepGrid[$panelCount++, "LCTFGame"] = "shockMATG";     $wepGrid[$panelCount++, "LCTFGame"] = "shockHitDistMax";     $wepGrid[$panelCount++, "LCTFGame"] = "shockDmgTG";
-$wepGrid[$panelCount++, "LCTFGame"] = "mineKillsTG";      $wepGrid[$panelCount++, "LCTFGame"] = "mineMATG";      $wepGrid[$panelCount++, "LCTFGame"] = "mineHitDistMax";      $wepGrid[$panelCount++, "LCTFGame"] = "mineDmgTG";
-$wepGrid[$panelCount++, "LCTFGame"] = "hGrenadeKillsTG";  $wepGrid[$panelCount++, "LCTFGame"] = "hGrenadeMATG";   $wepGrid[$panelCount++, "LCTFGame"] = "hGrenadeHitDistMax";  $wepGrid[$panelCount++, "LCTFGame"] = "hGrenadeDmgTG";
-$panelCount++;
+$wepGrid[$panelCount++, "LCTFGame"] = "discKillsTG";      $wepGrid[$panelCount++, "LCTFGame"] = "discMATG";      $wepGrid[$panelCount++, "LCTFGame"] = "discHitDistMax";      $wepGrid[$panelCount++, "LCTFGame"] = "discDmgTG";          
+$wepGrid[$panelCount++, "LCTFGame"] = "grenadeKillsTG";   $wepGrid[$panelCount++, "LCTFGame"] = "grenadeMATG";   $wepGrid[$panelCount++, "LCTFGame"] = "grenadeHitDistMax";   $wepGrid[$panelCount++, "LCTFGame"] = "grenadeDmgTG";     
+$wepGrid[$panelCount++, "LCTFGame"] = "shockKillsTG";     $wepGrid[$panelCount++, "LCTFGame"] = "shockMATG";     $wepGrid[$panelCount++, "LCTFGame"] = "shockHitDistMax";     $wepGrid[$panelCount++, "LCTFGame"] = "shockDmgTG"; 
+$wepGrid[$panelCount++, "LCTFGame"] = "mineKillsTG";      $wepGrid[$panelCount++, "LCTFGame"] = "mineMATG";      $wepGrid[$panelCount++, "LCTFGame"] = "mineHitDistMax";      $wepGrid[$panelCount++, "LCTFGame"] = "mineDmgTG";       
+$wepGrid[$panelCount++, "LCTFGame"] = "hGrenadeKillsTG";  $wepGrid[$panelCount++, "LCTFGame"] = "hGrenadeMATG";   $wepGrid[$panelCount++, "LCTFGame"] = "hGrenadeHitDistMax";  $wepGrid[$panelCount++, "LCTFGame"] = "hGrenadeDmgTG"; 
+$wepGridCount["LCTFGame"] = $panelCount++;
 
 $panelCount = 0;
 $panelThree[$panelCount,"LCTFGame"] = "winLostPctAvg";        $panelThree[$panelCount++,"LCTFGame"] = "scoreAvg";        $panelThree[$panelCount++,"LCTFGame"] = "scoreMax";              $panelThree[$panelCount++,"LCTFGame"] = "capEfficiencyAvg";
@@ -1598,7 +1565,7 @@ $panelThree[$panelCount++,"LCTFGame"] = "tripleKillTG";       $panelThree[$panel
 $panelThree[$panelCount++,"LCTFGame"] = "maHitDistMax";       $panelThree[$panelCount++,"LCTFGame"] = "groundDeathsTG";  $panelThree[$panelCount++,"LCTFGame"] = "deadDistMax";           $panelThree[$panelCount++,"LCTFGame"] = "minePlusDiscTG";
 $panelThree[$panelCount++,"LCTFGame"] = "minePlusDiscKillTG"; $panelThree[$panelCount++,"LCTFGame"] = "maHitHeightMax";  $panelThree[$panelCount++,"LCTFGame"] = "discReflectHitTG";      $panelThree[$panelCount++,"LCTFGame"] = "discReflectKillTG";
 $panelThree[$panelCount++,"LCTFGame"] = "killerDiscJumpTG";   $panelThree[$panelCount++,"LCTFGame"] = "firstKillTG";     $panelThree[$panelCount++,"LCTFGame"] = "lastKillTG";            $panelThree[$panelCount++,"LCTFGame"] = "deathKillsTG";
-$panelCount++;
+$panelThreeCount["LCTFGame"] = $panelCount++;
 
 $panelCount = 0;
 $smallPanel[$panelCount,"LCTFGame"] = "offenseScoreTG";   $smallPanel[$panelCount++,"LCTFGame"] = "defenseScoreTG"; $smallPanel[$panelCount++,"LCTFGame"] = "flagCapsTG";        $smallPanel[$panelCount++,"LCTFGame"] = "flagGrabsTG";
@@ -1607,7 +1574,7 @@ $smallPanel[$panelCount++,"LCTFGame"] = "grabSpeedAvg";   $smallPanel[$panelCoun
 $smallPanel[$panelCount++,"LCTFGame"] = "maFlagCatchTG";  $smallPanel[$panelCount++,"LCTFGame"] = "flagTossCatchTG";$smallPanel[$panelCount++,"LCTFGame"] = "interceptedFlagTG"; $smallPanel[$panelCount++,"LCTFGame"] = "maInterceptedFlagTG";
 $smallPanel[$panelCount++,"LCTFGame"] = "totalTimeTG";    $smallPanel[$panelCount++,"LCTFGame"] = "plasmaKillsTG";  $smallPanel[$panelCount++,"LCTFGame"] = "cgKillsTG";         $smallPanel[$panelCount++,"LCTFGame"] = "discKillsTG";
 $smallPanel[$panelCount++,"LCTFGame"] = "grenadeKillsTG"; $smallPanel[$panelCount++,"LCTFGame"] = "shockKillsTG";   $smallPanel[$panelCount++,"LCTFGame"] = "mineKillsTG";       $smallPanel[$panelCount++,"LCTFGame"] = "hGrenadeKillsTG";
-$panelCount++;
+$smallPanelCount["LCTFGame"] = $panelCount++;
 
 
 
@@ -1620,18 +1587,18 @@ $upperWepPanel[$panelCount++,"SCtFGame"] = "mineShotsFiredTG";     $upperWepPane
 $upperWepPanel[$panelCount++,"SCtFGame"] = "hGrenadeDeathsTG";     $upperWepPanel[$panelCount++,"SCtFGame"] = "doubleChainKillTG";    $upperWepPanel[$panelCount++,"SCtFGame"] = "tripleChainKillTG";
 $upperWepPanel[$panelCount++,"SCtFGame"] = "quadrupleChainKillTG"; $upperWepPanel[$panelCount++,"SCtFGame"] = "quintupleChainKillTG"; $upperWepPanel[$panelCount++,"SCtFGame"] = "sextupleChainKillTG";
 $upperWepPanel[$panelCount++,"SCtFGame"] = "septupleChainKillTG";  $upperWepPanel[$panelCount++,"SCtFGame"] = "octupleChainKillTG";   $upperWepPanel[$panelCount++,"SCtFGame"] = "nonupleChainKillTG";
-$panelCount++;
+$upperWepPanelCount["SCtFGame"] = $panelCount++;
 
 $panelCount = 0;
-$wepGrid[$panelCount, "SCtFGame"] = "blasterKillsTG";     $wepGrid[$panelCount++, "SCtFGame"] = "blasterMATG";  $wepGrid[$panelCount++, "SCtFGame"] = "blasterHitDistMax";   $wepGrid[$panelCount++, "SCtFGame"] = "blasterDmgTG";
-$wepGrid[$panelCount++, "SCtFGame"] = "plasmaKillsTG";    $wepGrid[$panelCount++, "SCtFGame"] = "plasmaMATG";    $wepGrid[$panelCount++, "SCtFGame"] = "plasmaHitDistMax";    $wepGrid[$panelCount++, "SCtFGame"] = "plasmaDmgTG";
+$wepGrid[$panelCount, "SCtFGame"] = "blasterKillsTG";     $wepGrid[$panelCount++, "SCtFGame"] = "blasterMATG";  $wepGrid[$panelCount++, "SCtFGame"] = "blasterHitDistMax";   $wepGrid[$panelCount++, "SCtFGame"] = "blasterDmgTG";        
+$wepGrid[$panelCount++, "SCtFGame"] = "plasmaKillsTG";    $wepGrid[$panelCount++, "SCtFGame"] = "plasmaMATG";    $wepGrid[$panelCount++, "SCtFGame"] = "plasmaHitDistMax";    $wepGrid[$panelCount++, "SCtFGame"] = "plasmaDmgTG";      
 $wepGrid[$panelCount++, "SCtFGame"] = "cgKillsTG";        $wepGrid[$panelCount++, "SCtFGame"] = "cgMATG";        $wepGrid[$panelCount++, "SCtFGame"] = "cgHitDistMax";        $wepGrid[$panelCount++, "SCtFGame"] = "cgDmgTG";
-$wepGrid[$panelCount++, "SCtFGame"] = "discKillsTG";      $wepGrid[$panelCount++, "SCtFGame"] = "discMATG";      $wepGrid[$panelCount++, "SCtFGame"] = "discHitDistMax";      $wepGrid[$panelCount++, "SCtFGame"] = "discDmgTG";
-$wepGrid[$panelCount++, "SCtFGame"] = "grenadeKillsTG";   $wepGrid[$panelCount++, "SCtFGame"] = "grenadeMATG";   $wepGrid[$panelCount++, "SCtFGame"] = "grenadeHitDistMax";   $wepGrid[$panelCount++, "SCtFGame"] = "grenadeDmgTG";
-$wepGrid[$panelCount++, "SCtFGame"] = "shockKillsTG";     $wepGrid[$panelCount++, "SCtFGame"] = "shockMATG";     $wepGrid[$panelCount++, "SCtFGame"] = "shockHitDistMax";     $wepGrid[$panelCount++, "SCtFGame"] = "shockDmgTG";
-$wepGrid[$panelCount++, "SCtFGame"] = "mineKillsTG";      $wepGrid[$panelCount++, "SCtFGame"] = "mineMATG";      $wepGrid[$panelCount++, "SCtFGame"] = "mineHitDistMax";      $wepGrid[$panelCount++, "SCtFGame"] = "mineDmgTG";
-$wepGrid[$panelCount++, "SCtFGame"] = "hGrenadeKillsTG";  $wepGrid[$panelCount++, "SCtFGame"] = "hGrenadeMATG";   $wepGrid[$panelCount++, "SCtFGame"] = "hGrenadeHitDistMax";  $wepGrid[$panelCount++, "SCtFGame"] = "hGrenadeDmgTG";
-$panelCount++;
+$wepGrid[$panelCount++, "SCtFGame"] = "discKillsTG";      $wepGrid[$panelCount++, "SCtFGame"] = "discMATG";      $wepGrid[$panelCount++, "SCtFGame"] = "discHitDistMax";      $wepGrid[$panelCount++, "SCtFGame"] = "discDmgTG";          
+$wepGrid[$panelCount++, "SCtFGame"] = "grenadeKillsTG";   $wepGrid[$panelCount++, "SCtFGame"] = "grenadeMATG";   $wepGrid[$panelCount++, "SCtFGame"] = "grenadeHitDistMax";   $wepGrid[$panelCount++, "SCtFGame"] = "grenadeDmgTG";     
+$wepGrid[$panelCount++, "SCtFGame"] = "shockKillsTG";     $wepGrid[$panelCount++, "SCtFGame"] = "shockMATG";     $wepGrid[$panelCount++, "SCtFGame"] = "shockHitDistMax";     $wepGrid[$panelCount++, "SCtFGame"] = "shockDmgTG"; 
+$wepGrid[$panelCount++, "SCtFGame"] = "mineKillsTG";      $wepGrid[$panelCount++, "SCtFGame"] = "mineMATG";      $wepGrid[$panelCount++, "SCtFGame"] = "mineHitDistMax";      $wepGrid[$panelCount++, "SCtFGame"] = "mineDmgTG";       
+$wepGrid[$panelCount++, "SCtFGame"] = "hGrenadeKillsTG";  $wepGrid[$panelCount++, "SCtFGame"] = "hGrenadeMATG";   $wepGrid[$panelCount++, "SCtFGame"] = "hGrenadeHitDistMax";  $wepGrid[$panelCount++, "SCtFGame"] = "hGrenadeDmgTG"; 
+$wepGridCount["SCtFGame"] = $panelCount++;
 
 $panelCount = 0;
 $panelThree[$panelCount,"SCtFGame"] = "winLostPctAvg";        $panelThree[$panelCount++,"SCtFGame"] = "scoreAvg";        $panelThree[$panelCount++,"SCtFGame"] = "scoreMax";              $panelThree[$panelCount++,"SCtFGame"] = "capEfficiencyAvg";
@@ -1646,7 +1613,7 @@ $panelThree[$panelCount++,"SCtFGame"] = "tripleKillTG";       $panelThree[$panel
 $panelThree[$panelCount++,"SCtFGame"] = "maHitDistMax";       $panelThree[$panelCount++,"SCtFGame"] = "groundDeathsTG";  $panelThree[$panelCount++,"SCtFGame"] = "deadDistMax";           $panelThree[$panelCount++,"SCtFGame"] = "minePlusDiscTG";
 $panelThree[$panelCount++,"SCtFGame"] = "minePlusDiscKillTG"; $panelThree[$panelCount++,"SCtFGame"] = "maHitHeightMax";  $panelThree[$panelCount++,"SCtFGame"] = "discReflectHitTG";      $panelThree[$panelCount++,"SCtFGame"] = "discReflectKillTG";
 $panelThree[$panelCount++,"SCtFGame"] = "killerDiscJumpTG";   $panelThree[$panelCount++,"SCtFGame"] = "firstKillTG";     $panelThree[$panelCount++,"SCtFGame"] = "lastKillTG";            $panelThree[$panelCount++,"SCtFGame"] = "deathKillsTG";
-$panelCount++;
+$panelThreeCount["SCtFGame"] = $panelCount++;
 
 $panelCount = 0;
 $smallPanel[$panelCount,"SCtFGame"] = "offenseScoreTG";   $smallPanel[$panelCount++,"SCtFGame"] = "defenseScoreTG"; $smallPanel[$panelCount++,"SCtFGame"] = "flagCapsTG";        $smallPanel[$panelCount++,"SCtFGame"] = "flagGrabsTG";
@@ -1655,7 +1622,7 @@ $smallPanel[$panelCount++,"SCtFGame"] = "grabSpeedAvg";   $smallPanel[$panelCoun
 $smallPanel[$panelCount++,"SCtFGame"] = "maFlagCatchTG";  $smallPanel[$panelCount++,"SCtFGame"] = "flagTossCatchTG";$smallPanel[$panelCount++,"SCtFGame"] = "interceptedFlagTG"; $smallPanel[$panelCount++,"SCtFGame"] = "maInterceptedFlagTG";
 $smallPanel[$panelCount++,"SCtFGame"] = "totalTimeTG";    $smallPanel[$panelCount++,"SCtFGame"] = "plasmaKillsTG";  $smallPanel[$panelCount++,"SCtFGame"] = "cgKillsTG";         $smallPanel[$panelCount++,"SCtFGame"] = "discKillsTG";
 $smallPanel[$panelCount++,"SCtFGame"] = "grenadeKillsTG"; $smallPanel[$panelCount++,"SCtFGame"] = "shockKillsTG";   $smallPanel[$panelCount++,"SCtFGame"] = "mineKillsTG";       $smallPanel[$panelCount++,"SCtFGame"] = "hGrenadeKillsTG";
-$panelCount++;
+$smallPanelCount["SCtFGame"] = $panelCount++;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 $panelCount = 0;
@@ -1671,18 +1638,18 @@ $upperWepPanel[$panelCount++,"LakRabbitGame"] = "doubleChainKillTG";     $upperW
 $upperWepPanel[$panelCount++,"LakRabbitGame"] = "quadrupleChainKillTG";  $upperWepPanel[$panelCount++,"LakRabbitGame"] = "quintupleChainKillTG";
 $upperWepPanel[$panelCount++,"LakRabbitGame"] = "sextupleChainKillTG";   $upperWepPanel[$panelCount++,"LakRabbitGame"] = "septupleChainKillTG";
 $upperWepPanel[$panelCount++,"LakRabbitGame"] = "octupleChainKillTG";    $upperWepPanel[$panelCount++,"LakRabbitGame"] = "nonupleChainKillTG";
-$panelCount++;
+$upperWepPanelCount["LakRabbitGame"] = $panelCount++;
 
 $panelCount = 0;
-$wepGrid[$panelCount,"LakRabbitGame"] = "blasterACCAvg";   $wepGrid[$panelCount++,"LakRabbitGame"] = "blasterComTG";  $wepGrid[$panelCount++,"LakRabbitGame"] = "blasterHitVVMax";  $wepGrid[$panelCount++,"LakRabbitGame"] = "blasterDmgTG";
-$wepGrid[$panelCount++,"LakRabbitGame"] = "plasmaACCAvg";  $wepGrid[$panelCount++,"LakRabbitGame"] = "plasmaComTG";   $wepGrid[$panelCount++,"LakRabbitGame"] = "plasmaHitVVMax";   $wepGrid[$panelCount++,"LakRabbitGame"] = "plasmaDmgTG";
-$wepGrid[$panelCount++,"LakRabbitGame"] = "discACCAvg";    $wepGrid[$panelCount++,"LakRabbitGame"] = "discComTG";     $wepGrid[$panelCount++,"LakRabbitGame"] = "discHitVVMax";     $wepGrid[$panelCount++,"LakRabbitGame"] = "discDmgTG";
-$wepGrid[$panelCount++,"LakRabbitGame"] = "grenadeACCAvg"; $wepGrid[$panelCount++,"LakRabbitGame"] = "grenadeComTG";  $wepGrid[$panelCount++,"LakRabbitGame"] = "grenadeHitVVMax";  $wepGrid[$panelCount++,"LakRabbitGame"] = "grenadeDmgTG";
-$wepGrid[$panelCount++,"LakRabbitGame"] = "mortarACCAvg";  $wepGrid[$panelCount++,"LakRabbitGame"] = "mortarComTG";   $wepGrid[$panelCount++,"LakRabbitGame"] = "mortarHitVVMax";   $wepGrid[$panelCount++,"LakRabbitGame"] = "mortarDmgTG";
-$wepGrid[$panelCount++,"LakRabbitGame"] = "shockACCAvg";   $wepGrid[$panelCount++,"LakRabbitGame"] = "shockComTG";    $wepGrid[$panelCount++,"LakRabbitGame"] = "shockHitVVMax";    $wepGrid[$panelCount++,"LakRabbitGame"] = "shockDmgTG";
-$wepGrid[$panelCount++,"LakRabbitGame"] = "mineACCAvg";    $wepGrid[$panelCount++,"LakRabbitGame"] = "mineComTG";     $wepGrid[$panelCount++,"LakRabbitGame"] = "mineHitVVMax";     $wepGrid[$panelCount++,"LakRabbitGame"] = "mineDmgTG";
-$wepGrid[$panelCount++,"LakRabbitGame"] = "hGrenadeACCAvg";$wepGrid[$panelCount++,"LakRabbitGame"] = "hGrenadeComTG"; $wepGrid[$panelCount++,"LakRabbitGame"] = "hGrenadeHitVVMax"; $wepGrid[$panelCount++,"LakRabbitGame"] = "hGrenadeDmgTG";
-$panelCount++;
+$wepGrid[$panelCount,"LakRabbitGame"] = "blasterACCAvg";   $wepGrid[$panelCount++,"LakRabbitGame"] = "blasterComTG";  $wepGrid[$panelCount++,"LakRabbitGame"] = "blasterHitSVMax";  $wepGrid[$panelCount++,"LakRabbitGame"] = "blasterDmgTG";
+$wepGrid[$panelCount++,"LakRabbitGame"] = "plasmaACCAvg";  $wepGrid[$panelCount++,"LakRabbitGame"] = "plasmaComTG";   $wepGrid[$panelCount++,"LakRabbitGame"] = "plasmaHitSVMax";   $wepGrid[$panelCount++,"LakRabbitGame"] = "plasmaDmgTG";
+$wepGrid[$panelCount++,"LakRabbitGame"] = "discACCAvg";    $wepGrid[$panelCount++,"LakRabbitGame"] = "discComTG";     $wepGrid[$panelCount++,"LakRabbitGame"] = "discHitSVMax";     $wepGrid[$panelCount++,"LakRabbitGame"] = "discDmgTG";
+$wepGrid[$panelCount++,"LakRabbitGame"] = "grenadeACCAvg"; $wepGrid[$panelCount++,"LakRabbitGame"] = "grenadeComTG";  $wepGrid[$panelCount++,"LakRabbitGame"] = "grenadeHitSVMax";  $wepGrid[$panelCount++,"LakRabbitGame"] = "grenadeDmgTG";
+$wepGrid[$panelCount++,"LakRabbitGame"] = "mortarACCAvg";  $wepGrid[$panelCount++,"LakRabbitGame"] = "mortarComTG";   $wepGrid[$panelCount++,"LakRabbitGame"] = "mortarHitSVMax";   $wepGrid[$panelCount++,"LakRabbitGame"] = "mortarDmgTG";
+$wepGrid[$panelCount++,"LakRabbitGame"] = "shockACCAvg";   $wepGrid[$panelCount++,"LakRabbitGame"] = "shockComTG";    $wepGrid[$panelCount++,"LakRabbitGame"] = "shockHitSVMax";    $wepGrid[$panelCount++,"LakRabbitGame"] = "shockDmgTG";
+$wepGrid[$panelCount++,"LakRabbitGame"] = "mineACCAvg";    $wepGrid[$panelCount++,"LakRabbitGame"] = "mineComTG";     $wepGrid[$panelCount++,"LakRabbitGame"] = "mineHitSVMax";     $wepGrid[$panelCount++,"LakRabbitGame"] = "mineDmgTG";
+$wepGrid[$panelCount++,"LakRabbitGame"] = "hGrenadeACCAvg";$wepGrid[$panelCount++,"LakRabbitGame"] = "hGrenadeComTG"; $wepGrid[$panelCount++,"LakRabbitGame"] = "hGrenadeHitSVMax"; $wepGrid[$panelCount++,"LakRabbitGame"] = "hGrenadeDmgTG";
+$wepGridCount["LakRabbitGame"] = $panelCount++;
 
 $panelCount = 0;
 $panelThree[$panelCount,"LakRabbitGame"] = "scoreTG";            $panelThree[$panelCount++,"LakRabbitGame"] = "scoreAvg";            $panelThree[$panelCount++,"LakRabbitGame"] = "scoreMax";
@@ -1701,7 +1668,7 @@ $panelThree[$panelCount++,"LakRabbitGame"] = "maHitDistMax";     $panelThree[$pa
 $panelThree[$panelCount++,"LakRabbitGame"] = "minePlusDiscTG";   $panelThree[$panelCount++,"LakRabbitGame"] = "minePlusDiscKillTG";  $panelThree[$panelCount++,"LakRabbitGame"] = "maHitHeightMax";
 $panelThree[$panelCount++,"LakRabbitGame"] = "discReflectHitTG"; $panelThree[$panelCount++,"LakRabbitGame"] = "discReflectKillTG";   $panelThree[$panelCount++,"LakRabbitGame"] = "killerDiscJumpTG";
 $panelThree[$panelCount++,"LakRabbitGame"] = "firstKillTG";      $panelThree[$panelCount++,"LakRabbitGame"] = "lastKillTG";          $panelThree[$panelCount++,"LakRabbitGame"] = "deathKillsTG";
-$panelCount++;
+$panelThreeCount["LakRabbitGame"] = $panelCount++;
 
 $panelCount = 0;
 $smallPanel[$panelCount,"LakRabbitGame"] = "flagGrabsTG";     $smallPanel[$panelCount++,"LakRabbitGame"] = "flagTimeMinTG";       $smallPanel[$panelCount++,"LakRabbitGame"] = "MidairflagGrabsTG";$smallPanel[$panelCount++,"LakRabbitGame"] = "totalTimeTG";
@@ -1710,35 +1677,100 @@ $smallPanel[$panelCount++,"LakRabbitGame"] = "blasterMATG";   $smallPanel[$panel
 $smallPanel[$panelCount++,"LakRabbitGame"] = "grenadeMATG";   $smallPanel[$panelCount++,"LakRabbitGame"] = "grenadeMAHitDistMax"; $smallPanel[$panelCount++,"LakRabbitGame"] = "shockACCAvg";      $smallPanel[$panelCount++,"LakRabbitGame"] = "plasmaACCAvg";
 $smallPanel[$panelCount++,"LakRabbitGame"] = "discMATG";      $smallPanel[$panelCount++,"LakRabbitGame"] = "discMAHitDistMax";    $smallPanel[$panelCount++,"LakRabbitGame"] = "discACCAvg";       $smallPanel[$panelCount++,"LakRabbitGame"] = "shockKillsTG";
 $smallPanel[$panelCount++,"LakRabbitGame"] = "shockMATG";     $smallPanel[$panelCount++,"LakRabbitGame"] = "shockRearShotTG";     $smallPanel[$panelCount++,"LakRabbitGame"] = "hGrenadeKillsTG";  $smallPanel[$panelCount++,"LakRabbitGame"] = "mineKillsTG";
-$panelCount++;
+$smallPanelCount["LakRabbitGame"] = $panelCount++;
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+$panelCount = 0;
+$upperWepPanel[$panelCount,"ArenaGame"] =   "blasterShotsFiredTG";   $upperWepPanel[$panelCount++,"ArenaGame"] = "blasterDeathsTG";      $upperWepPanel[$panelCount++,"ArenaGame"] = "plasmaShotsFiredTG";
+$upperWepPanel[$panelCount++,"ArenaGame"] = "plasmaDeathsTG";       $upperWepPanel[$panelCount++,"ArenaGame"] = "discShotsFiredTG";     $upperWepPanel[$panelCount++,"ArenaGame"] = "discDeathsTG";
+$upperWepPanel[$panelCount++,"ArenaGame"] = "grenadeShotsFiredTG";  $upperWepPanel[$panelCount++,"ArenaGame"] = "grenadeDeathsTG";      $upperWepPanel[$panelCount++,"ArenaGame"] = "cgShotsFiredTG";
+$upperWepPanel[$panelCount++,"ArenaGame"] = "cgDeathsTG";           $upperWepPanel[$panelCount++,"ArenaGame"] = "shockShotsFiredTG";    $upperWepPanel[$panelCount++,"ArenaGame"] = "shockDeathsTG";
+$upperWepPanel[$panelCount++,"ArenaGame"] = "laserDeathsTG";        $upperWepPanel[$panelCount++,"ArenaGame"] = "laserShotsFiredTG";     $upperWepPanel[$panelCount++,"ArenaGame"] = "hGrenadeShotsFiredTG";
+$upperWepPanelCount["ArenaGame"] = $panelCount++;
+
+$panelCount = 0;
+$wepGrid[$panelCount, "ArenaGame"] = "blasterKillsTG";     $wepGrid[$panelCount++, "ArenaGame"] = "blasterMATG";   $wepGrid[$panelCount++, "ArenaGame"] = "blasterHitDistMax";   $wepGrid[$panelCount++, "ArenaGame"] = "blasterDmgTG";        
+$wepGrid[$panelCount++, "ArenaGame"] = "plasmaKillsTG";    $wepGrid[$panelCount++, "ArenaGame"] = "plasmaMATG";    $wepGrid[$panelCount++, "ArenaGame"] = "plasmaHitDistMax";    $wepGrid[$panelCount++, "ArenaGame"] = "plasmaDmgTG";      
+$wepGrid[$panelCount++, "ArenaGame"] = "cgKillsTG";        $wepGrid[$panelCount++, "ArenaGame"] = "cgMATG";        $wepGrid[$panelCount++, "ArenaGame"] = "cgHitDistMax";        $wepGrid[$panelCount++, "ArenaGame"] = "cgDmgTG";
+$wepGrid[$panelCount++, "ArenaGame"] = "discKillsTG";      $wepGrid[$panelCount++, "ArenaGame"] = "discMATG";      $wepGrid[$panelCount++, "ArenaGame"] = "discHitDistMax";      $wepGrid[$panelCount++, "ArenaGame"] = "discDmgTG";          
+$wepGrid[$panelCount++, "ArenaGame"] = "grenadeKillsTG";   $wepGrid[$panelCount++, "ArenaGame"] = "grenadeMATG";   $wepGrid[$panelCount++, "ArenaGame"] = "grenadeHitDistMax";   $wepGrid[$panelCount++, "ArenaGame"] = "grenadeDmgTG";     
+$wepGrid[$panelCount++, "ArenaGame"] = "laserKillsTG";     $wepGrid[$panelCount++, "ArenaGame"] = "laserMATG";     $wepGrid[$panelCount++, "ArenaGame"] = "laserHitDistMax";      $wepGrid[$panelCount++, "ArenaGame"] = "laserDmgTG";       
+$wepGrid[$panelCount++, "ArenaGame"] = "shockKillsTG";     $wepGrid[$panelCount++, "ArenaGame"] = "shockMATG";     $wepGrid[$panelCount++, "ArenaGame"] = "shockHitDistMax";     $wepGrid[$panelCount++, "ArenaGame"] = "shockDmgTG"; 
+$wepGrid[$panelCount++, "ArenaGame"] = "hGrenadeKillsTG";  $wepGrid[$panelCount++, "ArenaGame"] = "hGrenadeMATG";  $wepGrid[$panelCount++, "ArenaGame"] = "hGrenadeHitDistMax";  $wepGrid[$panelCount++, "ArenaGame"] = "hGrenadeDmgTG"; 
+$wepGridCount["ArenaGame"] = $panelCount++;
+//discKillGround
+$panelCount = 0;
+$panelThree[$panelCount,"ArenaGame"] = "scoreTG";            $panelThree[$panelCount++,"ArenaGame"] = "scoreMax";           $panelThree[$panelCount++,"ArenaGame"] = "voicebindsallCountTG";
+$panelThree[$panelCount++,"ArenaGame"] = "killsTG";          $panelThree[$panelCount++,"ArenaGame"] = "totalWepDmgTG";       $panelThree[$panelCount++,"ArenaGame"] = "voteCountTG";
+$panelThree[$panelCount++,"ArenaGame"] = "hatTricksTG";     $panelThree[$panelCount++,"ArenaGame"] = "killStreakMax";       $panelThree[$panelCount++,"ArenaGame"] = "kdrAvg";
+$panelThree[$panelCount++,"ArenaGame"] = "ctrlKKillsTG";     $panelThree[$panelCount++,"ArenaGame"] = "blasterReflectKillTG";$panelThree[$panelCount++,"ArenaGame"] = "distMovTG";
+$panelThree[$panelCount++,"ArenaGame"] = "timeTLAvg";        $panelThree[$panelCount++,"ArenaGame"] = "maxSpeedMax";         $panelThree[$panelCount++,"ArenaGame"] = "discJumpTG";
+$panelThree[$panelCount++,"ArenaGame"] = "lagSpikesTG";      $panelThree[$panelCount++,"ArenaGame"] = "outOfBoundDeathsTG";  $panelThree[$panelCount++,"ArenaGame"] = "teamkillCountTG";
+$panelThree[$panelCount++,"ArenaGame"] = "EVKillsTG";        $panelThree[$panelCount++,"ArenaGame"] = "idleTimeTG";          $panelThree[$panelCount++,"ArenaGame"] = "firstKillTG";
+$panelThree[$panelCount++,"ArenaGame"] = "airTimeTG";        $panelThree[$panelCount++,"ArenaGame"] = "groundTimeTG";        $panelThree[$panelCount++,"ArenaGame"] = "lastKillTG"; 
+$panelThree[$panelCount++,"ArenaGame"] = "totalMATG";        $panelThree[$panelCount++,"ArenaGame"] = "groundKillsTG";        $panelThree[$panelCount++,"ArenaGame"] = "chatallCountTG";
+$panelThree[$panelCount++,"ArenaGame"] = "concussHitTG";     $panelThree[$panelCount++,"ArenaGame"] = "maHitDistMax";         $panelThree[$panelCount++,"ArenaGame"] = "maHitHeightMax";
+$panelThree[$panelCount++,"ArenaGame"] = "armorLKTG";        $panelThree[$panelCount++,"ArenaGame"] = "armorMKTG";           $panelThree[$panelCount++,"ArenaGame"] = "roundsWonTG";
+$panelThree[$panelCount++,"ArenaGame"] = "groundDeathsTG";    $panelThree[$panelCount++,"ArenaGame"] = "deadDistMax";      $panelThree[$panelCount++,"ArenaGame"] = "deathKillsTG";
+$panelThree[$panelCount++,"ArenaGame"] = "discReflectHitTG";  $panelThree[$panelCount++,"ArenaGame"] = "discReflectKillTG";   $panelThree[$panelCount++,"ArenaGame"] = "killerDiscJumpTG";       
+$panelThreeCount["ArenaGame"] =  $panelCount++; 
+    
+$panelCount = 0; 
+$smallPanel[$panelCount,"ArenaGame"] =   "discKillGroundTG"; 
+$smallPanel[$panelCount++,"ArenaGame"] = "discKillsTG";       
+$smallPanel[$panelCount++,"ArenaGame"] = "discMATG";          
+$smallPanel[$panelCount++,"ArenaGame"] = "discMAHitDistMax";   
+$smallPanel[$panelCount++,"ArenaGame"] = "laserKillsTG";    
+$smallPanel[$panelCount++,"ArenaGame"] = "laserHeadShotTG"; 
+$smallPanel[$panelCount++,"ArenaGame"] = "laserHitDistMax";
+$smallPanel[$panelCount++,"ArenaGame"] = "totalTimeTG"; 
+      
+$smallPanel[$panelCount++,"ArenaGame"] = "hGrenadeKillsTG";   
+$smallPanel[$panelCount++,"ArenaGame"] = "shockKillsTG";
+$smallPanel[$panelCount++,"ArenaGame"] = "shockMATG";    
+$smallPanel[$panelCount++,"ArenaGame"] = "shockRearShotTG"; 
+$smallPanel[$panelCount++,"ArenaGame"] = "grenadeKillsTG"; 
+$smallPanel[$panelCount++,"ArenaGame"] = "grenadeMATG";       
+$smallPanel[$panelCount++,"ArenaGame"] = "grenadeMAHitDistMax";
+$smallPanel[$panelCount++,"ArenaGame"] = "lArmorTimeTG";
+   
+$smallPanel[$panelCount++,"ArenaGame"] = "assistTG"; 
+$smallPanel[$panelCount++,"ArenaGame"] = "plasmaKillsTG";     
+$smallPanel[$panelCount++,"ArenaGame"] = "plasmaMATG";
+$smallPanel[$panelCount++,"ArenaGame"] = "plasmaMAHitDistMax";       
+$smallPanel[$panelCount++,"ArenaGame"] = "blasterKillsTG";    
+$smallPanel[$panelCount++,"ArenaGame"] = "blasterMATG";       
+$smallPanel[$panelCount++,"ArenaGame"] = "blasterMAHitDistMax";
+$smallPanel[$panelCount++,"ArenaGame"] = "mArmorTimeTG";
+$smallPanelCount["ArenaGame"] =  $panelCount++;
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 $panelCount = 0;
 $upperWepPanel[$panelCount, "DefaultGame"] = "discMAHitDistMax";     $upperWepPanel[$panelCount++, "DefaultGame"] = "plasmaMAHitDistMax";$upperWepPanel[$panelCount++, "DefaultGame"] = "blasterMAHitDistMax";
-$upperWepPanel[$panelCount++, "DefaultGame"] = "grenadeMAHitDistMax";$upperWepPanel[$panelCount++, "DefaultGame"] = "elfShotsFiredTG";  $upperWepPanel[$panelCount++, "DefaultGame"] = "totalWepDmgTG";
-$upperWepPanel[$panelCount++, "DefaultGame"] = "maxSpeedMax";        $upperWepPanel[$panelCount++, "DefaultGame"] = "shotsFiredTG";      $upperWepPanel[$panelCount++, "DefaultGame"] = "concussHitTG";
+$upperWepPanel[$panelCount++, "DefaultGame"] = "grenadeMAHitDistMax";$upperWepPanel[$panelCount++, "DefaultGame"] = "elfShotsFiredTG";  $upperWepPanel[$panelCount++, "DefaultGame"] = "totalWepDmgTG";   
+$upperWepPanel[$panelCount++, "DefaultGame"] = "maxSpeedMax";        $upperWepPanel[$panelCount++, "DefaultGame"] = "shotsFiredTG";      $upperWepPanel[$panelCount++, "DefaultGame"] = "concussHitTG";    
 $upperWepPanel[$panelCount++, "DefaultGame"] = "comboCountTG";       $upperWepPanel[$panelCount++, "DefaultGame"] = "concussHitTG";      $upperWepPanel[$panelCount++, "DefaultGame"] = "tripleKillTG";
-$panelCount++;
+$upperWepPanelCount["DefaultGame"] = $panelCount++;
 
 $panelCount = 0;
-$wepGrid[$panelCount, "DefaultGame"] = "blasterKillsTG";        $wepGrid[$panelCount++, "DefaultGame"] = "blasterMATG";      $wepGrid[$panelCount++, "DefaultGame"] = "blasterHitDistMax";
-$wepGrid[$panelCount++, "DefaultGame"] = "blasterDmgTG";        $wepGrid[$panelCount++, "DefaultGame"] = "plasmaKillsTG";    $wepGrid[$panelCount++, "DefaultGame"] = "plasmaMATG";
-$wepGrid[$panelCount++, "DefaultGame"] = "plasmaHitDistMax";    $wepGrid[$panelCount++, "DefaultGame"] = "plasmaDmgTG";      $wepGrid[$panelCount++, "DefaultGame"] = "cgKillsTG";
+$wepGrid[$panelCount, "DefaultGame"] = "blasterKillsTG";        $wepGrid[$panelCount++, "DefaultGame"] = "blasterMATG";      $wepGrid[$panelCount++, "DefaultGame"] = "blasterHitDistMax";   
+$wepGrid[$panelCount++, "DefaultGame"] = "blasterDmgTG";        $wepGrid[$panelCount++, "DefaultGame"] = "plasmaKillsTG";    $wepGrid[$panelCount++, "DefaultGame"] = "plasmaMATG";    
+$wepGrid[$panelCount++, "DefaultGame"] = "plasmaHitDistMax";    $wepGrid[$panelCount++, "DefaultGame"] = "plasmaDmgTG";      $wepGrid[$panelCount++, "DefaultGame"] = "cgKillsTG";        
 $wepGrid[$panelCount++, "DefaultGame"] = "cgMATG";              $wepGrid[$panelCount++, "DefaultGame"] = "cgHitDistMax";     $wepGrid[$panelCount++, "DefaultGame"] = "cgDmgTG";
-$wepGrid[$panelCount++, "DefaultGame"] = "discKillsTG";         $wepGrid[$panelCount++, "DefaultGame"] = "discMATG";         $wepGrid[$panelCount++, "DefaultGame"] = "discHitDistMax";
-$wepGrid[$panelCount++, "DefaultGame"] = "discDmgTG";           $wepGrid[$panelCount++, "DefaultGame"] = "grenadeKillsTG";   $wepGrid[$panelCount++, "DefaultGame"] = "grenadeMATG";
-$wepGrid[$panelCount++, "DefaultGame"] = "grenadeHitDistMax";   $wepGrid[$panelCount++, "DefaultGame"] = "grenadeDmgTG";     $wepGrid[$panelCount++, "DefaultGame"] = "laserKillsTG";
+$wepGrid[$panelCount++, "DefaultGame"] = "discKillsTG";         $wepGrid[$panelCount++, "DefaultGame"] = "discMATG";         $wepGrid[$panelCount++, "DefaultGame"] = "discHitDistMax";      
+$wepGrid[$panelCount++, "DefaultGame"] = "discDmgTG";           $wepGrid[$panelCount++, "DefaultGame"] = "grenadeKillsTG";   $wepGrid[$panelCount++, "DefaultGame"] = "grenadeMATG";   
+$wepGrid[$panelCount++, "DefaultGame"] = "grenadeHitDistMax";   $wepGrid[$panelCount++, "DefaultGame"] = "grenadeDmgTG";     $wepGrid[$panelCount++, "DefaultGame"] = "laserKillsTG";     
 $wepGrid[$panelCount++, "DefaultGame"] = "laserMATG";           $wepGrid[$panelCount++, "DefaultGame"] = "laserHitDistMax";  $wepGrid[$panelCount++, "DefaultGame"] = "laserDmgTG";
-$wepGrid[$panelCount++, "DefaultGame"] = "mortarKillsTG";       $wepGrid[$panelCount++, "DefaultGame"] = "mortarMATG";       $wepGrid[$panelCount++, "DefaultGame"] = "mortarHitDistMax";
-$wepGrid[$panelCount++, "DefaultGame"] = "mortarDmgTG";         $wepGrid[$panelCount++, "DefaultGame"] = "missileKillsTG";   $wepGrid[$panelCount++, "DefaultGame"] = "missileMATG";
-$wepGrid[$panelCount++, "DefaultGame"] = "missileHitDistMax";   $wepGrid[$panelCount++, "DefaultGame"] = "missileDmgTG";     $wepGrid[$panelCount++, "DefaultGame"] = "shockKillsTG";
+$wepGrid[$panelCount++, "DefaultGame"] = "mortarKillsTG";       $wepGrid[$panelCount++, "DefaultGame"] = "mortarMATG";       $wepGrid[$panelCount++, "DefaultGame"] = "mortarHitDistMax";    
+$wepGrid[$panelCount++, "DefaultGame"] = "mortarDmgTG";         $wepGrid[$panelCount++, "DefaultGame"] = "missileKillsTG";   $wepGrid[$panelCount++, "DefaultGame"] = "missileMATG";   
+$wepGrid[$panelCount++, "DefaultGame"] = "missileHitDistMax";   $wepGrid[$panelCount++, "DefaultGame"] = "missileDmgTG";     $wepGrid[$panelCount++, "DefaultGame"] = "shockKillsTG";     
 $wepGrid[$panelCount++, "DefaultGame"] = "shockMATG";           $wepGrid[$panelCount++, "DefaultGame"] = "shockHitDistMax";  $wepGrid[$panelCount++, "DefaultGame"] = "shockDmgTG";
-$wepGrid[$panelCount++, "DefaultGame"] = "mineKillsTG";         $wepGrid[$panelCount++, "DefaultGame"] = "mineMATG";         $wepGrid[$panelCount++, "DefaultGame"] = "mineHitDistMax";
-$wepGrid[$panelCount++, "DefaultGame"] = "mineDmgTG";           $wepGrid[$panelCount++, "DefaultGame"] = "hGrenadeKillsTG";  $wepGrid[$panelCount++, "DefaultGame"] = "hGrenadeMATG";
-$wepGrid[$panelCount++, "DefaultGame"] = "hGrenadeHitDistMax";  $wepGrid[$panelCount++, "DefaultGame"] = "hGrenadeDmgTG";    $wepGrid[$panelCount++, "DefaultGame"] = "satchelKillsTG";
+$wepGrid[$panelCount++, "DefaultGame"] = "mineKillsTG";         $wepGrid[$panelCount++, "DefaultGame"] = "mineMATG";         $wepGrid[$panelCount++, "DefaultGame"] = "mineHitDistMax";      
+$wepGrid[$panelCount++, "DefaultGame"] = "mineDmgTG";           $wepGrid[$panelCount++, "DefaultGame"] = "hGrenadeKillsTG";  $wepGrid[$panelCount++, "DefaultGame"] = "hGrenadeMATG";  
+$wepGrid[$panelCount++, "DefaultGame"] = "hGrenadeHitDistMax";  $wepGrid[$panelCount++, "DefaultGame"] = "hGrenadeDmgTG";    $wepGrid[$panelCount++, "DefaultGame"] = "satchelKillsTG";   
 $wepGrid[$panelCount++, "DefaultGame"] = "satchelMATG";         $wepGrid[$panelCount++, "DefaultGame"] = "satchelHitDistMax";$wepGrid[$panelCount++, "DefaultGame"] = "satchelDmgTG";
-$panelCount++;
+$wepGridCount["DefaultGame"] = $panelCount++;
 
 $panelCount = 0;
 $panelThree[$panelCount,"DefaultGame"] = "scoreTG";            $panelThree[$panelCount++,"DefaultGame"] = "voicebindsallCountTG";  $panelThree[$panelCount++,"DefaultGame"] = "flipflopCountTG";
@@ -1757,7 +1789,7 @@ $panelThree[$panelCount++,"DefaultGame"] = "maHitDistMax";     $panelThree[$pane
 $panelThree[$panelCount++,"DefaultGame"] = "minePlusDiscTG";   $panelThree[$panelCount++,"DefaultGame"] = "minePlusDiscKillTG";  $panelThree[$panelCount++,"DefaultGame"] = "maHitHeightMax";
 $panelThree[$panelCount++,"DefaultGame"] = "discReflectHitTG"; $panelThree[$panelCount++,"DefaultGame"] = "discReflectKillTG";   $panelThree[$panelCount++,"DefaultGame"] = "killerDiscJumpTG";
 $panelThree[$panelCount++,"DefaultGame"] = "firstKillTG";      $panelThree[$panelCount++,"DefaultGame"] = "lastKillTG";          $panelThree[$panelCount++,"DefaultGame"] = "deathKillsTG";
-$panelCount++;
+$panelThreeCount["DefaultGame"] = $panelCount++;
 
 $panelCount = 0;
 $smallPanel[$panelCount,"DefaultGame"] = "scoreAvg";        $smallPanel[$panelCount++,"DefaultGame"] = "scoreMax";            $smallPanel[$panelCount++,"DefaultGame"] = "distMovTG";$smallPanel[$panelCount++,"DefaultGame"] = "totalTimeTG";
@@ -1766,7 +1798,7 @@ $smallPanel[$panelCount++,"DefaultGame"] = "blasterMATG";   $smallPanel[$panelCo
 $smallPanel[$panelCount++,"DefaultGame"] = "grenadeMATG";   $smallPanel[$panelCount++,"DefaultGame"] = "grenadeMAHitDistMax"; $smallPanel[$panelCount++,"DefaultGame"] = "shockACCAvg";      $smallPanel[$panelCount++,"DefaultGame"] = "plasmaACCAvg";
 $smallPanel[$panelCount++,"DefaultGame"] = "discMATG";      $smallPanel[$panelCount++,"DefaultGame"] = "discMAHitDistMax";    $smallPanel[$panelCount++,"DefaultGame"] = "discACCAvg";       $smallPanel[$panelCount++,"DefaultGame"] = "shockKillsTG";
 $smallPanel[$panelCount++,"DefaultGame"] = "shockMATG";     $smallPanel[$panelCount++,"DefaultGame"] = "shockRearShotTG";     $smallPanel[$panelCount++,"DefaultGame"] = "hGrenadeKillsTG";  $smallPanel[$panelCount++,"DefaultGame"] = "mineKillsTG";
-$panelCount++;
+$smallPanelCount["DefaultGame"] = $panelCount++;
 
 
 //misc stats will only display if it has a value for it
@@ -1854,7 +1886,7 @@ function dtAICON(%client){
 package dtStats{
    function AIConnection::startMission(%client){// ai support
       parent::startMission(%client);
-      schedule(25000,0,"dtAICON",%client);
+      schedule(15000,0,"dtAICON",%client);
    }
    function GameConnection::onDrop(%client, %reason){
       dtStatsClientLeaveGame(%client);//common
@@ -1862,7 +1894,7 @@ package dtStats{
    }
    function CTFGame::clientMissionDropReady(%game, %client){
       parent::clientMissionDropReady(%game, %client);
-
+      
       if($dtStats::ctfTimes){
          %team1 = $dtServer::capTimes[cleanMapName($missionName),%game.class,1];
          %team2 = $dtServer::capTimes[cleanMapName($missionName),%game.class,1];
@@ -1870,21 +1902,17 @@ package dtStats{
          %time2 = %game.formatTime(getField(%team2,0), true);
          %name1 = getField(%team1,1);
          %name2 = getField(%team1,2);
-         BottomPrint(%client, "Best caps on " @ $CurrentMission @ ":\n" @ getTaggedString(%game.getTeamName(1)) @ ":" SPC %name1 @ " in " @ %time1 @ " seconds\n" @ getTaggedString(%game.getTeamName(2)) @ ":" SPC %name2 @ " in " @ %time2  @ " seconds", 20, 3);
+         BottomPrint(%client, "Best caps on " @ $CurrentMission @ ":\n" @ getTaggedString(%game.getTeamName(1)) @ ":" SPC %name1 @ " in " @ %time1 @ " seconds\n" @ getTaggedString(%game.getTeamName(2)) @ ":" SPC %name2 @ " in " @ %time2  @ " seconds", 20, 3);  
       }
       dtStatsMissionDropReady(%game, %client);//common
    }
    function CTFGame::gameOver( %game ){
-      dtStatsGameOver(%game);
+      dtStatsGameOver(%game); 
       parent::gameOver(%game);
-
-      if(isObject(dtGameStat)){
-         dtGameStat.delete();
-      }
    }
    function CTFGame::onClientKilled(%game, %clVictim, %clKiller, %damageType, %implement, %damageLocation){
       clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %damageLocation);//for stats collection
-      if(%clKiller.team != %clVictim.team && isObject(%clKiller.player)){
+      if(%clKiller.team != %clVictim.team && isObject(%clKiller.player)){// note test for vehicles 
          %dist = vectorDist($dtStats::FlagPos[%clKiller.team], %clKiller.player.getPosition());
          if(%dist > ($dtStats::FlagTotalDist*0.5)){// kill made closer to the enemy flag
             %clKiller.dtStats.stat["OffKills"]++;
@@ -1931,10 +1959,6 @@ package dtStats{
    function LakRabbitGame::gameOver( %game ){
       dtStatsGameOver(%game);//common
       parent::gameOver(%game);
-
-      if(isObject(dtGameStat)){
-         dtGameStat.delete();
-      }
    }
    function LakRabbitGame::recalcScore(%game, %client){
       if($missionRunning){
@@ -1961,10 +1985,6 @@ package dtStats{
    function ArenaGame::gameOver( %game ){
       dtStatsGameOver(%game);
       parent::gameOver(%game);
-
-      if(isObject(dtGameStat)){
-         dtGameStat.delete();
-      }
    }
    function ArenaGame::onClientKilled(%game, %clVictim, %clKiller, %damageType, %implement, %damageLocation){
       clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %damageLocation);//for stats collection
@@ -1982,9 +2002,9 @@ package dtStats{
       else
          parent::updateScoreHud(%game, %client, %tag);
    }
-   function ArenaGame::sendDebriefing(%game, %client){
+   function ArenaGame::sendDebriefing(%game, %client){ 
       if(%client.isWatchOnly){
-         parent::sendDebriefing(%game, %client);
+         parent::sendDebriefing(%game, %client);   
          return;
       }
       messageClient( %client, 'MsgClearDebrief', "" );
@@ -2010,7 +2030,7 @@ package dtStats{
             messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 and Team %2 tie!', %game.getTeamName(%firstTeam), %game.getTeamName(%secondTeam) );
          else
             messageClient( %client, 'MsgDebriefResult', "", '<just:center>The mission ended in a tie.' );
-
+            
          if ( $Arena::Pref::TrackHighScores && Game.class $= "ArenaGame" ){
             if ( %game.newHighScoreFlag )
               messageClient( %client, 'MsgDebriefResult', "", '<spush><color:3cb4b4><font:univers condensed:18>%1 has set a NEW INDIVIDUAL RECORD for this mission with a score of %2!<spop>', $Arena::HighScores::Name[$currentMission], $Arena::HighScores::Score[$currentMission] );
@@ -2022,9 +2042,14 @@ package dtStats{
               messageClient( %client, 'MsgDebriefResult', "", '<spush><color:3cb4b4><font:univers condensed:18>But there are not enough human players here to set a new high score.<spop>' );
          }
          messageClient( %client, 'MsgDebriefAddLine', "", ' ' );
+         
 
-         // Player scores:
-         messageClient( %client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>PLAYER<lmargin%%:20>TEAM<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>Assists<lmargin%%:65>Total Dmg<lmargin%%:75>Rounds Fired<lmargin%%:85>Disc MA<spop>' );
+         if($dtStats::arenaKDRStats){
+               messageClient( %client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>PLAYER<lmargin%%:20>TEAM<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>DEATHS<lmargin%%:65>KDR<lmargin%%:75>ASSISTS<lmargin%%:85>DISC MA<spop>' );
+         }
+         else{
+            messageClient( %client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>PLAYER<lmargin%%:20>TEAM<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>ASSISTS<lmargin%%:65>TOTAL DMG<lmargin%%:75>ROUNDS FIRED<lmargin%%:85>DISC MA<spop>' );
+         }
          for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
             %count[%team] = 0;
 
@@ -2046,10 +2071,16 @@ package dtStats{
             %cl = $TeamRank[%highTeam, %count[%highTeam]];
             %score = %cl.score $= "" ? 0 : %cl.score;
             %kills = %cl.kills $= "" ? 0 : %cl.kills;
-            %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, %game.getTeamName(%cl.team), %score, %kills, %cl.dtStats.stat["assist"], cropFloat(%cl.dtStats.stat["totalWepDmg"],1), %cl.dtStats.stat["shotsFired"], %cl.dtStats.stat["discMA"] );
-
-            %count[%highTeam]++;
+            %deaths = %cl.deaths $= "" ? 0 : %cl.deaths;
+            if($dtStats::arenaKDRStats){
+               %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
+               messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, %game.getTeamName(%cl.team), %score, %kills , %deaths, cropFloat(%cl.dtStats.stat["kdr"],2), %cl.dtStats.stat["assist"], %cl.dtStats.stat["discMA"] );
+            }
+            else{
+               %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
+               messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, %game.getTeamName(%cl.team), %score, %kills, %cl.dtStats.stat["assist"], cropFloat(%cl.dtStats.stat["totalWepDmg"],1), %cl.dtStats.stat["shotsFired"], %cl.dtStats.stat["discMA"] );
+            }
+            %count[%highTeam]++; 
             %notDone = false;
             for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
             {
@@ -2060,7 +2091,7 @@ package dtStats{
                }
             }
          }
-
+         
          //now go through an list all the observers:
          %count = ClientGroup.getCount();
          %printedHeader = false;
@@ -2073,91 +2104,32 @@ package dtStats{
                if (!%printedHeader)
                {
                   %printedHeader = true;
-                  messageClient(%client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>OBSERVERS<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>Assists<lmargin%%:65>OffKills<lmargin%%:75>DefKills<lmargin%%:85>Disc MA<spop>');
+                  %score = %cl.score $= "" ? 0 : %cl.score;
+                  %kills = %cl.kills $= "" ? 0 : %cl.kills;
+                  %deaths = %cl.deaths $= "" ? 0 : %cl.deaths;
+                  if($dtStats::arenaKDRStats){
+                     messageClient(%client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>OBSERVERS<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>DEATHS<lmargin%%:65>KDR<lmargin%%:75>ASSISTS<lmargin%%:85>DISC MA<spop>');
+                  }
+                  else{
+                     messageClient(%client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>OBSERVERS<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>ASSISTS<lmargin%%:65>TOTAL DMG<lmargin%%:75>ROUNDS FIRED<lmargin%%:85>DISC MA<spop>');
+                  }
                }
 
                //print out the client
-               %score = %cl.score $= "" ? 0 : %cl.score;//<bitmap:bullet_2>
-               %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
-               messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, "", %score, %kills, %cl.dtStats.stat["assist"], %cl.dtStats.stat["OffKills"], %cl.dtStats.stat["DefKills"], %cl.dtStats.stat["discMA"] );
-            }
-         }
-         extendedDebrief(%game, %client);
-
-      }
-      else if($dtStats::teamDebrief == 2){
-         %topScore = "";
-         %topCount = 0;
-         for ( %team = 1; %team <= %game.numTeams; %team++ ){
-            if ( %topScore $= "" || $TeamScore[%team] > %topScore ){
-               %topScore = $TeamScore[%team];
-               %firstTeam = %team;
-               %topCount = 1;
-            }
-            else if ( $TeamScore[%team] == %topScore ){
-               %secondTeam = %team;
-               %topCount++;
-            }
-         }
-
-         // Mission result:
-         if ( %topCount == 1 )
-            messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 wins!', %game.getTeamName(%firstTeam) );
-         else if ( %topCount == 2 )
-            messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 and Team %2 tie!', %game.getTeamName(%firstTeam), %game.getTeamName(%secondTeam) );
-         else
-            messageClient( %client, 'MsgDebriefResult', "", '<just:center>The mission ended in a tie.' );
-
-         if ( $Arena::Pref::TrackHighScores && Game.class $= "ArenaGame" ){
-            if ( %game.newHighScoreFlag )
-              messageClient( %client, 'MsgDebriefResult', "", '<spush><color:3cb4b4><font:univers condensed:18>%1 has set a NEW INDIVIDUAL RECORD for this mission with a score of %2!<spop>', $Arena::HighScores::Name[$currentMission], $Arena::HighScores::Score[$currentMission] );
-            else if ( $Arena::HighScores::Name[$currentMission] !$= "" && $Arena::HighScores::Score[$currentMission] !$= "" )
-              messageClient( %client, 'MsgDebriefResult', "", '<spush><color:3cb4b4><font:univers condensed:18>%1 holds the individual record for this mission with a score of %2.<spop>', $Arena::HighScores::Name[$currentMission], $Arena::HighScores::Score[$currentMission] );
-            else
-              messageClient( %client, 'MsgDebriefResult', "", '<spush><color:3cb4b4><font:univers condensed:18>There is no high score recorded for this mission.<spop>' );
-            if ( %game.notEnoughHumansFlag )
-              messageClient( %client, 'MsgDebriefResult', "", '<spush><color:3cb4b4><font:univers condensed:18>But there are not enough human players here to set a new high score.<spop>' );
-         }
-
-         messageClient( %client, 'MsgDebriefAddLine', "", ' ' );
-         messageClient( %client, 'MsgDebriefAddLine', "", '<tab:100,300,400><color:00dcd4><font:univers condensed:30>%1\t%3\t%2\t%4\n<font:univers condensed:18>', $teamName[1], $teamName[2], $TeamScore[1], $TeamScore[2]);
-         messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,170,210,250,300,430,470,510,550><color:00dc00>Player\tScore\tKills\tAssist\tDmg\tPlayer\tScore\tKills\tAssist\tDmg');
-
-         %teamsize = ($TeamRank[1, count] > $TeamRank[2, count]) ? $TeamRank[1, count] : $TeamRank[2, count];
-         for(%i=0; %i < %teamsize; %i++){
-            %t1Obj = $TeamRank[1, %i];
-            %t2Obj = $TeamRank[2, %i];
-            if(isObject(%t1Obj) && isObject(%t2Obj)){
-               %dtStats1 = %t1Obj.dtStats;
-               %dtStats2 = %t2Obj.dtStats;
-               %statsLine = getTaggedString(%t1Obj.name) @ "\t" @ %t1Obj.score @ "\t" @ %t1Obj.kills @ "\t" @ %dtStats1.stat["assist"] @ "\t" @ cropFloat(%dtStats1.stat["totalWepDmg"],1) @ "\t" @ %i+1 @ "." @  getTaggedString(%t2Obj.name) @  "\t" @ %t2Obj.score @ "\t" @ %t2Obj.kills @ "\t" @ %dtStats2.stat["assist"] @ "\t" @ cropFloat(%dtStats2.stat["totalWepDmg"],1);
-               messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300,430,470,510,550><color:3cb4b4><font:univers condensed:15>" @ %i+1 @ "." @  %statsLine);
-            }
-            else if(isObject(%t1Obj) && !isObject(%t2Obj)){
-               %dtStats1 = %t1Obj.dtStats;
-               messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300,430,470,510,550><color:3cb4b4><font:univers condensed:15>" @ %i+1 @ "." @  getTaggedString(%t1Obj.name) @ "\t" @ %t1Obj.score @ "\t" @ %t1Obj.kills @ "\t" @ %dtStats1.stat["assist"] @ "\t" @ cropFloat(%dtStats1.stat["totalWepDmg"],1) @ "\t\t\t\t\t");
-            }
-            else if(!isObject(%t1Obj) && isObject(%t2Obj)){
-               %dtStats2 = %t2Obj.dtStats;
-               messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300,430,470,510,550><color:3cb4b4><font:univers condensed:15>\t\t\t\t\t" @ %i+1 @ "." @  getTaggedString(%t2Obj.name) @  "\t" @ %t2Obj.score @ "\t" @ %t2Obj.kills @ "\t" @ %dtStats2.stat["assist"] @ "\t" @ cropFloat(%dtStats2.stat["totalWepDmg"],1));
-            }
-         }
-         %printedHeader = false;
-         for (%i = 0; %i <  ClientGroup.getCount(); %i++)
-         {
-            %cl = ClientGroup.getObject(%i);
-            if (%cl.team <= 0)
-            {
-               //print the header only if we actually find an observer
-               if (!%printedHeader)
-               {
-                  %printedHeader = true;
-                  messageClient(%client, 'MsgDebriefAddLine', "", "\n\n<tab:130,170,210,250,300><color:00dc00>OBSERVERS\tScore\tOff\tDef\tKills");
+               if($dtStats::arenaKDRStats){
+                  %score = %cl.score $= "" ? 0 : %cl.score;//<bitmap:bullet_2>
+                  %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
+                  messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, "", %score, %kills , %deaths, cropFloat(%cl.dtStats.stat["kdr"],2), %cl.dtStats.stat["assist"], %cl.dtStats.stat["discMA"] );
                }
-               messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300><color:3cb4b4> <font:univers condensed:15>" @ getTaggedString(%cl.name) @ "\t" @ %cl.score @ "\t" @ %cl.offenseScore @ "\t" @ %cl.defenseScore @ "\t" @ %cl.kills);
+               else {
+                  %score = %cl.score $= "" ? 0 : %cl.score;//<bitmap:bullet_2>
+                  %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
+                  messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, "", %score, %kills, %cl.dtStats.stat["assist"], cropFloat(%cl.dtStats.stat["totalWepDmg"],1), %cl.dtStats.stat["shotsFired"], %cl.dtStats.stat["discMA"] );
+               }
             }
          }
          extendedDebrief(%game, %client);
+         
       }
       else{
          parent::sendDebriefing(%game, %client);// note not default game
@@ -2176,10 +2148,6 @@ package dtStats{
    function DMGame::gameOver( %game ){
       dtStatsGameOver(%game);
       parent::gameOver(%game);
-
-      if(isObject(dtGameStat)){
-         dtGameStat.delete();
-      }
    }
    function DMGame::recalcScore(%game, %client){
 	  if(!$missionRunning){
@@ -2209,22 +2177,18 @@ package dtStats{
          %time2 = %game.formatTime(getField(%team2,0), true);
          %name1 = getField(%team1,1);
          %name2 = getField(%team1,2);
-         BottomPrint(%client, "Best caps on " @ $CurrentMission @ ":\n" @ getTaggedString(%game.getTeamName(1)) @ ":" SPC %name1 @ " in " @ %time1 @ " seconds\n" @ getTaggedString(%game.getTeamName(2)) @ ":" SPC %name2 @ " in " @ %time2  @ " seconds", 20, 3);
+         BottomPrint(%client, "Best caps on " @ $CurrentMission @ ":\n" @ getTaggedString(%game.getTeamName(1)) @ ":" SPC %name1 @ " in " @ %time1 @ " seconds\n" @ getTaggedString(%game.getTeamName(2)) @ ":" SPC %name2 @ " in " @ %time2  @ " seconds", 20, 3);  
       }
       dtStatsMissionDropReady(%game, %client);//common
    }
    function LCTFGame::gameOver( %game ){
       dtStatsGameOver(%game);//common
       parent::gameOver(%game);
-
-      if(isObject(dtGameStat)){
-         dtGameStat.delete();
-      }
    }
    function LCTFGame::onClientKilled(%game, %clVictim, %clKiller, %damageType, %implement, %damageLocation){
-      clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %damageLocation);//for stats collection
       if(%clKiller.team != %clVictim.team){
-         %dist = vectorDist($dtStats::FlagPos[%clKiller.team], %clKiller.player.getPosition());
+         %pos = isObject(%clKiller.player) ? %clKiller.player.getPosition() : %clKiller.lp;
+         %dist = vectorDist($dtStats::FlagPos[%clKiller.team], %pos);
          if(%dist > ($dtStats::FlagTotalDist*0.5)){// kill made closer to the enemy flag
             %clKiller.dtStats.stat["OffKills"]++;
          }
@@ -2232,9 +2196,10 @@ package dtStats{
             %clKiller.dtStats.stat["DefKills"]++;
          }
       }
+      clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %damageLocation);//for stats collection
       parent::onClientKilled(%game, %clVictim, %clKiller, %damageType, %implement, %damageLocation);
    }
-
+   
    function LCTFGame::processGameLink(%game, %client, %arg1, %arg2, %arg3, %arg4, %arg5){
       if($dtStats::Enable || %client.isSuperAdmin)
          dtGameLink(%game, %client, %arg1, %arg2, %arg3, %arg4, %arg5);
@@ -2247,7 +2212,7 @@ package dtStats{
       else
          parent::updateScoreHud(%game, %client, %tag);
    }
-
+   
    function SCtFGame::clientMissionDropReady(%game, %client){
       parent::clientMissionDropReady(%game, %client);
       if($dtStats::ctfTimes){
@@ -2257,17 +2222,13 @@ package dtStats{
          %time2 = %game.formatTime(getField(%team2,0), true);
          %name1 = getField(%team1,1);
          %name2 = getField(%team1,2);
-         BottomPrint(%client, "Best caps on " @ $CurrentMission @ ":\n" @ getTaggedString(%game.getTeamName(1)) @ ":" SPC %name1 @ " in " @ %time1 @ " seconds\n" @ getTaggedString(%game.getTeamName(2)) @ ":" SPC %name2 @ " in " @ %time2  @ " seconds", 20, 3);
+         BottomPrint(%client, "Best caps on " @ $CurrentMission @ ":\n" @ getTaggedString(%game.getTeamName(1)) @ ":" SPC %name1 @ " in " @ %time1 @ " seconds\n" @ getTaggedString(%game.getTeamName(2)) @ ":" SPC %name2 @ " in " @ %time2  @ " seconds", 20, 3);  
       }
       dtStatsMissionDropReady(%game, %client);//common
    }
    function SCtFGame::gameOver( %game ){
       dtStatsGameOver(%game);//common
       parent::gameOver(%game);
-
-      if(isObject(dtGameStat)){
-         dtGameStat.delete();
-      }
    }
    function SCtFGame::onClientKilled(%game, %clVictim, %clKiller, %damageType, %implement, %damageLocation){
       clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %damageLocation);//for stats collection
@@ -2282,7 +2243,7 @@ package dtStats{
       }
       parent::onClientKilled(%game, %clVictim, %clKiller, %damageType, %implement, %damageLocation);
    }
-
+   
    function SCtFGame::processGameLink(%game, %client, %arg1, %arg2, %arg3, %arg4, %arg5){
       if($dtStats::Enable || %client.isSuperAdmin)
          dtGameLink(%game, %client, %arg1, %arg2, %arg3, %arg4, %arg5);
@@ -2297,17 +2258,19 @@ package dtStats{
    }
    ///////////////////////////////////////////////////////////////////////////////
    function DefaultGame::missionLoadDone(%game){
-      parent::missionLoadDone(%game);
-
-      $dtStats::MapStart = 1;//rebuild custom map list after first load
-      buildMissionList();//dont this way to prevent locking a person out of selecting a start map
-
+      parent::missionLoadDone(%game);   
+      if(isObject(dtGameStat)){
+         dtGameStat.delete();  
+      }
+      $dtStats::MapStart = 1;//rebuild custom map list after first load 
+      buildMissionList();// this way to prevent locking a person out of selecting a start map
+      
       dtSaveServerVars();
       dtScanForRepair();
       if(%game.class $= "CTFGame" || %game.class $= "LCTFGame" || %game.class $= "SCtFGame"){
          $dtStats::FlagPos[1] =  $TeamFlag[1].getPosition();
          $dtStats::FlagPos[2] =  $TeamFlag[2].getPosition();
-         $dtStats::FlagTotalDist = vectorDist($dtStats::FlagPos[1], $dtStats::FlagPos[2]);
+         $dtStats::FlagTotalDist = vectorDist($dtStats::FlagPos[1], $dtStats::FlagPos[2]); 
       }
       $dtStats::gameID = formattimestring("yymmddHHnnss");
       if($dtStats::debugEchos)
@@ -2331,6 +2294,10 @@ package dtStats{
       }
    }
    function chatMessageAll( %sender, %msgString, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9, %a10 ){
+      if ( getsubstr(detag(%a2),0,1) $= "#" ){
+         error("dtchatcommandtest");
+         return;  
+      }
       parent::chatMessageAll( %sender, %msgString, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9, %a10 );
       %sender.dtStats.stat["chatallCount"]++;
     }
@@ -2452,7 +2419,7 @@ package dtStats{
       if(isActivePackage(dtStatsGame))
          deactivatePackage(dtStatsGame);
    }
-
+   
    function ArenaGame::activatePackages(%game){
       parent::activatePackages(%game);
       if(isActivePackage(dtStatsGame)){
@@ -2478,8 +2445,9 @@ package dtStats{
          %clAttacker.dmgdFlagTime = getSimTime();
 	}
 	function CTFGame::testEscortAssist(%game, %victimID, %killerID){
-	   if((getSimTime() - %victimID.dmgdFlagTime) < 5000 && %killerID.player.holdingFlag $= "")
+	   if((getSimTime() - %victimID.dmgdFlagTime) < 5000 && %killerID.player.holdingFlag $= ""){
 		  return true;
+      }
 	   return false;
 	}
 	function LCTFGame::onClientDamaged(%game, %clVictim, %clAttacker, %damageType, %implement, %damageLoc){
@@ -2490,8 +2458,9 @@ package dtStats{
 		  %clAttacker.dmgdFlagTime = getSimTime();
 	}
 	function LCTFGame::testEscortAssist(%game, %victimID, %killerID){
-	   if((getSimTime() - %victimID.dmgdFlagTime) < 5000 && %killerID.player.holdingFlag $= "")
+	   if((getSimTime() - %victimID.dmgdFlagTime) < 5000 && %killerID.player.holdingFlag $= ""){
 		  return true;
+	   }
 	   return false;
 	}
    function SCtFGame::onClientDamaged(%game, %clVictim, %clAttacker, %damageType, %implement, %damageLoc){
@@ -2502,9 +2471,18 @@ package dtStats{
 		  %clAttacker.dmgdFlagTime = getSimTime();
 	}
 	function SCtFGame::testEscortAssist(%game, %victimID, %killerID){
-	   if((getSimTime() - %victimID.dmgdFlagTime) < 5000 && %killerID.player.holdingFlag $= "")
+	   if((getSimTime() - %victimID.dmgdFlagTime) < 5000 && %killerID.player.holdingFlag $= ""){
 		  return true;
+	   }
 	   return false;
+	}
+	function ProjectileData::onCollision(%data, %projectile, %targetObject, %modifier, %position, %normal){
+	   %cl = %projectile.sourceObject.client;
+      if(isObject(%cl)){
+         %cl.lastExp = %data TAB %projectile.initialPosition TAB %position TAB %projectile.getWorldBox();
+         %cl.lastExpTime = getSimTime();  
+      }
+      parent::onCollision(%data, %projectile, %targetObject, %modifier, %position, %normal);
 	}
    function ProjectileData::onExplode(%data, %proj, %pos, %mod){
       %dataName = %data.getName();
@@ -2525,9 +2503,9 @@ package dtStats{
                   //error("disc bounce" SPC %angleDeg SPC %wdist);
                }
             }
-            else
+            else{
                %sourceClient.discReflect = 0;
-
+            }
             if(vectorDist(%pos,%proj.sourceObject.getPosition()) < 4){
                 %sourceClient.lastDiscJump = getSimTime();
             }
@@ -2546,16 +2524,20 @@ package dtStats{
                %sourceClient.stat["flareHit"] = getSimTime();
                %sourceClient.flareSource = %proj.targetSource.client;
             }
-            else
+            else{
                %sourceClient.stat["flareHit"] = 0;
+            }
       }
 
       if(isObject(%sourceClient)){
-         if(%proj.dtShotSpeed > 0)
+         if(%proj.dtShotSpeed > 0){
             %sourceClient.dtShotSpeed = %proj.dtShotSpeed;
-         else
+         }
+         else{
             %sourceClient.dtShotSpeed = mFloor(vectorLen(%proj.sourceObject.getVelocity()) * 3.6);
-         %sourceClient.lastExp = %data TAB %proj.initialPosition TAB %pos;
+         }
+         %sourceClient.lastExp = %data TAB %proj.initialPosition TAB %pos TAB %proj.getWorldBox();
+         %sourceClient.lastExpTime = getSimTime();
       }
       parent::onExplode(%data, %proj, %pos, %mod);
    }
@@ -2633,8 +2615,8 @@ package dtStats{
       }
       parent::onDamage(%this, %obj);
    }
-
-
+   
+   
    function CTFGame::recalcScore(%game, %cl){
       parent::recalcScore(%game, %cl);
       %dtStats = %cl.dtStats;
@@ -2659,7 +2641,7 @@ package dtStats{
    }
    function CTFGame::awardScoreTkDestroy(%game, %cl, %obj){
       parent::awardScoreTkDestroy(%game, %cl, %obj);
-      %cl.dtStats.stat["tkDestroys"] = %cl.tkDestroys;
+      %cl.dtStats.stat["tkDestroys"] = %cl.tkDestroys; 
    }
 
    function CTFGame::awardScoreFlagCap(%game, %cl, %flag){
@@ -2698,18 +2680,18 @@ package dtStats{
          case "DeployedStationInventory":
             %cl.dtStats.stat["depStationDestroys"] = %cl.depStationDestroys;
          case "MPBTeleporter":
-            %cl.dtStats.stat["mpbtstationDestroys"] = %cl.mpbtstationDestroys;
+            %cl.dtStats.stat["mpbtstationDestroys"] = %cl.mpbtstationDestroys; 
 
       }
    }
    function CTFGame::awardScoreVehicleDestroyed(%game, %client, %vehicleType, %mult, %passengers){
        %val = parent::awardScoreVehicleDestroyed(%game, %client, %vehicleType, %mult, %passengers);
        switch$(%vehicleType){// add stas here
-         case "Grav Cycle":
+         case "Grav Cycle": 
             %client.dtStats.stat["gravCycleDes"]++;
          case "Assault Tank":
             %client.dtStats.stat["assaultTankDes"]++;
-         case "MPB":
+         case "MPB":  
             %client.dtStats.stat["MPBDes"]++;
          case "Turbograv":
             %client.dtStats.stat["turbogravDes"]++;
@@ -2718,15 +2700,15 @@ package dtStats{
          case "Heavy Transport":
             %client.dtStats.stat["heavyTransportDes"]++;
        }
-       %client.dtStats.stat["vehicleScore"] = %client.vehicleScore;
-       %client.dtStats.stat["vehicleBonus"] = %client.vehicleBonus;
+       %client.dtStats.stat["vehicleScore"] = %client.vehicleScore; 
+       %client.dtStats.stat["vehicleBonus"] = %client.vehicleBonus; 
       return %val;
    }
    function CTFGame::awardScoreFlagDefend(%game, %killerID){
       %val = parent::awardScoreFlagDefend(%game, %killerID);
       %killerID.dtStats.stat["flagDefends"] = %killerID.flagDefends;
       dtMinMax("flagDefends", "flag", 1, %killerID.dtStats.stat["flagDefends"], %killerID);
-      return %val;
+      return %val;   
    }
    function CTFGame::awardScoreGenDefend(%game, %killerID){
       %val = parent::awardScoreGenDefend(%game, %killerID);
@@ -2747,7 +2729,7 @@ package dtStats{
    }
    function CTFGame::awardScoreFlagReturn(%game, %cl, %perc){
       %val = parent::awardScoreFlagReturn(%game, %cl, %perc);
-      %cl.dtStats.stat["flagReturns"] = %cl.flagReturns;
+      %cl.dtStats.stat["flagReturns"]++;
       dtMinMax("flagReturns", "flag", 1, %cl.dtStats.stat["flagReturns"], %cl);
       %cl.dtStats.stat["returnPts"] = %cl.returnPts;
       return %val;
@@ -2789,7 +2771,7 @@ package dtStats{
             %client.dtStats.stat["depInvRepairs"] = %client.depInvRepairs;
             dtMinMax("repairs", "misc", 3, 1, %client);
          case "MPBTeleporter":
-            %client.dtStats.stat["mpbtstationRepairs"] = %client.mpbtstationRepairs;
+            %client.dtStats.stat["mpbtstationRepairs"] = %client.mpbtstationRepairs;  
             dtMinMax("repairs", "misc", 3, 1, %client);
       }
    }
@@ -2845,7 +2827,7 @@ package dtStats{
       %client.dtStats.stat["assists"] = %client.assists;
       %client.dtStats.stat["roundKills"] = %client.roundKills;
       %client.dtStats.stat["hatTricks"] = %client.hatTricks;
-
+      
    }
 
    function LCTFGame::recalcScore(%game, %cl){
@@ -2895,14 +2877,14 @@ package dtStats{
       %val = parent::awardScoreFlagDefend(%game, %killerID);
       %killerID.dtStats.stat["flagDefends"] = %killerID.flagDefends;
       dtMinMax("flagDefends", "flag", 1, %killerID.dtStats.stat["flagDefends"], %killerID);
-      return %val;
+      return %val;   
    }
    function LCTFGame::awardScoreStalemateReturn(%game, %cl){
       %val = parent::awardScoreStalemateReturn(%game, %cl);
       %cl.dtStats.stat["stalemateReturn"]++;
       return %val;
    }
-
+   
    function SCtFGame::recalcScore(%game, %cl){
       parent::recalcScore(%game, %cl);
       %dtStats = %cl.dtStats;
@@ -2950,7 +2932,7 @@ package dtStats{
       %val = parent::awardScoreFlagDefend(%game, %killerID);
       %killerID.dtStats.stat["flagDefends"] = %killerID.flagDefends;
       dtMinMax("flagDefends", "flag", 1, %killerID.dtStats.stat["flagDefends"], %killerID);
-      return %val;
+      return %val;   
    }
    function SCtFGame::awardScoreStalemateReturn(%game, %cl){
       %val = parent::awardScoreStalemateReturn(%game, %cl);
@@ -2980,12 +2962,93 @@ package dtStats{
         //}
       //}
    //}
+   // new debriefing stuff
+   function LakRabbitGame::sendDebriefing( %game, %client ){
+      if(%client.isWatchOnly){
+         parent::sendDebriefing(%game, %client);   
+         return;
+      }
+      messageClient( %client, 'MsgClearDebrief', "" );
+      if($dtStats::teamDebrief == 1){
+         messageClient( %client, 'MsgDebriefAddLine', "", '<spush><lmargin:0><color:00dc00><font:univers condensed:18>PLAYER<lmargin%%:23>SCORE<lmargin%%:34>KILLS<lmargin%%:44>MAS<lmargin%%:52>SPEED<lmargin%%:62>DIST<lmargin%%:70>TOT DIST<lmargin%%:80>SHOCK<lmargin%%:90>SL HITS<spop>' );
+         //													%cl.name, %score, %kills, %mas, %avgSpeed, %avgDistance, %alltotdistance, %shockPercent, %totshockhits
+         // Scores:
+         %totscore	= 0;
+         %totkills	= 0;
+         %totmas		= 0;
+         %totspeed	= 0;
+         %totdistance	= 0;
+         //%totchainacc	= 0;
+         //%totsnipepercent= 0;
+         %totshockpercent= 0;
+         %speeds		= 0;
+         %dists		= 0;
+         //%chains		= 0;
+         //%snipes		= 0;
+         %shocks		= 0;
+         %alltotdistance		= 0;
+         %totshockhits		= 0;
+
+         %count = $TeamRank[0, count];
+         for(%i = 0; %i < %count; %i++){
+            // Send the debrief line:
+            %cl = $TeamRank[0, %i];
+
+            if(%cl.score == 0)	%score = 0;
+            else			%score = %cl.score;
+            if(%cl.kills == 0)	%kills = 0;
+            else			%kills = %cl.kills;
+            if(%cl.mas == 0)	%mas = 0;
+            else			%mas = %cl.mas;
+
+            //if(%cl.totalSnipes == 0) %cl.totalSnipes = 1;
+            if(%cl.totalShocks == 0) %cl.totalShocks = 1;
+
+            if(%cl.totalSpeed == 0)	%avgSpeed = 0;
+            else				%avgSpeed = mFloor(%cl.totalSpeed/%cl.mas);
+            if(%cl.totalDistance == 0)	%avgDistance = 0;
+            else				%avgDistance = mFloor(%cl.totalDistance/%cl.mas);
+            //if(%cl.totalChainAccuracy == 0)	%avgChainAcc = 0;
+            //else				%avgChainAcc = mFloor(%cl.totalChainAccuracy/%cl.totalChainHits);
+            //if(%cl.totalSnipeHits == 0)	%snipePercent = 0;
+            //else				%snipePercent = mFloor(%cl.totalSnipeHits/%cl.totalSnipes*100);
+            if(%cl.totalShockHits == 0)	%shockPercent = 0;
+            else				%shockPercent = mFloor(%cl.totalShockHits/%cl.totalShocks*100);
+            if(%cl.totalDistance == 0) %othertotdistance = 0;
+            else				%othertotdistance = mFloor(%cl.totalDistance);
+            if(%cl.totalShockHits == 0) %shockhits = 0;
+            else				%shockhits = mFloor(%cl.totalShockHits);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0><clip%%:18> %1</clip><lmargin%%:23>%2<lmargin%%:34>%3<lmargin%%:44>%4<lmargin%%:52>%5<lmargin%%:62>%6<lmargin%%:70>%7<lmargin%%:80>%8%%<lmargin%%:90>%9',
+               %cl.name, %score, %kills, %mas, %avgSpeed, %avgDistance, %othertotdistance, %shockPercent, %shockhits);
+
+            if(%score)		%totscore		+= %score;
+            if(%kills)		%totkills		+= %kills;
+            if(%mas)		%totmas			+= %mas;
+            if(%avgSpeed){		%totspeed		+= %avgSpeed;		%speeds++; }
+            if(%avgDistance){	%totdistance		+= %avgDistance;	%dists++; }
+            //if(%avgChainAcc){	%totchainacc		+= %avgChainAcc;	%chains++; }
+            //if(%snipePercent){	%totsnipepercent	+= %snipePercent;	%snipes++; }
+            if(%shockPercent){	%totshockpercent	+= %shockPercent;	%shocks++; }
+            if(%othertotdistance){	%alltotdistance			+= %othertotdistance;  }
+            if(%shockhits){			%totshockhits			+= %shockhits;  }
+
+         }
+
+         messageClient( %client, 'MsgDebriefAddLine', "", '<spush><lmargin:0><Font:Arial:15><color:00FF7F>%1<lmargin%%:23>%2<lmargin%%:34>%3<lmargin%%:44>%4<lmargin%%:52>%5<lmargin%%:62>%6<lmargin%%:70>%7<lmargin%%:80>%8%%<lmargin%%:90>%9<spop>\n',
+            "   Totals:", %totscore, %totkills, %totmas, mFloor(%totspeed/%speeds), mFloor(%totdistance/%dists), %alltotdistance, mFloor(%totshockpercent/%shocks), %totshockhits);
+      extendedDebrief(%game, %client);
+      }
+      else{
+         parent::sendDebriefing(%game, %client); 
+         extendedDebrief(%game, %client);  
+      }
+   }
 };
 //helps with game types that override functions and dont use parent
 // that way we get called first then the gametype can do whatever
 
 
-// there is no main function for these
+// there is no main function for these 
 function  LCTFGame::awardScoreDeath(%game, %victimID){
    parent::awardScoreDeath(%game, %victimID);
    %victimID.dtStats.stat["deaths"]  = %victimID.deaths;
@@ -3025,69 +3088,15 @@ function CTFGame::awardScoreTeamkill(%game, %victimID, %killerID){
    %killerID.dtStats.stat["teamKills"] = %killerID.teamKills;
 }
 
+
+
 function CTFGame::sendDebriefing(%game, %client){
    if(%client.isWatchOnly){
-      parent::sendDebriefing(%game, %client);
+      parent::sendDebriefing(%game, %client);   
       return;
    }
    messageClient( %client, 'MsgClearDebrief', "" );
-   if($dtStats::teamDebrief == 2){
-      %topScore = "";
-      %topCount = 0;
-      for ( %team = 1; %team <= %game.numTeams; %team++ ){
-         if ( %topScore $= "" || $TeamScore[%team] > %topScore ){
-            %topScore = $TeamScore[%team];
-            %firstTeam = %team;
-            %topCount = 1;
-         }
-         else if ( $TeamScore[%team] == %topScore ){
-            %secondTeam = %team;
-            %topCount++;
-         }
-      }
-
-      // Mission result:
-      if ( %topCount == 1 )
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 wins!', %game.getTeamName(%firstTeam) );
-      else if ( %topCount == 2 )
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 and Team %2 tie!', %game.getTeamName(%firstTeam), %game.getTeamName(%secondTeam) );
-      else
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>The mission ended in a tie.' );
-
-      messageClient( %client, 'MsgDebriefAddLine', "", ' ' );
-      messageClient( %client, 'MsgDebriefAddLine', "", '<tab:100,300,400><color:00dcd4><font:univers condensed:30>%1\t%3\t%2\t%4\n<font:univers condensed:18>', $teamName[1], $teamName[2], $TeamScore[1], $TeamScore[2]);
-      messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,170,210,250,300,430,470,510,550><color:00dc00>Player\tScore\tOff\tDef\tKills\tPlayer\tScore\tOff\tDef\tKills');
-
-      %teamsize = ($TeamRank[1, count] > $TeamRank[2, count]) ? $TeamRank[1, count] : $TeamRank[2, count];
-      for(%i=0; %i < %teamsize; %i++){
-         %t1Obj = $TeamRank[1, %i];
-         %t2Obj = $TeamRank[2, %i];
-         if(isObject(%t1Obj) && isObject(%t2Obj))
-            messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300,430,470,510,550><color:3cb4b4><font:univers condensed:15>" @ %i+1 @ "." @  getTaggedString(%t1Obj.name) @ "\t" @ %t1Obj.score @ "\t" @ %t1Obj.offenseScore @ "\t" @ %t1Obj.defenseScore @ "\t" @ %t1Obj.kills @ "\t" @ %i+1 @ "." @  getTaggedString(%t2Obj.name) @  "\t" @ %t2Obj.score @ "\t" @ %t2Obj.offenseScore @ "\t" @ %t2Obj.defenseScore @ "\t" @ %t2Obj.kills);
-         else if(isObject(%t1Obj) && !isObject(%t2Obj))
-            messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300,430,470,510,550><color:3cb4b4><font:univers condensed:15>" @ %i+1 @ "." @  getTaggedString(%t1Obj.name) @ "\t" @ %t1Obj.score @ "\t" @ %t1Obj.offenseScore @ "\t" @ %t1Obj.defenseScore @ "\t" @ %t1Obj.kills @ "\t\t\t\t\t");
-         else if(!isObject(%t1Obj) && isObject(%t2Obj))
-            messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300,430,470,510,550><color:3cb4b4><font:univers condensed:15>\t\t\t\t\t" @ %i+1 @ "." @  getTaggedString(%t2Obj.name) @  "\t" @ %t2Obj.score @ "\t" @ %t2Obj.offenseScore @ "\t" @ %t2Obj.defenseScore @ "\t" @ %t2Obj.kills);
-      }
-      //now go through an list all the observers:
-      %printedHeader = false;
-      for (%i = 0; %i <  ClientGroup.getCount(); %i++)
-      {
-         %cl = ClientGroup.getObject(%i);
-         if (%cl.team <= 0)
-         {
-            //print the header only if we actually find an observer
-            if (!%printedHeader)
-            {
-               %printedHeader = true;
-               messageClient(%client, 'MsgDebriefAddLine', "", "\n\n<tab:130,170,210,250,300><color:00dc00>OBSERVERS\tScore\tOff\tDef\tKills");
-            }
-            messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300><color:3cb4b4> <font:univers condensed:15>" @ getTaggedString(%cl.name) @ "\t" @ %cl.score @ "\t" @ %cl.offenseScore @ "\t" @ %cl.defenseScore @ "\t" @ %cl.kills);
-         }
-      }
-      extendedDebrief(%game, %client);
-   }
-   else if($dtStats::teamDebrief == 1){
+   if($dtStats::teamDebrief == 1){
       %topScore = "";
       %topCount = 0;
       for ( %team = 1; %team <= %game.numTeams; %team++ )
@@ -3150,7 +3159,7 @@ function CTFGame::sendDebriefing(%game, %client){
          %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
          messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, %game.getTeamName(%cl.team), %score, %kills, %cl.dtStats.stat["assist"], %cl.dtStats.stat["OffKills"], %cl.dtStats.stat["DefKills"], %cl.dtStats.stat["discMA"] );
 
-         %count[%highTeam]++;
+         %count[%highTeam]++; 
          %notDone = false;
          for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
          {
@@ -3161,7 +3170,7 @@ function CTFGame::sendDebriefing(%game, %client){
             }
          }
       }
-
+      
       //now go through an list all the observers:
       %count = ClientGroup.getCount();
       %printedHeader = false;
@@ -3192,67 +3201,11 @@ function CTFGame::sendDebriefing(%game, %client){
 
 function LCTFGame::sendDebriefing(%game, %client){
    if(%client.isWatchOnly){
-      parent::sendDebriefing(%game, %client);
+      parent::sendDebriefing(%game, %client);   
       return;
    }
    messageClient( %client, 'MsgClearDebrief', "" );
-   if($dtStats::teamDebrief == 2){
-      %topScore = "";
-      %topCount = 0;
-      for ( %team = 1; %team <= %game.numTeams; %team++ ){
-         if ( %topScore $= "" || $TeamScore[%team] > %topScore ){
-            %topScore = $TeamScore[%team];
-            %firstTeam = %team;
-            %topCount = 1;
-         }
-         else if ( $TeamScore[%team] == %topScore ){
-            %secondTeam = %team;
-            %topCount++;
-         }
-      }
-
-      // Mission result:
-      if ( %topCount == 1 )
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 wins!', %game.getTeamName(%firstTeam) );
-      else if ( %topCount == 2 )
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 and Team %2 tie!', %game.getTeamName(%firstTeam), %game.getTeamName(%secondTeam) );
-      else
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>The mission ended in a tie.' );
-
-      messageClient( %client, 'MsgDebriefAddLine', "", ' ' );
-      messageClient( %client, 'MsgDebriefAddLine', "", '<tab:100,300,400><color:00dcd4><font:univers condensed:30>%1\t%3\t%2\t%4\n<font:univers condensed:18>', $teamName[1], $teamName[2], $TeamScore[1], $TeamScore[2]);
-      messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,170,210,250,300,430,470,510,550><color:00dc00>Player\tScore\tOff\tDef\tKills\tPlayer\tScore\tOff\tDef\tKills');
-
-      %teamsize = ($TeamRank[1, count] > $TeamRank[2, count]) ? $TeamRank[1, count] : $TeamRank[2, count];
-      for(%i=0; %i < %teamsize; %i++){
-         %t1Obj = $TeamRank[1, %i];
-         %t2Obj = $TeamRank[2, %i];
-         if(isObject(%t1Obj) && isObject(%t2Obj))
-            messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300,430,470,510,550><color:3cb4b4><font:univers condensed:15>" @ %i+1 @ "." @  getTaggedString(%t1Obj.name) @ "\t" @ %t1Obj.score @ "\t" @ %t1Obj.offenseScore @ "\t" @ %t1Obj.defenseScore @ "\t" @ %t1Obj.kills @ "\t" @ %i+1 @ "." @  getTaggedString(%t2Obj.name) @  "\t" @ %t2Obj.score @ "\t" @ %t2Obj.offenseScore @ "\t" @ %t2Obj.defenseScore @ "\t" @ %t2Obj.kills);
-         else if(isObject(%t1Obj) && !isObject(%t2Obj))
-            messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300,430,470,510,550><color:3cb4b4><font:univers condensed:15>" @ %i+1 @ "." @  getTaggedString(%t1Obj.name) @ "\t" @ %t1Obj.score @ "\t" @ %t1Obj.offenseScore @ "\t" @ %t1Obj.defenseScore @ "\t" @ %t1Obj.kills @ "\t\t\t\t\t");
-         else if(!isObject(%t1Obj) && isObject(%t2Obj))
-            messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300,430,470,510,550><color:3cb4b4><font:univers condensed:15>\t\t\t\t\t" @ %i+1 @ "." @  getTaggedString(%t2Obj.name) @  "\t" @ %t2Obj.score @ "\t" @ %t2Obj.offenseScore @ "\t" @ %t2Obj.defenseScore @ "\t" @ %t2Obj.kills);
-      }
-      //now go through an list all the observers:
-      %printedHeader = false;
-      for (%i = 0; %i <  ClientGroup.getCount(); %i++)
-      {
-         %cl = ClientGroup.getObject(%i);
-         if (%cl.team <= 0)
-         {
-            //print the header only if we actually find an observer
-            if (!%printedHeader)
-            {
-               %printedHeader = true;
-               messageClient(%client, 'MsgDebriefAddLine', "", "\n\n<tab:130,170,210,250,300><color:00dc00>OBSERVERS\tScore\tOff\tDef\tKills");
-            }
-            messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300><color:3cb4b4> <font:univers condensed:15>" @ getTaggedString(%cl.name) @ "\t" @ %cl.score @ "\t" @ %cl.offenseScore @ "\t" @ %cl.defenseScore @ "\t" @ %cl.kills);
-         }
-      }
-      extendedDebrief(%game, %client);
-   }
-   else if($dtStats::teamDebrief == 1){
+   if($dtStats::teamDebrief == 1){
       %topScore = "";
       %topCount = 0;
       for ( %team = 1; %team <= %game.numTeams; %team++ )
@@ -3315,7 +3268,7 @@ function LCTFGame::sendDebriefing(%game, %client){
          %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
          messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, %game.getTeamName(%cl.team), %score, %kills, %cl.dtStats.stat["assist"], %cl.dtStats.stat["OffKills"], %cl.dtStats.stat["DefKills"], %cl.dtStats.stat["discMA"] );
 
-         %count[%highTeam]++;
+         %count[%highTeam]++; 
          %notDone = false;
          for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
          {
@@ -3326,7 +3279,7 @@ function LCTFGame::sendDebriefing(%game, %client){
             }
          }
       }
-
+      
       //now go through an list all the observers:
       %count = ClientGroup.getCount();
       %printedHeader = false;
@@ -3357,67 +3310,11 @@ function LCTFGame::sendDebriefing(%game, %client){
 
 function SCtFGame::sendDebriefing(%game, %client){
    if(%client.isWatchOnly){
-      parent::sendDebriefing(%game, %client);
+      parent::sendDebriefing(%game, %client);   
       return;
    }
    messageClient( %client, 'MsgClearDebrief', "" );
-   if($dtStats::teamDebrief == 2){
-      %topScore = "";
-      %topCount = 0;
-      for ( %team = 1; %team <= %game.numTeams; %team++ ){
-         if ( %topScore $= "" || $TeamScore[%team] > %topScore ){
-            %topScore = $TeamScore[%team];
-            %firstTeam = %team;
-            %topCount = 1;
-         }
-         else if ( $TeamScore[%team] == %topScore ){
-            %secondTeam = %team;
-            %topCount++;
-         }
-      }
-
-      // Mission result:
-      if ( %topCount == 1 )
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 wins!', %game.getTeamName(%firstTeam) );
-      else if ( %topCount == 2 )
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 and Team %2 tie!', %game.getTeamName(%firstTeam), %game.getTeamName(%secondTeam) );
-      else
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>The mission ended in a tie.' );
-
-      messageClient( %client, 'MsgDebriefAddLine', "", ' ' );
-      messageClient( %client, 'MsgDebriefAddLine', "", '<tab:100,300,400><color:00dcd4><font:univers condensed:30>%1\t%3\t%2\t%4\n<font:univers condensed:18>', $teamName[1], $teamName[2], $TeamScore[1], $TeamScore[2]);
-      messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,170,210,250,300,430,470,510,550><color:00dc00>Player\tScore\tOff\tDef\tKills\tPlayer\tScore\tOff\tDef\tKills');
-
-      %teamsize = ($TeamRank[1, count] > $TeamRank[2, count]) ? $TeamRank[1, count] : $TeamRank[2, count];
-      for(%i=0; %i < %teamsize; %i++){
-         %t1Obj = $TeamRank[1, %i];
-         %t2Obj = $TeamRank[2, %i];
-         if(isObject(%t1Obj) && isObject(%t2Obj))
-            messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300,430,470,510,550><color:3cb4b4><font:univers condensed:15>" @ %i+1 @ "." @  getTaggedString(%t1Obj.name) @ "\t" @ %t1Obj.score @ "\t" @ %t1Obj.offenseScore @ "\t" @ %t1Obj.defenseScore @ "\t" @ %t1Obj.kills @ "\t" @ %i+1 @ "." @  getTaggedString(%t2Obj.name) @  "\t" @ %t2Obj.score @ "\t" @ %t2Obj.offenseScore @ "\t" @ %t2Obj.defenseScore @ "\t" @ %t2Obj.kills);
-         else if(isObject(%t1Obj) && !isObject(%t2Obj))
-            messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300,430,470,510,550><color:3cb4b4><font:univers condensed:15>" @ %i+1 @ "." @  getTaggedString(%t1Obj.name) @ "\t" @ %t1Obj.score @ "\t" @ %t1Obj.offenseScore @ "\t" @ %t1Obj.defenseScore @ "\t" @ %t1Obj.kills @ "\t\t\t\t\t");
-         else if(!isObject(%t1Obj) && isObject(%t2Obj))
-            messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300,430,470,510,550><color:3cb4b4><font:univers condensed:15>\t\t\t\t\t" @ %i+1 @ "." @  getTaggedString(%t2Obj.name) @  "\t" @ %t2Obj.score @ "\t" @ %t2Obj.offenseScore @ "\t" @ %t2Obj.defenseScore @ "\t" @ %t2Obj.kills);
-      }
-      //now go through an list all the observers:
-      %printedHeader = false;
-      for (%i = 0; %i <  ClientGroup.getCount(); %i++)
-      {
-         %cl = ClientGroup.getObject(%i);
-         if (%cl.team <= 0)
-         {
-            //print the header only if we actually find an observer
-            if (!%printedHeader)
-            {
-               %printedHeader = true;
-               messageClient(%client, 'MsgDebriefAddLine', "", "\n\n<tab:130,170,210,250,300><color:00dc00>OBSERVERS\tScore\tOff\tDef\tKills");
-            }
-            messageClient( %client, 'MsgDebriefAddLine', "", "<tab:130,170,210,250,300><color:3cb4b4> <font:univers condensed:15>" @ getTaggedString(%cl.name) @ "\t" @ %cl.score @ "\t" @ %cl.offenseScore @ "\t" @ %cl.defenseScore @ "\t" @ %cl.kills);
-         }
-      }
-      extendedDebrief(%game, %client);
-   }
-   else if($dtStats::teamDebrief == 1){
+   if($dtStats::teamDebrief == 1){
       %topScore = "";
       %topCount = 0;
       for ( %team = 1; %team <= %game.numTeams; %team++ )
@@ -3480,7 +3377,7 @@ function SCtFGame::sendDebriefing(%game, %client){
          %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
          messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, %game.getTeamName(%cl.team), %score, %kills, %cl.dtStats.stat["assist"], %cl.dtStats.stat["OffKills"], %cl.dtStats.stat["DefKills"], %cl.dtStats.stat["discMA"] );
 
-         %count[%highTeam]++;
+         %count[%highTeam]++; 
          %notDone = false;
          for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
          {
@@ -3491,7 +3388,7 @@ function SCtFGame::sendDebriefing(%game, %client){
             }
          }
       }
-
+      
       //now go through an list all the observers:
       %count = ClientGroup.getCount();
       %printedHeader = false;
@@ -3522,7 +3419,7 @@ function SCtFGame::sendDebriefing(%game, %client){
 
 function extendedDebrief(%game, %client){
    if($dtStats::evoStyleDebrief && !%client.isWatchOnly){
-      if(dtGameStat.gc["flag"] > 0){
+      if(dtGameStat.gc["flag"] > 0){ 
          messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0> ' );
          messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280><color:00dc00>FLAG STATS\tPLAYER\t' );
          if(dtGameStat.stat["heldTimeSec"] > 0)
@@ -3566,33 +3463,33 @@ function extendedDebrief(%game, %client){
          if(dtGameStat.stat["mortarMA"] > 0){
             %line = '<tab:150,280,380,510><color:00dc00>Mortar\t<color:3cb4b4>%1\t%2\t%3\t%4m';
             messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["mortarMA"], dtGameStat.stat["mortarMA"], dtGameStat.name["mortarMAHitDist"], mFormatFloat(dtGameStat.stat["mortarMAHitDist"], "%.2f"));
-         }
+         } 
       }
       if(dtGameStat.gc["misc"] > 0){
          messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0> ' );
          messageClient( %client, 'MsgDebriefAddLine', "", '<color:00dc00>MISC' );
          if(dtGameStat.stat["laserHeadShot"] > 0)
             messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280,380><color:00dc00>Headhunter <color:3cb4b4>\t%1\t%2',dtGameStat.name["laserHeadShot"],dtGameStat.stat["laserHeadShot"]);
-         if(dtGameStat.stat["laserHitDist"] > 0)
+         if(dtGameStat.stat["laserHitDist"] > 0)   
             messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280,380><color:00dc00>Longest Snipeshot<color:3cb4b4>\t%1\t%2m',dtGameStat.name["laserHitDist"],mFormatFloat(dtGameStat.stat["laserHitDist"], "%.2f"));
-         if(dtGameStat.stat["shockRearShot"] > 0)
+         if(dtGameStat.stat["shockRearShot"] > 0)   
             messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280,380><color:00dc00>Taser Tailgater<color:3cb4b4>\t%1\t%2',dtGameStat.name["shockRearShot"],dtGameStat.stat["shockRearShot"]);
-         if(dtGameStat.stat["repairs"] > 0)
+         if(dtGameStat.stat["repairs"] > 0)   
             messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280,380><color:00dc00>Fixer Upper<color:3cb4b4>\t%1\t%2',dtGameStat.name["repairs"],dtGameStat.stat["repairs"]);
       }
-
+      
       if(dtGameStat.gc["wep"] > 0){
          messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0> ' );
          messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280,380,510><color:00dc00>\tPLAYER\tDAMAGE\tPLAYER\tKILLS');
-
+                   
          if(dtGameStat.stat["blasterDmg"] > 0){
             %line = '<tab:150,280,380,510><color:00dc00>Blaster Master\t<color:3cb4b4>%1\t%2\t%3\t%4';
             messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["blasterDmg"], mFormatFloat(dtGameStat.stat["blasterDmg"], "%.2f"), dtGameStat.name["blasterKills"], dtGameStat.stat["blasterKills"]);
-         }
+         }       
          if(dtGameStat.stat["plasmaDmg"] > 0){
             %line = '<tab:150,280,380,510><color:00dc00>Plasma Roaster\t<color:3cb4b4>%1\t%2\t%3\t%4';
             messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["plasmaDmg"], mFormatFloat(dtGameStat.stat["plasmaDmg"], "%.2f"), dtGameStat.name["plasmaKills"], dtGameStat.stat["plasmaKills"]);
-         }
+         }      
          if(dtGameStat.stat["discDmg"] > 0){
             %line = '<tab:150,280,380,510><color:00dc00>Disc-O-maniac\t<color:3cb4b4>%1\t%2\t%3\t%4';
             messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["discDmg"], mFormatFloat(dtGameStat.stat["discDmg"], "%.2f"), dtGameStat.name["discKills"], dtGameStat.stat["discKills"]);
@@ -3737,10 +3634,10 @@ package dtStatsGame{
       clientDmgStats(%data,%position,%sourceObject,%targetObject, %damageType,%amount);
       parent::damageObject(%data, %targetObject, %sourceObject, %position, %amount, %damageType, %momVec, %mineSC);
    }
-
+   
   function SensorJammerPackImage::onMount(%data, %obj, %slot){
       parent::onMount(%data, %obj, %slot);
-      %obj.client.dtStats.stat["jammer"]++;
+      %obj.client.dtStats.stat["jammer"]++;   
    }
 
    //0 Fire 1 ??? 2 jump 3 jet 4 gernade 5 mine
@@ -3877,10 +3774,10 @@ package dtStatsGame{
    }
    function CTFGame::boundaryLoseFlag(%game, %player){
       %flag = %player.holdingFlag;
-
+      
       %ftime = getSimTime() - %game.dtTotalFlagTime[%flag];
       %player.client.dtStats.stat["flagTimeMin"] += (%ftime/1000)/60;
-
+      
       %game.dtTotalFlagTime[%flag] = 0;
      parent::boundaryLoseFlag(%game, %player);
    }
@@ -3947,12 +3844,12 @@ package dtStatsGame{
       if(%game.dtTotalFlagTime[%flag]){
          %heldTime = (getSimTime() - %game.dtTotalFlagTime[%flag])/1000;
          %dtStats.stat["flagTimeMin"] += %heldTime/60;
-
+         
          if(%heldTime < %dtStats.stat["heldTimeSec"] || !%dtStats.stat["heldTimeSec"]){
             %dtStats.stat["heldTimeSec"]  = %heldTime;
             dtMinMax("heldTimeSec", "flag", 2, %heldTime,  %player.client);
-
-
+            
+           
          }
          if($dtStats::ctfTimes){
             %heldTimeMS = getSimTime() - %game.dtTotalFlagTime[%flag];
@@ -3966,7 +3863,7 @@ package dtStatsGame{
                      %saved = "\c2Saved: \c3-" @ %game.formatTime(%oldTime - %heldTimeMS, true) @ "\c2";
                   }
                   //schedule(2000, 0, "messageAll", 'MsgCTFNewRecord', "\c2It's a new record! Time: \c3"@ %fTime @"\c2 " @ %saved  @ "~wfx/misc/hunters_horde.wav");
-                  schedule(4000, 0, "messageAll", 'MsgCTFNewRecord', '\c2It\'s a new %3 record! Time: \c3%1 \c2%2  ~wfx/misc/hunters_horde.wav',%fTime,%saved,$TeamName[%clTeam]);
+                  schedule(4000, 0, "messageAll", 'MsgCTFNewRecord', '\c2It\'s a new %3 record! Time: \c3%1 \c2%2  ~wfx/misc/hunters_horde.wav',%fTime,%saved,$TeamName[%clTeam]);                  
                   $dtServer::capTimes[%mapName,%game.class,%clTeam] = %heldTimeMS TAB %dtStats.name;
                }
             }
@@ -3990,10 +3887,10 @@ package dtStatsGame{
 /////////////////////////////////////////////////////////////////////////////
    function LCTFGame::playerDroppedFlag(%game, %player){
       %flag = %player.holdingFlag;
-
+      
       %ftime = getSimTime() - %game.dtTotalFlagTime[%flag];
       %player.client.dtStats.stat["flagTimeMin"] += (%ftime/1000)/60;
-
+      
       %game.dtTotalFlagTime[%flag] = 0;
       if(%player.getState() !$= "Dead"){
          %player.client.dtStats.stat["flagToss"]++;
@@ -4007,10 +3904,10 @@ package dtStatsGame{
    }
    function LCTFGame::boundaryLoseFlag(%game, %player){
       %flag = %player.holdingFlag;
-
+      
       %ftime = getSimTime() - %game.dtTotalFlagTime[%flag];
       %player.client.dtStats.stat["flagTimeMin"] += (%ftime/1000)/60;
-
+      
       %game.dtTotalFlagTime[%flag] = 0;
       parent::boundaryLoseFlag(%game, %player);
    }
@@ -4070,7 +3967,7 @@ package dtStatsGame{
       }
       if(%game.dtTotalFlagTime[%flag]){
          %heldTime = (getSimTime() - %game.dtTotalFlagTime[%flag])/1000;
-         %dtStats.stat["flagTimeMin"]  += %heldTime/60;
+         %dtStats.stat["flagTimeMin"]  += %heldTime/60; 
          if(%heldTime < %dtStats.stat["heldTimeSec"] || !%dtStats.stat["heldTimeSec"]){
             %dtStats.stat["heldTimeSec"]  = %heldTime;
             dtMinMax("heldTimeSec", "flag", 2, %heldTime,  %player.client);
@@ -4108,14 +4005,14 @@ package dtStatsGame{
       }
       parent::playerTouchOwnFlag(%game, %player, %flag);
    }
-
-
+   
+   
    function SCtFGame::playerDroppedFlag(%game, %player){
       %flag = %player.holdingFlag;
-
+      
       %ftime = getSimTime() - %game.dtTotalFlagTime[%flag];
       %player.client.dtStats.stat["flagTimeMin"] += (%ftime/1000)/60;
-
+      
       %game.dtTotalFlagTime[%flag] = 0;
       if(%player.getState() !$= "Dead"){
          %player.client.dtStats.stat["flagToss"]++;
@@ -4129,10 +4026,10 @@ package dtStatsGame{
    }
    function SCtFGame::boundaryLoseFlag(%game, %player){
       %flag = %player.holdingFlag;
-
+      
       %ftime = getSimTime() - %game.dtTotalFlagTime[%flag];
       %player.client.dtStats.stat["flagTimeMin"] += (%ftime/1000)/60;
-
+      
       %game.dtTotalFlagTime[%flag] = 0;
       parent::boundaryLoseFlag(%game, %player);
    }
@@ -4192,7 +4089,7 @@ package dtStatsGame{
       }
       if(%game.dtTotalFlagTime[%flag]){
          %heldTime = (getSimTime() - %game.dtTotalFlagTime[%flag])/1000;
-         %dtStats.stat["flagTimeMin"]  += %heldTime/60;
+         %dtStats.stat["flagTimeMin"]  += %heldTime/60; 
          if(%heldTime < %dtStats.stat["heldTimeSec"] || !%dtStats.stat["heldTimeSec"]){
             %dtStats.stat["heldTimeSec"]  = %heldTime;
             dtMinMax("heldTimeSec", "flag", 2, %heldTime,  %player.client);
@@ -4342,7 +4239,7 @@ function ArenaHud( %game, %client, %tag )
   for ( %iTeam = 1; %iTeam <= Game.numTeams; %iTeam++ )
   {
     // Send team name
-
+    
     %teamPlayerCount = tsPlayerCountTeam( %iTeam );
     %teamPlayerCountPlural = %teamPlayerCount == 1 ? "" : "s";
 
@@ -4866,7 +4763,7 @@ function CTFHud(%game, %client, %tag){// defaultGame/evo
          %index++;
       }
 
-      //for(%i = 10; %i <= 32; %i++){
+      //for(%i = 10; %i <= 32; %i++){             
          //messageClient(%client, 'SetLineHud', "", %tag, %index, '<just:center><spush><font:Tribes2:%1> [RobotoGg %1]</a><spop>', %i);
          //%index++;
      //}
@@ -4878,7 +4775,7 @@ function dtStatsMissionDropReady(%game, %client){ // called when client has fini
    if($dtStats::debugEchos){error("dtStatsMissionDropReady GUID = "  SPC %client.guid);}
    if($HostGamePlayerCount > $dtServer::maxPlayers[cleanMapName($CurrentMission),%game.class])
       $dtServer::maxPlayers[cleanMapName($CurrentMission),%game.class] = $HostGamePlayerCount;
-
+      
    %client.lp = "";//last position for distMove
    %client.lgame = %game.class;
    %foundOld = 0;
@@ -4958,7 +4855,7 @@ function dtStatsClientLeaveGame(%client){
          %client.dtStats.leftPCT = Game.getGamePct();
          if(isGameRun() && %client.score != 0){
             updateTeamTime(%client.dtStats, %client.dtStats.team);
-            armorTimer(%client.dtStats, 0, 1);
+            armorTimer(%client.dtStats, 0, 1);  
          }
       }
       else{
@@ -4972,35 +4869,91 @@ function dtStatsGameOver( %game ){
    $dtStats::LastMissionDN = $MissionDisplayName;
    $dtStats::LastMissionCM = $CurrentMission;
    $dtStats::LastGameType = %game.class;
-
-   if(($Host::TournamentMode && %game.getGamePct() > 50) || $dtStats::tmMode){
-      if(!getFieldCount($dtServerVars::pugIDS[%game.class])){
-         $dtServerVars::pugIDS[%game.class] = $dtStats::gameID;
-         $dtServerVars::pugMap[%game.class] = $MissionDisplayName;
-         $dtServerVars::pugDate[%game.class]  = formattimestring("M-d-yy");
-         $dtServerVars::pugFS[%game.class] = $TeamScore[1] SPC $TeamScore[2];
-      }
-      else{
-         $dtServerVars::pugIDS[%game.class] = $dtServerVars::pugIDS[%game.class] TAB $dtStats::gameID;
-         $dtServerVars::pugMap[%game.class] = $dtServerVars::pugMap[%game.class] TAB $MissionDisplayName;
-         $dtServerVars::pugDate[%game.class] = $dtServerVars::pugDate[%game.class] TAB formattimestring("M-d-yy");
-         $dtServerVars::pugFS[%game.class] = $dtServerVars::pugFS[%game.class] TAB $TeamScore[1] SPC $TeamScore[2];
-      }
-      if($dtStats::tmMode &&  (%game.class $= "CTFGame" ||  %game.class $= "LCTFGame" ||  %game.class $= "SCtFGame")){
-         if($dtStats::tmModeGC++ >= 6){// only works in ctf mode
-            $dtStats::tmMode = 0;
-            $dtStats::tmModeGC = 0;
+   if($Host::TournamentMode){
+      $dtStats::tmMode = (%game.getGamePct() > 50);
+   }
+   if(%game.class $= "CTFGame" || %game.class $= "LCTFGame" || %game.class $= "SCtFGame"  || %game.class $= "ArenaGame" ){ 
+      if($dtStats::tmMode){
+         if(!isObject(pugList)){
+            new simGroup(pugList); 
+            rootGroup.add(pugList);  
+         }
+         %tmClass = "TM" @ %game.class;
+         if(!isObject(%tmClass)){
+            new simGroup(%tmClass){
+               game = %game.class;
+            }; 
+            pugList.add(%tmClass);  
+         }
+         %so = new scriptObject(){
+            pugID = $dtStats::gameID;
+            mapName = $MissionDisplayName;
+            date =  formattimestring("M-d-yy");
+            teamOne = $TeamScore[1]; 
+            teamTwo = $TeamScore[2];
+            gameType = %game.class;
+            count = %tmClass.count;
+            mark = dtMarkDate();
+         };
+         %tmClass.add(%so);
+         if(%tmClass.getCount() > 100){
+            %max = 0;
+            for(%i = 0; %i < %tmClass.getCount(); %i++){
+               %obj =  %tmClass.getObject(%i);  
+               %delta = getTimeDelta(%obj.mark);
+               if(%max < %delta){
+                  %max = %delta;
+                  %delObj = %obj;
+               }
+            }
+            if(isObject(%delObj)){
+               %delObj.delete();
+            }
          }
       }
       else{
-         $dtStats::tmMode = 0;
-         $dtStats::tmModeGC = 0;
+         if(!isObject(pubList)){
+            new simGroup(pubList); 
+            rootGroup.add(pubList);  
+         }
+         %gmClass = "GM" @ %game.class;
+         if(!isObject(%gmClass)){
+            new simGroup(%gmClass){
+               game = %game.class;
+            }; 
+            pubList.add(%gmClass);  
+         }
+         %so = new scriptObject(){
+            pugID = $dtStats::gameID;
+            mapName = $MissionDisplayName;
+            date =  formattimestring("M-d-yy");
+            teamOne = $TeamScore[1]; 
+            teamTwo = $TeamScore[2];
+            gameType = %game.class;
+            count = %gmClass.count;
+            mark = dtMarkDate();
+         };
+         %gmClass.add(%so);
+         if(%gmClass.getCount() > 100){
+            %max = 0;
+            for(%i = 0; %i < %gmClass.getCount(); %i++){
+               %obj =  %gmClass.getObject(%i);  
+               %delta = getTimeDelta(%obj.mark);
+               if(%max < %delta){
+                  %max = %delta;
+                  %delObj = %obj;
+               }
+            }
+            if(isObject(%delObj)){
+               %delObj.delete();
+            }
+         }  
       }
    }
    if(%game.getGamePct() > 90){
       $dtServer::playCount[cleanMapName($CurrentMission),%game.class]++;
       $dtServer::lastPlay[cleanMapName($CurrentMission),%game.class] = getDayNum() TAB getYear() TAB formattimestring("mm/dd/yy hh:nn:a");
-      if(%game.numTeams > 1){
+      if(%game.numTeams > 1){      
          if($teamScore[1] > $teamScore[2]){
             $dtServer::teamOneWin[cleanMapName($CurrentMission),%game.class]++;
             $dtServer::teamTwoLoss[cleanMapName($CurrentMission),%game.class]++;
@@ -5013,7 +4966,7 @@ function dtStatsGameOver( %game ){
    }
    else
       $dtServer::skipCount[cleanMapName($CurrentMission),%game.class]++;
-
+      
    if(!$dtStats::statsSave){//in case of admin skip map and it has not finished saving the old map
       $dtStats::statsSave = 1;
       statsGroup.stat["firstKill"] = 0;
@@ -5030,7 +4983,7 @@ function dtStatsGameOver( %game ){
             %dtStats.markForDelete = 1;
             if($dtStats::Enable){
                %game.postGameStats(%dtStats);
-               if(!%dtStats.gameData[%game.class]){
+               if(!%dtStats.gameData[%game.class,$dtStats::tmMode]){
                   %time += $dtStats::saveTime;
                   schedule(%time,0,"loadGameStats",%dtStats,%game.class);
                }
@@ -5045,10 +4998,10 @@ function dtStatsGameOver( %game ){
             %client.dtStats.isBot = (%client.isWatchOnly == 1);
             %client.viewMenu = %client.viewClient = %client.viewStats = 0;//reset hud
             %client.lastPage   = 1; %client.lgame = %game;
-
+            
             if($dtStats::Enable){
                %game.postGameStats(%dtStats);
-               if(!%dtStats.gameData[%game.class]){
+               if(!%dtStats.gameData[%game.class, $dtStats::tmMode]){
                   %time += $dtStats::saveTime;
                   schedule(%time,0,"loadGameStats",%dtStats,%game.class);
                }
@@ -5058,7 +5011,7 @@ function dtStatsGameOver( %game ){
                schedule(%time,0,"saveGameTotalStats",%dtStats,%game.class); //
             }
             else{
-               resetDtStats(%dtStats,%game.class,0);
+               resetDtStats(%dtStats,%game.class,0);   
             }
          }
          else{
@@ -5089,7 +5042,7 @@ function DefaultGame::postGameStats(%game,%dtStats){ //stats to add up at the en
    if(!isObject(%dtStats))
       return;
    %dtStats.stat["tournamentMode"]  = $Host::TournamentMode;
-
+   
    %dtStats.stat["null"] = getRandom(1,100);
 
    %dtStats.stat["kdr"] = %dtStats.stat["deaths"] ? (%dtStats.stat["kills"]/%dtStats.stat["deaths"]) : %dtStats.stat["kills"];
@@ -5171,13 +5124,13 @@ function DefaultGame::postGameStats(%game,%dtStats){ //stats to add up at the en
 
    if(%dtStats.stat["blasterShotsFired"] < 15)
       %dtStats.stat["blasterACC"] = 0;
-
+      
    if(%dtStats.stat["missileShotsFired"] < 8)
       %dtStats.stat["missileACC"] = 0;
 
    if(%dtStats.stat["hGrenadeShotsFired"] < 6)
       %dtStats.stat["hGrenadeACC"] = 0;
-
+      
    if(%dtStats.stat["mineShotsFired"] < 6)
       %dtStats.stat["mineACC"] = 0;
 
@@ -5216,8 +5169,8 @@ function DefaultGame::postGameStats(%game,%dtStats){ //stats to add up at the en
                            %dtStats.stat["depTurretRepairs"];
 
       %dtStats.stat["capEfficiency"] = (%dtStats.stat["flagGrabs"] > 0)  ? (%dtStats.stat["flagCaps"] / %dtStats.stat["flagGrabs"]) : 0;
-
-
+      
+      
       if(statsGroup.team[1] == statsGroup.team[2]){
          %dtStats.stat["winCount"] = 0;
          %dtStats.stat["lossCount"] = 0;
@@ -5235,8 +5188,30 @@ function DefaultGame::postGameStats(%game,%dtStats){ //stats to add up at the en
       %winCount = %winCount ? %winCount : 0;
       %dtStats.stat["winLostPct"] = (%winCount / %lostCount);
    }
-   else if(%game.class $= "LakRabbitGame")
+   else if(%game.class $= "LakRabbitGame"){
       %dtStats.stat["flagTimeMin"] = (%dtStats.flagTimeMS / 1000)/60;
+   }
+   else if(%game.class $= "ArenaGame"){
+      %dtStats.stat["WLR"] = (%dtStats.stat["roundsLost"] > 0) ? %dtStats.stat["roundsWon"] / %dtStats.stat["roundsLost"] : %dtStats.stat["roundsWon"];  
+      if(%dtStats.stat["discShotsFired"]){
+         %dtStats.stat["discMARatio"] = %dtStats.stat["discMA"] / %dtStats.stat["discShotsFired"];
+      }
+      if(%dtStats.stat["plasmaShotsFired"]){
+         %dtStats.stat["plasmaMARatio"] = %dtStats.stat["plasmaMA"] / %dtStats.stat["plasmaShotsFired"];
+      }
+      if(%dtStats.stat["laserShotsFired"]){
+         %dtStats.stat["laserMARatio"] = %dtStats.stat["laserMA"] / %dtStats.stat["laserShotsFired"];
+      }
+      if(%dtStats.stat["grenadeShotsFired"]){
+         %dtStats.stat["grenadeMARatio"] = %dtStats.stat["grenadeMA"] / %dtStats.stat["grenadeShotsFired"];
+      }
+      if(%dtStats.stat["shockShotsFired"]){
+         %dtStats.stat["shockMARatio"] = %dtStats.stat["shockMA"] / %dtStats.stat["shockShotsFired"];
+      }
+      if(%dtStats.stat["blasterShotsFired"]){
+         %dtStats.stat["blasterMARatio"] = %dtStats.stat["blasterMA"] / %dtStats.stat["blasterShotsFired"];
+      }
+   }
 }
 
 function isGameRun(){//
@@ -5353,6 +5328,21 @@ function SCtFGame::getGamePct(%game){
       return %timePct;
 }
 
+function ArenaGame::getGamePct(%game){
+   %curTimeLeftMS =  ((getSimTime() - $missionStartTime)/1000)/60;
+   %timePct =    (%curTimeLeftMS /  $Host::TimeLimit) * 100;
+   %timePct = (%timePct > 100) ?  100 : %timePct;
+   %scorePct = 0;
+   for ( %i = 1; %i <= %game.numTeams; %i++ ){
+      %score = ($TeamScore[%i] / %game.roundLimit) * 100;
+      %scorePct = (%score > %scorePct) ? %score : %scorePct;      
+   }
+   if(%scorePct > %timePct)
+      return %scorePct;
+   else
+      return %timePct;
+}
+
 function msToMinSec(%time)
 {
    %sec = mFloor(%time / 1000);
@@ -5440,7 +5430,7 @@ function cleanName(%nm){
 }
 
 function cleanMapName(%nm){
- return stripChars(%nm," !_\"#$%&'()*+,-./:;<=>?@[\\]^'{|}~\t\n\r0123456789");
+ return stripChars(%nm," !_\"#$%&'()*+,-./:;<=>?@[\\]^'{|}~\t\n\r0123456789");  
 }
 
 function setGUIDName(%client){
@@ -5552,7 +5542,13 @@ function loadGameStats(%dtStats,%game){// called when client joins server.cs onC
    if($dtStats::debugEchos){error("loadGameStats GUID = "  SPC %dtStats.guid);}
    if(%dtStats.guid !$= ""){
       loadGameTotalStats(%dtStats,%game);
-      %filename = "serverStats/stats/" @ %game @ "/" @ %dtStats.guid  @ "g.cs";
+      if($dtStats::tmMode){
+         %filename = "serverStats/statsTM/" @ %game @ "/" @ %dtStats.guid  @ "g.cs";   
+      }
+      else{
+         %filename = "serverStats/stats/" @ %game @ "/" @ %dtStats.guid  @ "g.cs";
+      }
+      
       if(isFile(%filename)){
          %file = new FileObject();
          RootGroup.add(%file);
@@ -5560,20 +5556,24 @@ function loadGameStats(%dtStats,%game){// called when client joins server.cs onC
          while( !%file.isEOF() ){
             %line = strreplace(%file.readline(),"%t","\t");
             %var = getField(%line,0);
-            %dtStats.gameStats[%var,"g",%game] =  getFields(%line,1,getFieldCount(%line)-1);
+            %dtStats.gameStats[%var,"g",%game,$dtStats::tmMode] =  getFields(%line,1,getFieldCount(%line)-1);
          }
-         %dtStats.gameData[%game]= 1;
+         %dtStats.gameData[%game,$dtStats::tmMode]= 1;
          %file.close();
          %file.delete();
       }
       else
-       %dtStats.gameData[%game]= 1;
+       %dtStats.gameData[%game,$dtStats::tmMode]= 1;
    }
 }
 function loadGameTotalStats(%dtStats,%game){
    if($dtStats::debugEchos){error("loadGameTotalStats GUID = "  SPC %dtStats.guid);}
-
-   %filename = "serverStats/stats/" @ %game @ "/" @ %dtStats.guid  @ "t.cs";
+   if($dtStats::tmMode){
+      %filename = "serverStats/statsTM/" @ %game @ "/" @ %dtStats.guid  @ "t.cs";   
+   }
+   else{
+      %filename = "serverStats/stats/" @ %game @ "/" @ %dtStats.guid  @ "t.cs";
+   }
    %d = $dtStats::curDay; %w = $dtStats::curWeek; %m = $dtStats::curMonth; %q = $dtStats::curQuarter; %y = $dtStats::curYear;
    if(isFile(%filename)){
       %file = new FileObject();
@@ -5600,7 +5600,7 @@ function loadGameTotalStats(%dtStats,%game){
          if(%month){%m0 = %m1;%m1 = %m;}
          if(%quarter){%q0 = %q1;%q1 = %q;}
          if(%year){ %y0 = %y1; %y1 = %y;}
-         %dtStats.gameStats["dwmqy","t",%game] =  %d0 TAB %d1 TAB %w0 TAB %w1 TAB %m0 TAB %m1 TAB %q0 TAB %q1 TAB %y0 TAB %y1; // update line
+         %dtStats.gameStats["dwmqy","t",%game,$dtStats::tmMode] =  %d0 TAB %d1 TAB %w0 TAB %w1 TAB %m0 TAB %m1 TAB %q0 TAB %q1 TAB %y0 TAB %y1; // update line
       }
       while( !%file.isEOF() ){
          %line = strreplace(%file.readline(),"%t","\t");
@@ -5618,60 +5618,70 @@ function loadGameTotalStats(%dtStats,%game){
             if(%quarter){%q0 = %q1;%q1 = 0;}
             if(%year){ %y0 = %y1;%y1 = 0;}
 
-            %dtStats.gameStats[%var,"t",%game] = %d0 TAB %d1 TAB %w0 TAB %w1 TAB %m0 TAB %m1 TAB %q0 TAB %q1 TAB %y0 TAB %y1;
+            %dtStats.gameStats[%var,"t",%game,$dtStats::tmMode] = %d0 TAB %d1 TAB %w0 TAB %w1 TAB %m0 TAB %m1 TAB %q0 TAB %q1 TAB %y0 TAB %y1;
          }
       }
       %file.close();
       %file.delete();
    }
    else// must be new person so be sure to set the dates
-      %dtStats.gameStats["dwmqy","t",%game] =  %d TAB %d TAB %w TAB %w TAB %m TAB %m TAB %q TAB %q TAB %y TAB %y;
+      %dtStats.gameStats["dwmqy","t",%game, $dtStats::tmMode] =  %d TAB %d TAB %w TAB %w TAB %m TAB %m TAB %q TAB %q TAB %y TAB %y;
 }
 function saveGameTotalStats(%dtStats,%game){
    if($dtStats::debugEchos){error("saveGameTotalStats GUID = "  SPC %dtStats.guid);}
-      if(%dtStats.guid !$= "" && !%dtStats.isBot){// dont save if we are dont have a guid or is a bot
+      if(%dtStats.guid !$= "" && !%dtStats.isBot){// dont save if we are dont have a guid or is a bot 
 
-         if(%dtStats.gameStats["statsOverWrite","g",%game] $= ""){%dtStats.gameStats["statsOverWrite","g",%game] = 0;}
+         if(%dtStats.gameStats["statsOverWrite","g",%game,$dtStats::tmMode] $= ""){%dtStats.gameStats["statsOverWrite","g",%game,$dtStats::tmMode] = 0;}
          %fileTotal = new FileObject();
          RootGroup.add(%fileTotal);
-         %fileNameTotal = "serverStats/stats/"@ %game @ "/" @ %dtStats.guid  @ "t.cs";
+         if($dtStats::tmMode){
+            %fileNameTotal = "serverStats/statsTM/"@ %game @ "/" @ %dtStats.guid  @ "t.cs";   
+         }
+         else{
+            %fileNameTotal = "serverStats/stats/"@ %game @ "/" @ %dtStats.guid  @ "t.cs";
+         }
          %fileTotal.OpenForWrite(%fileNameTotal);
-         %fileTotal.writeLine("days" @ "%t" @ strreplace(%dtStats.gameStats["dwmqy","t",%game],"\t","%t"));
-         %fileTotal.writeLine("gameCount" @ "%t" @ strreplace(%dtStats.gameStats["gameCount","t",%game],"\t","%t"));
+         %fileTotal.writeLine("days" @ "%t" @ strreplace(%dtStats.gameStats["dwmqy","t",%game,$dtStats::tmMode],"\t","%t"));
+         %fileTotal.writeLine("gameCount" @ "%t" @ strreplace(%dtStats.gameStats["gameCount","t",%game,$dtStats::tmMode],"\t","%t"));
          %fileTotal.writeLine("playerName" @ "%t" @  %dtStats.name);
          %fileTotal.writeLine("versionNum" @ "%t" @  $dtStats::version);
 
          %fileGame = new FileObject();
          RootGroup.add(%fileGame);
-         %fileNameGame = "serverStats/stats/" @ %game @ "/" @ %dtStats.guid  @ "g.cs";
+         if($dtStats::tmMode){
+            %fileNameGame = "serverStats/statsTM/" @ %game @ "/" @ %dtStats.guid  @ "g.cs";
+         }
+         else{
+            %fileNameGame = "serverStats/stats/" @ %game @ "/" @ %dtStats.guid  @ "g.cs";
+         }
          %fileGame.OpenForWrite(%fileNameGame);
          %fileGame.writeLine("playerName" @ "%t" @ trim(%dtStats.name));
-         %fileGame.writeLine("statsOverWrite" @ "%t" @ %dtStats.gameStats["statsOverWrite","g",%game]);
-         %fileGame.writeLine("totalGames" @ "%t" @  %dtStats.gameStats["totalGames","g",%game]);
-         %fileGame.writeLine("fullSet" @ "%t" @  %dtStats.gameStats["fullSet","g",%game]);
-         %fileGame.writeLine("dayStamp" @ "%t" @ strreplace(%dtStats.gameStats["dayStamp","g",%game],"\t","%t"));
-         %fileGame.writeLine("weekStamp" @ "%t" @ strreplace(%dtStats.gameStats["weekStamp","g",%game],"\t","%t"));
-         %fileGame.writeLine("monthStamp" @ "%t" @ strreplace(%dtStats.gameStats["monthStamp","g",%game],"\t","%t"));
-         %fileGame.writeLine("quarterStamp" @ "%t" @ strreplace(%dtStats.gameStats["quarterStamp","g",%game],"\t","%t"));
-         %fileGame.writeLine("yearStamp" @ "%t" @ strreplace(%dtStats.gameStats["yearStamp","g",%game],"\t","%t"));
-         %fileGame.writeLine("dateStamp" @ "%t" @ strreplace(%dtStats.gameStats["dateStamp","g",%game],"\t","%t"));
-         %fileGame.writeLine("timeDayMonth" @ "%t" @ strreplace(%dtStats.gameStats["timeDayMonth","g",%game],"\t","%t"));
-         %fileGame.writeLine("map" @ "%t" @ strreplace(%dtStats.gameStats["map","g",%game],"\t","%t"));
-         %fileGame.writeLine("mapID" @ "%t" @ strreplace(%dtStats.gameStats["mapID","g",%game],"\t","%t"));
-         %fileGame.writeLine("mapGameID" @ "%t" @ strreplace(%dtStats.gameStats["mapGameID","g",%game],"\t","%t"));
-         %fileGame.writeLine("gameID" @ "%t" @ strreplace(%dtStats.gameStats["gameID","g",%game],"\t","%t"));
-         %fileGame.writeLine("gamePCT" @ "%t" @ strreplace(%dtStats.gameStats["gamePCT","g",%game],"\t","%t"));
-         %fileGame.writeLine("versionNum" @ "%t" @ strreplace(%dtStats.gameStats["versionNum","g",%game],"\t","%t"));
+         %fileGame.writeLine("statsOverWrite" @ "%t" @ %dtStats.gameStats["statsOverWrite","g",%game,$dtStats::tmMode]);
+         %fileGame.writeLine("totalGames" @ "%t" @  %dtStats.gameStats["totalGames","g",%game,$dtStats::tmMode]);
+         %fileGame.writeLine("fullSet" @ "%t" @  %dtStats.gameStats["fullSet","g",%game,$dtStats::tmMode]);
+         %fileGame.writeLine("dayStamp" @ "%t" @ strreplace(%dtStats.gameStats["dayStamp","g",%game,$dtStats::tmMode],"\t","%t"));
+         %fileGame.writeLine("weekStamp" @ "%t" @ strreplace(%dtStats.gameStats["weekStamp","g",%game,$dtStats::tmMode],"\t","%t"));
+         %fileGame.writeLine("monthStamp" @ "%t" @ strreplace(%dtStats.gameStats["monthStamp","g",%game,$dtStats::tmMode],"\t","%t"));
+         %fileGame.writeLine("quarterStamp" @ "%t" @ strreplace(%dtStats.gameStats["quarterStamp","g",%game,$dtStats::tmMode],"\t","%t"));
+         %fileGame.writeLine("yearStamp" @ "%t" @ strreplace(%dtStats.gameStats["yearStamp","g",%game,$dtStats::tmMode],"\t","%t"));
+         %fileGame.writeLine("dateStamp" @ "%t" @ strreplace(%dtStats.gameStats["dateStamp","g",%game,$dtStats::tmMode],"\t","%t"));
+         %fileGame.writeLine("timeDayMonth" @ "%t" @ strreplace(%dtStats.gameStats["timeDayMonth","g",%game,$dtStats::tmMode],"\t","%t"));
+         %fileGame.writeLine("map" @ "%t" @ strreplace(%dtStats.gameStats["map","g",%game,$dtStats::tmMode],"\t","%t"));
+         %fileGame.writeLine("mapID" @ "%t" @ strreplace(%dtStats.gameStats["mapID","g",%game,$dtStats::tmMode],"\t","%t"));
+         %fileGame.writeLine("mapGameID" @ "%t" @ strreplace(%dtStats.gameStats["mapGameID","g",%game,$dtStats::tmMode],"\t","%t"));
+         %fileGame.writeLine("gameID" @ "%t" @ strreplace(%dtStats.gameStats["gameID","g",%game,$dtStats::tmMode],"\t","%t"));
+         %fileGame.writeLine("gamePCT" @ "%t" @ strreplace(%dtStats.gameStats["gamePCT","g",%game,$dtStats::tmMode],"\t","%t"));
+         %fileGame.writeLine("versionNum" @ "%t" @ strreplace(%dtStats.gameStats["versionNum","g",%game,$dtStats::tmMode],"\t","%t"));
 
          for(%q = 0; %q < $statsVars::count[%game]; %q++){
             %varNameType = $statsVars::varNameType[%q,%game];
             %varType =  $statsVars::varType[%varNameType,%game];
             if(%varType !$= "TTL"){
-               %val = %dtStats.gameStats[%varNameType,"g",%game];
+               %val = %dtStats.gameStats[%varNameType,"g",%game,$dtStats::tmMode];
                %fileGame.writeLine(%varNameType @ "%t" @ strreplace(%val,"\t","%t"));
             }
             if(%varType !$= "Game"){
-               %val = %dtStats.gameStats[%varNameType,"t",%game];
+               %val = %dtStats.gameStats[%varNameType,"t",%game,$dtStats::tmMode];
                %fileTotal.writeLine(%varNameType @ "%t" @ strreplace(%val,"\t","%t"));
             }
          }
@@ -5697,23 +5707,23 @@ function getMapIDName(%game){
 function incGameStats(%dtStats,%game) {// record that games stats and inc by one
    if($dtStats::debugEchos){error("incGameStats GUID = "  SPC %dtStats.guid);}
 
-   %c = %dtStats.gameStats["statsOverWrite","g",%game]++;
-   if(%dtStats.gameStats["statsOverWrite","g",%game]  > $dtStats::MaxNumOfGames-1 || %dtStats.gameStats["statsOverWrite","g",%game]  > 99){
-      %c = %dtStats.gameStats["statsOverWrite","g",%game] = 0;
-      %dtStats.gameStats["fullSet","g",%game] = 1;
+   %c = %dtStats.gameStats["statsOverWrite","g",%game,$dtStats::tmMode]++;
+   if(%dtStats.gameStats["statsOverWrite","g",%game,$dtStats::tmMode]  > $dtStats::MaxNumOfGames-1 || %dtStats.gameStats["statsOverWrite","g",%game,$dtStats::tmMode]  > 99){
+      %c = %dtStats.gameStats["statsOverWrite","g",%game,$dtStats::tmMode] = 0;
+      %dtStats.gameStats["fullSet","g",%game,$dtStats::tmMode] = 1;
    }
 
-   %dtStats.gameStats["totalGames","g",%game]++;
+   %dtStats.gameStats["totalGames","g",%game,$dtStats::tmMode]++;
 
-   %c1 = getField(%dtStats.gameStats["gameCount","t",%game],1);
+   %c1 = getField(%dtStats.gameStats["gameCount","t",%game,$dtStats::tmMode],1);
    setValueField(%dtStats,"gameCount","t",%game,1,%c1++);
-   %c7 = getField(%dtStats.gameStats["gameCount","t",%game],3);
+   %c7 = getField(%dtStats.gameStats["gameCount","t",%game,$dtStats::tmMode],3);
    setValueField(%dtStats,"gameCount","t",%game,3,%c7++);
-   %c30 = getField(%dtStats.gameStats["gameCount","t",%game],5);
+   %c30 = getField(%dtStats.gameStats["gameCount","t",%game,$dtStats::tmMode],5);
    setValueField(%dtStats,"gameCount","t",%game,5,%c30++);
-   %c90 = getField(%dtStats.gameStats["gameCount","t",%game],7);
+   %c90 = getField(%dtStats.gameStats["gameCount","t",%game,$dtStats::tmMode],7);
    setValueField(%dtStats,"gameCount","t",%game,7,%c90++);
-   %c365 = getField(%dtStats.gameStats["gameCount","t",%game],9);
+   %c365 = getField(%dtStats.gameStats["gameCount","t",%game,$dtStats::tmMode],9);
    setValueField(%dtStats,"gameCount","t",%game,9,%c365++);
 
    setValueField(%dtStats,"dayStamp","g",%game,%c,$dtStats::curDay);
@@ -5729,36 +5739,36 @@ function incGameStats(%dtStats,%game) {// record that games stats and inc by one
    setValueField(%dtStats,"gameID","g",%game,%c,$dtStats::gameID);
    setValueField(%dtStats,"gamePCT","g",%game,%c,%dtStats.gamePCT);
    setValueField(%dtStats,"versionNum","g",%game,%c,$dtStats::version);
-
+   
    for(%q = 0; %q < $statsVars::count[%game]; %q++){
       %varNameType = $statsVars::varNameType[%q,%game];
       %varName = $statsVars::varName[%q,%game];
       %varType =  $statsVars::varType[%varNameType,%game];
-
+      
       switch$(%varType){
          case "Game":
             %val = %dtStats.stat[%varName];
             setValueField(%dtStats,%varNameType,"g",%game,%c,%val);
-
+            
          case "TG":
             %val = %dtStats.stat[%varName];
             setValueField(%dtStats,%varNameType,"g",%game,%c,%val);
 
             for(%x = 1; %x <= 9; %x+=2){
-               %t = getField(%dtStats.gameStats[%varNameType,"t",%game],%x);
+               %t = getField(%dtStats.gameStats[%varNameType,"t",%game,$dtStats::tmMode],%x);
                setValueField(%dtStats,%varNameType,"t",%game,%x,addNum(%t,%val));
             }
          case "TTL":
             %val = %dtStats.stat[%varName];
             for(%x = 1; %x <= 9; %x+=2){
-               %t = getField(%dtStats.gameStats[%varNameType,"t",%game],%x);
+               %t = getField(%dtStats.gameStats[%varNameType,"t",%game,$dtStats::tmMode],%x);
                setValueField(%dtStats,%varNameType,"t",%game,%x,addNum(%t,%val));
             }
          case "Max":
             %val = %dtStats.stat[%varName];
             setValueField(%dtStats,%varNameType,"g",%game,%c,%val);
             for(%x = 1; %x <= 9; %x+=2){
-               %t =    getField(%dtStats.gameStats[%varNameType,"t",%game],%x);
+               %t =    getField(%dtStats.gameStats[%varNameType,"t",%game,$dtStats::tmMode],%x);
                if(%val > %t){
                   setValueField(%dtStats,%varNameType,"t",%game,%x,%val);
                }
@@ -5771,11 +5781,11 @@ function incGameStats(%dtStats,%game) {// record that games stats and inc by one
             setValueField(%dtStats,%varNameType,"g",%game,%c,%val);
 
             for(%x = 1; %x <= 9; %x+=2){
-               %t = getField(%dtStats.gameStats[%varNameType,"t",%game],%x);
+               %t = getField(%dtStats.gameStats[%varNameType,"t",%game,$dtStats::tmMode],%x);
                if(%val < %t && %val != 0 || !%t){
                   setValueField(%dtStats,%varNameType,"t",%game,%x,%val);
                }
-               else{
+               else{           
                   setValueField(%dtStats,%varNameType,"t",%game,%x,%t);
                }
             }
@@ -5784,7 +5794,7 @@ function incGameStats(%dtStats,%game) {// record that games stats and inc by one
             setValueField(%dtStats,%varNameType,"g",%game,%c,%val);
 
             for(%x = 1; %x <= 9; %x+=2){
-               %t = strreplace(getField(%dtStats.gameStats[%varNameType,"t",%game],%x),"%a","\t");
+               %t = strreplace(getField(%dtStats.gameStats[%varNameType,"t",%game,$dtStats::tmMode],%x),"%a","\t");
                if(%val != 0){
                   %total = getField(%t,1) + %val;
                   if(%total<950000){
@@ -5829,6 +5839,11 @@ function cropFloat(%num,%x){
    }
    else
       return %num;
+}
+
+function roundDec(%num, %places) {
+   %factor = mPow(10, %places);
+   return mCeil(%num * %factor - 0.5) / %factor;
 }
 
 function addNum(%a,%b){
@@ -5987,21 +6002,21 @@ function genBlanks(){ // optimization thing saves on haveing to do it with every
 }
 function setValueField(%dtStats,%var,%type,%game,%c,%val){
    if(%type $= "g"){
-      %fc = getFieldCount(%dtStats.gameStats[%var,%type,%game]);
+      %fc = getFieldCount(%dtStats.gameStats[%var,%type,%game,$dtStats::tmMode]);
       if(%fc < 2){
-         %dtStats.gameStats[%var,%type,%game] = $dtStats::blank["g"];
+         %dtStats.gameStats[%var,%type,%game,$dtStats::tmMode] = $dtStats::blank["g"];
       }
       else if( %fc > $dtStats::MaxNumOfGames){// trim it down as it as the MaxNumOfGames have gotten smaller
-         %dtStats.gameStats[%var,%type,%game] = getFields(%dtStats.gameStats[%var,%type,%game],0,$dtStats::MaxNumOfGames-1);
+         %dtStats.gameStats[%var,%type,%game,$dtStats::tmMode] = getFields(%dtStats.gameStats[%var,%type,%game,$dtStats::tmMode],0,$dtStats::MaxNumOfGames-1);
       }
-      %dtStats.gameStats[%var,%type,%game] =   setField(%dtStats.gameStats[%var,%type,%game],%c, hasValue(%val));
+      %dtStats.gameStats[%var,%type,%game,$dtStats::tmMode] =   setField(%dtStats.gameStats[%var,%type,%game,$dtStats::tmMode],%c, hasValue(%val));
    }
    else if(%type $= "t"){
-      %fc = getFieldCount(%dtStats.gameStats[%var,%type,%game]);
+      %fc = getFieldCount(%dtStats.gameStats[%var,%type,%game,$dtStats::tmMode]);
       if(%fc < 2){
-         %dtStats.gameStats[%var,%type,%game] = $dtStats::blank["t"];
+         %dtStats.gameStats[%var,%type,%game,$dtStats::tmMode] = $dtStats::blank["t"];
       }
-      %dtStats.gameStats[%var,%type,%game] =   setField(%dtStats.gameStats[%var,%type,%game],%c, hasValue(%val));
+      %dtStats.gameStats[%var,%type,%game,$dtStats::tmMode] =   setField(%dtStats.gameStats[%var,%type,%game,$dtStats::tmMode],%c, hasValue(%val));
    }
 }
 
@@ -6024,7 +6039,7 @@ function hasValue(%val){//make sure we have at least something in the field spot
    //%dtStats.stat["suicides"] = %client.suicides;
    //%dtStats.stat["escortAssists"] = %client.escortAssists;
    //%dtStats.stat["teamKills"] = %client.teamKills;
-   //%dtStats.stat["tkDestroys"] = %client.tkDestroys;
+   //%dtStats.stat["tkDestroys"] = %client.tkDestroys; 
    //%dtStats.stat["flagCaps"] = %client.flagCaps;
    //%dtStats.stat["flagGrabs"] = %client.flagGrabs;
    //%dtStats.stat["genDestroys"] = %client.genDestroys;
@@ -6032,14 +6047,14 @@ function hasValue(%val){//make sure we have at least something in the field spot
    //%dtStats.stat["turretDestroys"] = %client.turretDestroys;
    //%dtStats.stat["iStationDestroys"] = %client.iStationDestroys;
    //%dtStats.stat["vstationDestroys"] = %client.vstationDestroys;
-   //%dtStats.stat["mpbtstationDestroys"] = %client.mpbtstationDestroys;
+   //%dtStats.stat["mpbtstationDestroys"] = %client.mpbtstationDestroys; 
    //%dtStats.stat["solarDestroys"] = %client.solarDestroys;
    //%dtStats.stat["sentryDestroys"] = %client.sentryDestroys;
    //%dtStats.stat["depSensorDestroys"] = %client.depSensorDestroys;
    //%dtStats.stat["depTurretDestroys"] = %client.depTurretDestroys;
    //%dtStats.stat["depStationDestroys"] = %client.depStationDestroys;
-   //%dtStats.stat["vehicleScore"] = %client.vehicleScore;
-   //%dtStats.stat["vehicleBonus"] = %client.vehicleBonus;
+   //%dtStats.stat["vehicleScore"] = %client.vehicleScore; 
+   //%dtStats.stat["vehicleBonus"] = %client.vehicleBonus; 
 //
    //%dtStats.stat["flagDefends"] = %client.flagDefends;
    //%dtStats.stat["defenseScore"] = %client.defenseScore;
@@ -6107,14 +6122,14 @@ function resGameStats(%client,%game){// copy data back over to client
    %client.turretDestroys = %dtStats.stat["turretDestroys"];
    %client.iStationDestroys = %dtStats.stat["iStationDestroys"];
    %client.vstationDestroys = %dtStats.stat["vstationDestroys"];
-   %client.mpbtstationDestroys = %dtStats.stat["mpbtstationDestroys"];
+   %client.mpbtstationDestroys = %dtStats.stat["mpbtstationDestroys"]; 
    %client.solarDestroys = %dtStats.stat["solarDestroys"];
    %client.sentryDestroys = %dtStats.stat["sentryDestroys"];
    %client.depSensorDestroys = %dtStats.stat["depSensorDestroys"];
    %client.depTurretDestroys = %dtStats.stat["depTurretDestroys"];
    %client.depStationDestroys = %dtStats.stat["depStationDestroys"];
-   %client.vehicleScore = %dtStats.stat["vehicleScore"];
-   %client.vehicleBonus  = %dtStats.stat["vehicleBonus"];
+   %client.vehicleScore = %dtStats.stat["vehicleScore"]; 
+   %client.vehicleBonus  = %dtStats.stat["vehicleBonus"]; 
 
    %client.flagDefends = %dtStats.stat["flagDefends"];
    %client.defenseScore = %dtStats.stat["defenseScore"];
@@ -6157,7 +6172,7 @@ function resGameStats(%client,%game){// copy data back over to client
 	%client.totalSnipes = %dtStats.stat["totalSnipes"];
 	%client.totalShockHits = %dtStats.stat["totalShockHits"];
    %client.totalShocks = %dtStats.stat["totalShocks"];
-
+   
    %client.snipeKills = %dtStats.stat["snipeKills"];
    %client.roundsWon = %dtStats.stat["roundsWon"];
    %client.roundsLost = %dtStats.stat["roundsLost"];
@@ -6201,7 +6216,7 @@ function resetDtStats(%dtStats,%game,%slow){
          //%var = $dtStats::uGFV[%i,%game];;
          //%dtStats.stat[%var]= 0;
       //}
-
+      
       for(%i = 1; %i <= $dtStats::unusedCount; %i++){//script unused
          %var = $dtStats::unused[%i];
          %dtStats.stat[%var]= 0;
@@ -6308,32 +6323,36 @@ function deadDist(%pos,%pl){
 }
 
 function dtMinMax(%statName,%group,%minMax,%value,%client){
-   $Host::ClassicEvoStats = !$dtStats::evoStyleDebrief;
-   if(!isObject(dtGameStat)){
-      new scriptObject(dtGameStat);
-   }
-   dtGameStat.gc[%group]++;
-   switch(%minMax){
-      case 1:
-         if(dtGameStat.stat[%statName] < %value || dtGameStat.stat[%statName] $= ""){
-            dtGameStat.stat[%statName] = %value;
-            dtGameStat.name[%statName] =  getTaggedString(%client.name);
-            dtGameStat.client[%statName] = %client;
+   if($dtStats::evoStyleDebrief){
+      if(!isObject(dtGameStat)){
+         new scriptObject(dtGameStat);
+         rootGroup.add(dtGameStat);
+      }
+      if(%value != 0){
+         dtGameStat.gc[%group]++;
+         switch(%minMax){
+            case 1:
+               if(dtGameStat.stat[%statName] < %value || dtGameStat.stat[%statName] $= ""){
+                  dtGameStat.stat[%statName] = %value;
+                  dtGameStat.name[%statName] =  getTaggedString(%client.name);
+                  dtGameStat.client[%statName] = %client;
+               }
+            case 2:
+               if(dtGameStat.stat[%statName] > %value || dtGameStat.stat[%statName] $= ""){
+                  dtGameStat.stat[%statName] = %value;
+                  dtGameStat.name[%statName] =  getTaggedString(%client.name);
+                  dtGameStat.client[%statName] = %client;
+               }
+            case 3:
+               dtGameStat.statTrack[%statName, %client] += %value;
+               %minMax = dtGameStat.statTrack[%statName, %client];
+               if(dtGameStat.stat[%statName] < %value || dtGameStat.stat[%statName] $= ""){
+                  dtGameStat.stat[%statName] = %value;
+                  dtGameStat.name[%statName] =  getTaggedString(%client.name);
+                  dtGameStat.client[%statName] = %client;
+               }
          }
-      case 2:
-         if(dtGameStat.stat[%statName] > %value || dtGameStat.stat[%statName] $= ""){
-            dtGameStat.stat[%statName] = %value;
-            dtGameStat.name[%statName] =  getTaggedString(%client.name);
-            dtGameStat.client[%statName] = %client;
-         }
-      case 3:
-         dtGameStat.statTrack[%statName, %client] += %value;
-         %minMax = dtGameStat.statTrack[%statName, %client];
-         if(dtGameStat.stat[%statName] < %value || dtGameStat.stat[%statName] $= ""){
-            dtGameStat.stat[%statName] = %value;
-            dtGameStat.name[%statName] =  getTaggedString(%client.name);
-            dtGameStat.client[%statName] = %client;
-         }
+      }
    }
 }
 
@@ -6356,6 +6375,12 @@ function clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %d
    }
    %killerDT = %clKiller.dtStats;
    %victimDT = %clVictim.dtStats;
+   
+   if(%clKiller.killBy  == %clVictim){
+      %clKiller.killBy = 0;
+      %killerDT.stat["revenge"]++;
+   }
+   %clVictim.killBy = %clKiller;
    //fail safe in case  package is out of order
    %victimPlayer = isObject(%clVictim.player) ? %clVictim.player : %clVictim.lastPlayer;
    %killerPlayer = isObject(%clKiller.player) ? %clKiller.player : %clKiller.lastPlayer;
@@ -6443,25 +6468,26 @@ function clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %d
 //------------------------------------------------------------------------------
          if(rayTest(%victimPlayer, $dtStats::midAirHeight)){%vcAir =1;}else{%vcAir =2;}
          if(rayTest(%killerPlayer, $dtStats::midAirHeight)){%kcAir =1;}else{%kcAir =2;}
-
+         %vdis = rayTestDis(%victimPlayer);
+         
          switch$(%victimPlayer.getArmorSize()){
-            case "Light":%killerDT.stat["armorL"]++;
+            case "Light":%killerDT.stat["armorL"]++; 
                switch$(%killerPlayer.getArmorSize()){
-                  case "Light": %killerDT.stat["armorLL"]++;%killerDT.stat["armorLK"]++;
-                  case "Medium":%killerDT.stat["armorML"]++;%killerDT.stat["armorMK"]++;
-                  case "Heavy": %killerDT.stat["armorHL"]++;%killerDT.stat["armorHK"]++;
+                  case "Light": %killerDT.stat["armorLL"]++;%killerDT.stat["armorLK"]++; 
+                  case "Medium":%killerDT.stat["armorML"]++;%killerDT.stat["armorMK"]++; 
+                  case "Heavy": %killerDT.stat["armorHL"]++;%killerDT.stat["armorHK"]++; 
                }
-            case "Medium": %killerDT.stat["armorM"]++;
+            case "Medium": %killerDT.stat["armorM"]++; 
                switch$(%killerPlayer.getArmorSize()){
-                  case "Light": %killerDT.stat["armorLM"]++;%killerDT.stat["armorLK"]++;
-                  case "Medium":%killerDT.stat["armorMM"]++;%killerDT.stat["armorMK"]++;
-                  case "Heavy": %killerDT.stat["armorHM"]++;%killerDT.stat["armorHK"]++;
+                  case "Light": %killerDT.stat["armorLM"]++;%killerDT.stat["armorLK"]++; 
+                  case "Medium":%killerDT.stat["armorMM"]++;%killerDT.stat["armorMK"]++; 
+                  case "Heavy": %killerDT.stat["armorHM"]++;%killerDT.stat["armorHK"]++; 
                }
-            case "Heavy":%killerDT.stat["armorH"]++;
+            case "Heavy":%killerDT.stat["armorH"]++; 
                switch$(%killerPlayer.getArmorSize()){
                   case "Light": %killerDT.stat["armorLH"]++;%killerDT.stat["armorLK"]++;
-                  case "Medium":%killerDT.stat["armorMH"]++;%killerDT.stat["armorMK"]++;
-                  case "Heavy": %killerDT.stat["armorHH"]++;%killerDT.stat["armorHK"]++;
+                  case "Medium":%killerDT.stat["armorMH"]++;%killerDT.stat["armorMK"]++; 
+                  case "Heavy": %killerDT.stat["armorHH"]++;%killerDT.stat["armorHK"]++; 
                }
          }
 //------------------------------------------------------------------------------
@@ -6491,30 +6517,27 @@ function clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %d
          %killerDT.stat["cloakersKilled"]++;
       }
       if(getSimTime() - %killerPlayer.isCloakTime < 2000 && %killerPlayer.isCloakTime  > 0){
-         %killerDT.stat["cloakerKills"]++;
+         %killerDT.stat["cloakerKills"]++; 
       }
-
+      
       switch$(%damageType){// list of all damage types to track see damageTypes.cs
          case $DamageType::Bullet:
             %killerDT.stat["cgKills"]++;
             %victimDT.stat["cgDeaths"]++;
             if(%killerDT.stat["cgKillDist"] < %dis){%killerDT.stat["cgKillDist"] = %dis;}
-            if(%killerDT.stat["cgKillVV"] < %victimVel){%killerDT.stat["cgKillVV"] = %victimVel;}
-            if(%killerDT.stat["cgKillSV"] <  %clKiller.dtShotSpeed){%killerDT.stat["cgKillSV"] = %clKiller.dtShotSpeed;}
 
             if(%isCombo){%killerDT.stat["cgCom"]++;}
             dtMinMax("cgKills", "wep", 1, %killerDT.stat["cgKills"], %clKiller);
          case $DamageType::Disc:
             %killerDT.stat["discKills"]++;
             %victimDT.stat["discDeaths"]++;
+            if(%vdis < 6){%killerDT.stat["discKillGround"]++;}
             if(%killerDT.stat["discKillDist"] < %dis){%killerDT.stat["discKillDist"] = %dis;}
-            if(%killerDT.stat["discKillVV"] < %victimVel){%killerDT.stat["discKillVV"] = %victimVel;}
-            if(%killerDT.stat["discKillSV"] <  %clKiller.dtShotSpeed){%killerDT.stat["discKillSV"] = %clKiller.dtShotSpeed;}
             if(%isCombo){%killerDT.stat["discCom"]++;}
             if(%clKiller.mdHit){%killerDT.stat["minePlusDiscKill"]++;}
 
             if(getSimTime() - %clKiller.discReflect < 256){%killerDT.stat["discReflectKill"]++;}
-
+            
             dtMinMax("discKills", "wep", 1, %killerDT.stat["discKills"], %clKiller);
             dtMinMax("minePlusDiscKill", "wep", 1, %killerDT.stat["minePlusDiscKill"], %clKiller);
          case $DamageType::Grenade:
@@ -6522,8 +6545,6 @@ function clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %d
                %killerDT.stat["hGrenadeKills"]++;
                %victimDT.stat["hGrenadeDeaths"]++;
                if(%killerDT.stat["hGrenadeKillDist"] < %dis){%killerDT.stat["hGrenadeKillDist"] = %dis;}
-               if(%killerDT.stat["hGrenadeKillVV"] < %victimVel){%killerDT.stat["hGrenadeKillVV"] = %victimVel;}
-               if(%killerDT.stat["hGrenadeKillSV"] <  %clKiller.dtShotSpeed){%killerDT.stat["hGrenadeKillSV"] = %clKiller.dtShotSpeed;}
                if(%isCombo){%killerDT.stat["hGrenadeCom"]++;}
                dtMinMax("hGrenadeKills", "wep", 1, %killerDT.stat["hGrenadeKills"], %clKiller);
             }
@@ -6531,8 +6552,6 @@ function clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %d
                %killerDT.stat["grenadeKills"]++;
                %victimDT.stat["grenadeDeaths"]++;
                if(%killerDT.stat["grenadeKillDist"] < %dis){%killerDT.stat["grenadeKillDist"] = %dis;}
-               if(%killerDT.stat["grenadeKillVV"] < %victimVel){%killerDT.stat["grenadeKillVV"] = %victimVel;}
-               if(%killerDT.stat["grenadeKillSV"] <  %clKiller.dtShotSpeed){%killerDT.stat["grenadeKillSV"] = %clKiller.dtShotSpeed;}
                if(%isCombo){%killerDT.stat["grenadeCom"]++;}
                dtMinMax("grenadeKills", "wep", 1, %killerDT.stat["grenadeKills"], %clKiller);
             }
@@ -6543,48 +6562,36 @@ function clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %d
             %killerDT.stat["laserKills"]++;
             %victimDT.stat["laserDeaths"]++;
             if(%killerDT.stat["laserKillDist"] < %dis){%killerDT.stat["laserKillDist"] = %dis;}
-            if(%killerDT.stat["laserKillVV"] < %victimVel){%killerDT.stat["laserKillVV"] = %victimVel;}
-            if(%killerDT.stat["laserKillSV"] <  %clKiller.dtShotSpeed){%killerDT.stat["laserKillSV"] = %clKiller.dtShotSpeed;}
             if(%isCombo){%killerDT.stat["laserCom"]++;}
             dtMinMax("laserKills", "wep", 1, %killerDT.stat["laserKills"], %clKiller);
          case $DamageType::Mortar:
             %killerDT.stat["mortarKills"]++;
             %victimDT.stat["mortarDeaths"]++;
             if(%killerDT.stat["mortarKillDist"] < %dis){%killerDT.stat["mortarKillDist"] = %dis;}
-            if(%killerDT.stat["mortarKillVV"] < %victimVel){%killerDT.stat["mortarKillVV"] = %victimVel;}
-            if(%killerDT.stat["mortarKillSV"] <  %clKiller.dtShotSpeed){%killerDT.stat["mortarKillSV"] = %clKiller.dtShotSpeed;}
             if(%isCombo){%killerDT.stat["mortarCom"]++;}
             dtMinMax("mortarKills", "wep", 1, %killerDT.stat["mortarKills"], %clKiller);
          case $DamageType::Missile:
             %killerDT.stat["missileKills"]++;
             %victimDT.stat["missileDeaths"]++;
             if(%killerDT.stat["missileKillDist"] < %dis){%killerDT.stat["missileKillDist"] = %dis;}
-            if(%killerDT.stat["missileKillVV"] < %victimVel){%killerDT.stat["missileKillVV"] = %victimVel;}
-            if(%killerDT.stat["missileKillSV"] <  %clKiller.dtShotSpeed){%killerDT.stat["missileKillSV"] = %clKiller.dtShotSpeed;}
             if(%isCombo){%killerDT.stat["missileCom"]++;}
             dtMinMax("missileKills", "wep", 1, %killerDT.stat["missileKills"], %clKiller);
          case $DamageType::ShockLance:
             %killerDT.stat["shockKills"]++;
             %victimDT.stat["shockDeaths"]++;
             if(%killerDT.stat["shockKillDist"] < %dis){%killerDT.stat["shockKillDist"] = %dis;}
-            if(%killerDT.stat["shockKillVV"] < %victimVel){%killerDT.stat["shockKillVV"] = %victimVel;}
-            if(%killerDT.stat["shockKillSV"] <  %clKiller.dtShotSpeed){%killerDT.stat["shockKillSV"] = %clKiller.dtShotSpeed;}
             if(%isCombo){%killerDT.stat["shockCom"]++;}
             dtMinMax("shockKills", "wep", 1, %killerDT.stat["shockKills"], %clKiller);
          case $DamageType::Plasma:
             %killerDT.stat["plasmaKills"]++;
             %victimDT.stat["plasmaDeaths"]++;
             if(%killerDT.stat["plasmaKillDist"] < %dis){%killerDT.stat["plasmaKillDist"] = %dis;}
-            if(%killerDT.stat["plasmaKillVV"] < %victimVel){%killerDT.stat["plasmaKillVV"] = %victimVel;}
-            if(%killerDT.stat["plasmaKillSV"] <  %clKiller.dtShotSpeed){%killerDT.stat["plasmaKillSV"] = %clKiller.dtShotSpeed;}
             if(%isCombo){%killerDT.stat["plasmaCom"]++;}
             dtMinMax("plasmaKills", "wep", 1, %killerDT.stat["plasmaKills"], %clKiller);
          case $DamageType::Blaster:
             %killerDT.stat["blasterKills"]++;
             %victimDT.stat["blasterDeaths"]++;
             if(%killerDT.stat["blasterKillDist"] < %dis){%killerDT.stat["blasterKillDist"] = %dis;}
-            if(%killerDT.stat["blasterKillVV"] < %victimVel){%killerDT.stat["blasterKillVV"] = %victimVel;}
-            if(%killerDT.stat["blasterKillSV"] <  %clKiller.dtShotSpeed){%killerDT.stat["blasterKillSV"] = %clKiller.dtShotSpeed;}
             if(%isCombo){%killerDT.stat["blasterCom"]++;}
             if(getSimTime() - %clKiller.blasterReflect < 256){%killerDT.stat["blasterReflectKill"]++;}
             dtMinMax("blasterKills", "wep", 1, %killerDT.stat["blasterKills"], %clKiller);
@@ -6595,7 +6602,6 @@ function clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %d
             %killerDT.stat["mineKills"]++;
             %victimDT.stat["mineDeaths"]++;
             if(%killerDT.stat["mineKillDist"] < %dis){%killerDT.stat["mineKillDist"] = %dis;}
-            if(%killerDT.stat["mineKillVV"] < %victimVel){%killerDT.stat["mineKillVV"] = %victimVel;}
             if(%isCombo){%killerDT.stat["mineCom"]++;}
             if(%clKiller.mdHit){%killerDT.stat["minePlusDiscKill"]++;}
             dtMinMax("mineKills", "wep", 1, %killerDT.stat["mineKills"], %clKiller);
@@ -6604,7 +6610,6 @@ function clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %d
             %killerDT.stat["satchelKills"]++;
             %victimDT.stat["satchelDeaths"]++;
             if(%killerDT.stat["satchelKillDist"] < %dis){%killerDT.stat["satchelKillDist"] = %dis;}
-            if(%killerDT.stat["satchelKillVV"] < %victimVel){%killerDT.stat["satchelKillVV"] = %victimVel;}
             if(%isCombo){%killerDT.stat["satchelCom"]++;}
             dtMinMax("satchelKills", "wep", 1, %killerDT.stat["satchelKills"], %clKiller);
          case $DamageType::Explosion:
@@ -6803,6 +6808,22 @@ function rayTestDis(%targetObject){
       return 0;
 }
 
+
+function testHit2(%sClient,%tgClient){
+   %plr = %tgClient.player;
+   %b = getField(%sClient.lastExp,3);
+   %a = %plr.getWorldBox();   
+   
+   %hit  =  (getWord(%a, 0) <= getWord(%b, 3) && getWord(%a, 3) >= getWord(%b, 0)) &&
+         (getWord(%a, 1) <= getWord(%b, 4) && getWord(%a, 4) >= getWord(%b, 1)) &&
+         (getWord(%a, 2)<= getWord(%b, 5) && getWord(%a, 5) >= getWord(%b, 2));
+   if(%hit && (!%sClient.lastDHit || (getSimTime() - %sClient.lastDHit > 128))){
+      %sClient.lastDHit = getSimTime();// lock out double hits
+      return 1;
+   }
+   return 0;
+}
+
 function testHit(%client){
    if(isObject(%client)){
       %field = %client.lastExp;
@@ -6811,15 +6832,16 @@ function testHit(%client){
          %mask = $TypeMasks::PlayerObjectType;
          %vec = vectorNormalize(vectorSub(%ePos,%sPos));// some how this vector works
          %ray = containerRayCast(%ePos, VectorAdd(%ePos, VectorScale(VectorNormalize(%vec), 5)), %mask, %client.player);
-         if(%ray){
+         if(%ray &&  (!%client.lastDHit || (getSimTime() - %client.lastDHit > 128))){
+            %client.lastDHit = getSimTime();
             //%dmgType = %data.radiusDamageType;
-            //error(%dmgType);
             return 1;
          }
       }
    }
    return 0;
 }
+
 function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageType, %amount){
    if(%damageType == $DamageType::Explosion || %damageType == $DamageType::Ground ||
          %damageType == $DamageType::OutOfBounds ||  %damageType == $DamageType::Lava ||
@@ -6838,7 +6860,7 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
       }
       return;
    }
-
+   
 //------------------------------------------------------------------------------
    if(%amount > 0 && %damageType > 0){
       if(isObject(%sourceObject)){
@@ -6847,21 +6869,15 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
             %sourceClient = %sourceObject.client;
             %sourceClient.lastPlayer = %sourceClient.player;
             %sourceDT = %sourceClient.dtStats;
-            %directHit = testHit(%sourceClient);
             %sv = mFloor(vectorLen(%sourceObject.getVelocity()) * 3.6);
          }
          else if(%sourceClass $= "Turret"){
             %sourceClient = %sourceObject.owner;
             %sourceDT = %sourceClient.dtStats;
-            %directHit = 0;
          }
          else if(%sourceClass $= "VehicleTurret" || %sourceClass $= "FlyingVehicle" || %sourceClass $= "HoverVehicle" || %sourceClass $= "WheeledVehicle"){
             %sourceClient = %sourceObject.getControllingClient();
             %sourceDT = %sourceClient.dtStats;
-            %directHit = 0;
-         }
-         else{
-            %directHit = 0;
          }
       }
       if(isObject(%targetObject)){
@@ -6880,7 +6896,12 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
                if(getSimTime() - %sourceClient.stat["flareHit"] < 256){%sourceClient.flareSource.dtStats.stat["flareHit"]++;}
             }
             if(%sourceClass $= "Player" && %targetClient.team != %sourceClient.team && %sourceObject != %targetObject){
-               %dis = vectorDist(%targetObject.getPosition(),%sourceObject.getPosition());
+               if((getSimTime() - %sourceClient.lastExpTime) < 32){
+                  %dis = vectorDist(getField(%sourceClient.lastExp,1),getField(%sourceClient.lastExp,2));
+               }
+               else{
+                  %dis = vectorDist(%targetObject.getPosition(),%sourceObject.getPosition());
+               }
                if(!%targetObject.combo[%sourceClient,%damageType]){
                   %targetObject.combo[%sourceClient,%damageType] = 1;
                   %sourceClient.player.combo[%targetObject]++;
@@ -6893,14 +6914,14 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
 
                %targetClient.lastHitBy = %sourceClient;
                %targetClient.lastHitTime = getSimTime();
-
+               
                if(%targetObject.isShielded && %damageType != $DamageType::Blaster){
                   %amount = %data.checkShields(%targetObject, %position, %amount, %damageType);
                   if(!%amount){
-                     %targetDT.stat["shieldPackDmg"] += %amount;
+                     %targetDT.stat["shieldPackDmg"] += %amount;  
                   }
                }
-
+               
 
                if(%targetClient.EVDamageType && %targetClient.EVDamageType != %damageType && (getSimTime() - %targetClient.EVDamagetime) < 3000){ // they were hit by something befor they were killed
                   %sourceDT.stat["EVHitWep"]++;
@@ -6920,8 +6941,8 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
 
                if(%targetObject.isCloaked()){
                   %targetObject.isCloakTime = getSimTime();
-               }
-
+               } 
+               
                //%dmgL = %targetObject.getDamageLocation(%position);
                %rayTest = rayTestDis(%targetObject);
                if(%rayTest >= $dtStats::midAirHeight && %damageType == $DamageType::Disc){
@@ -6937,101 +6958,112 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
                switch$(%damageType){// list of all damage types to track see damageTypes.cs
                   case $DamageType::Blaster:
                      %sourceDT.stat["blasterDmg"] += %amount;
+                     dtMinMax("blasterDmg", "wep", 1, %sourceDT.stat["blasterDmg"], %sourceClient);
                      %sourceDT.stat["blasterHits"]++;
                      %sourceDT.stat["blasterACC"] =  (%sourceDT.stat["blasterHits"] / (%sourceDT.stat["blasterShotsFired"] ? %sourceDT.stat["blasterShotsFired"] : 1)) * 100;
                      if(%sourceDT.stat["blasterHitDist"] < %dis){%sourceDT.stat["blasterHitDist"] = %dis;}
                      if(%sourceDT.stat["weaponHitDist"] < %dis){%sourceDT.stat["weaponHitDist"] = %dis;}
+                     if(%sourceDT.stat["blasterHitSV"] < %sv){%sourceDT.stat["blasterHitSV"]  = %sv;}
                      if(%rayTest >= $dtStats::midAirHeight){
                         if(%sourceDT.stat["blasterMAHitDist"] < %dis){%sourceDT.stat["blasterMAHitDist"] = %dis;}
                         %sourceDT.stat["blasterMA"]++;
+                        dtMinMax("blasterMA", "ma", 1, %sourceDT.stat["blasterMA"], %sourceClient);
+                        dtMinMax("blasterMAHitDist", "ma", 1, %sourceDT.stat["blasterMAHitDist"], %sourceClient);
+                        dtMidAirMessage(%sourceClient,"Blaster", %dis, %sourceDT.stat["blasterMA"]);
                      }
                      if(getSimTime() - %sourceObject.client.blasterReflect < 256){%sourceDT.stat["blasterReflectHit"]++;}
-                     dtMinMax("blasterDmg", "wep", 1, %sourceDT.stat["blasterDmg"], %sourceClient);
-                     dtMinMax("blasterMA", "ma", 1, %sourceDT.stat["blasterMA"], %sourceClient);
-                     dtMinMax("blasterMAHitDist", "ma", 1, %sourceDT.stat["blasterMAHitDist"], %sourceClient);
+               
                   case $DamageType::Plasma:
                      %sourceDT.stat["plasmaDmg"] += %amount;
+                     dtMinMax("plasmaDmg", "wep", 1, %sourceDT.stat["plasmaDmg"], %sourceClient);
+                     %directHit = testHit2(%sourceClient,%targetObject.client);
                      if(%directHit){%sourceDT.stat["plasmaHits"]++;%sourceDT.stat["plasmaDmgHits"]++;}
                      else{%sourceDT.stat["plasmaDmgHits"]++;}
                      %sourceDT.stat["plasmaACC"] = (%sourceDT.stat["plasmaHits"] / (%sourceDT.stat["plasmaShotsFired"] ? %sourceDT.stat["plasmaShotsFired"] : 1)) * 100;
                      %sourceDT.stat["plasmaDmgACC"] = (%sourceDT.stat["plasmaDmgHits"] / (%sourceDT.stat["plasmaShotsFired"] ? %sourceDT.stat["plasmaShotsFired"] : 1)) * 100;
                      if(%sourceDT.stat["plasmaHitDist"] < %dis){%sourceDT.stat["plasmaHitDist"] = %dis;}
                      if(%sourceDT.stat["weaponHitDist"] < %dis){%sourceDT.stat["weaponHitDist"] = %dis;}
+                     if(%sourceDT.stat["plasmaHitSV"] < %vv){%sourceDT.stat["plasmaHitSV"]  = %sv;}
                      if(%rayTest >= $dtStats::midAirHeight){
-                        if(%sourceDT.stat["plasmaMAHitDist"] < %dis){%sourceDT.stat["plasmaMAHitDist"] = %dis;}
                         if(%directHit){
-                           dtMidAirMessage(%sourceClient,"Plasma Rifle", %dis);
+                           if(%sourceDT.stat["plasmaMAHitDist"] < %dis){%sourceDT.stat["plasmaMAHitDist"] = %dis;}
                            %sourceDT.stat["plasmaMA"]++;
+                           dtMidAirMessage(%sourceClient,"Plasma Rifle", %dis, %sourceDT.stat["plasmaMA"]);
+                           dtMinMax("plasmaMA", "ma", 1, %sourceDT.stat["plasmaMA"], %sourceClient);
+                           dtMinMax("plasmaMAHitDist", "ma", 1, %sourceDT.stat["plasmaMAHitDist"], %sourceClient);
                         }
                      }
-                     dtMinMax("plasmaDmg", "wep", 1, %sourceDT.stat["plasmaDmg"], %sourceClient);
-                     dtMinMax("plasmaMA", "ma", 1, %sourceDT.stat["plasmaMA"], %sourceClient);
-                     dtMinMax("plasmaMAHitDist", "ma", 1, %sourceDT.stat["plasmaMAHitDist"], %sourceClient);
                   case $DamageType::Bullet:
                      %sourceDT.stat["cgDmg"] += %amount;
+                     dtMinMax("cgDmg", "wep", 1, %sourceDT.stat["cgDmg"], %sourceClient);
                      %sourceDT.stat["cgHits"]++;
 
                      %sourceDT.stat["cgACC"] = (%sourceDT.stat["cgHits"] / (%sourceDT.stat["cgShotsFired"] ? %sourceDT.stat["cgShotsFired"] : 1)) * 100;
                      if(%sourceDT.stat["cgHitDist"] < %dis){%sourceDT.stat["cgHitDist"] = %dis;}
                      if(%sourceDT.stat["weaponHitDist"] < %dis){%sourceDT.stat["weaponHitDist"] = %dis;}
+                     if(%sourceDT.stat["cgHitSV"] < %sv){%sourceDT.stat["cgHitSV"]  = %sv;}
                      if(%rayTest >= $dtStats::midAirHeight){
                         if(%sourceDT.stat["cgMAHitDist"] < %dis){%sourceDT.stat["cgMAHitDist"] = %dis;}
                         %sourceDT.stat["cgMA"]++;
                      }
-                     dtMinMax("cgDmg", "wep", 1, %sourceDT.stat["cgDmg"], %sourceClient);
                   case $DamageType::Disc:
                      %sourceDT.stat["discDmg"] += %amount;
+                     dtMinMax("discDmg", "wep", 1, %sourceDT.stat["discDmg"], %sourceClient);
+                     %directHit = testHit2(%sourceClient,%targetObject.client);
                      if(%directHit){%sourceDT.stat["discHits"]++;%sourceDT.stat["discDmgHits"]++;}
                      else{%sourceDT.stat["discDmgHits"]++;}
                      %sourceDT.stat["discACC"] = (%sourceDT.stat["discHits"] / (%sourceDT.stat["discShotsFired"] ? %sourceDT.stat["discShotsFired"] : 1)) * 100;
                      %sourceDT.stat["discDmgACC"] = (%sourceDT.stat["discDmgHits"] / (%sourceDT.stat["discShotsFired"] ? %sourceDT.stat["discShotsFired"] : 1)) * 100;
                      if(%sourceDT.stat["discHitDist"] < %dis){%sourceDT.stat["discHitDist"] = %dis;}
                      if(%sourceDT.stat["weaponHitDist"] < %dis){%sourceDT.stat["weaponHitDist"] = %dis;}
+                     if(%sourceDT.stat["discHitSV"] < %sv){%sourceDT.stat["discHitSV"]  = %sv;}
                      %sourceClient.mdHit = 0;
                      if((getSimTime() - %targetClient.mdTime1) < 256){%sourceDT.stat["minePlusDisc"]++; %sourceClient.mdHit = 1;}
                      %targetClient.mdTime2 = getSimTime();
                      if(%rayTest >= $dtStats::midAirHeight){
-                        if(%sourceDT.stat["discMAHitDist"] < %dis){%sourceDT.stat["discMAHitDist"] = %dis;}
                         if(%directHit){
-                           dtMidAirMessage(%sourceClient,"Spinfusor", %dis);
+                           if(%sourceDT.stat["discMAHitDist"] < %dis){%sourceDT.stat["discMAHitDist"] = %dis;}
                            %sourceDT.stat["discMA"]++;
+                           dtMidAirMessage(%sourceClient,"Spinfusor", %dis, %sourceDT.stat["discMA"]);
+                           dtMinMax("discMA", "ma", 1, %sourceDT.stat["discMA"], %sourceClient);
+                           dtMinMax("discMAHitDist", "ma", 1, %sourceDT.stat["discMAHitDist"], %sourceClient);
                         }
                      }
                      if(getSimTime() - %sourceObject.client.discReflect < 256){%sourceDT.stat["discReflectHit"]++;}
-                     dtMinMax("discDmg", "wep", 1, %sourceDT.stat["discDmg"], %sourceClient);
-                     dtMinMax("discMA", "ma", 1, %sourceDT.stat["discMA"], %sourceClient);
-                     dtMinMax("discMAHitDist", "ma", 1, %sourceDT.stat["discMAHitDist"], %sourceClient);
                      dtMinMax("minePlusDisc", "wep", 1, %sourceDT.stat["minePlusDisc"], %sourceClient);
                   case $DamageType::Grenade:
                      if($dtObjExplode.dtNade){
                         %sourceDT.stat["hGrenadeDmg"] += %amount;
+                        dtMinMax("hGrenadeDmg", "wep", 1, %sourceDT.stat["hGrenadeDmg"], %sourceClient);
                         %sourceDT.stat["hGrenadeHits"]++;
                         %sourceDT.stat["hGrenadeACC"] = (%sourceDT.stat["hGrenadeHits"] / (%sourceDT.stat["hGrenadeShotsFired"] ? %sourceDT.stat["hGrenadeShotsFired"] : 1)) * 100;
                         if(%sourceDT.stat["hGrenadeHitDist"] < %dis){%sourceDT.stat["hGrenadeHitDist"] = %dis;}
                         if(%sourceDT.stat["weaponHitDist"] < %dis){%sourceDT.stat["weaponHitDist"] = %dis;}
+                        if(%sourceDT.stat["hGrenadeHitSV"] < %sv){%sourceDT.stat["hGrenadeHitSV"]  = %sv;}
                         if(%rayTest >= $dtStats::midAirHeight){
                            if(%sourceDT.stat["hGrenadeMAHitDist"] < %dis){%sourceDT.stat["hGrenadeMAHitDist"] = %dis;}
                            %sourceDT.stat["hGrenadeMA"]++;
                         }
-                        dtMinMax("hGrenadeDmg", "wep", 1, %sourceDT.stat["hGrenadeDmg"], %sourceClient);
                      }
                      else{
                         %sourceDT.stat["grenadeDmg"] += %amount;
+                        dtMinMax("grenadeDmg", "wep", 1, %sourceDT.stat["grenadeDmg"], %sourceClient);
+                        %directHit = testHit2(%sourceClient,%targetObject.client);
                         if(%directHit){%sourceDT.stat["grenadeHits"]++;%sourceDT.stat["grenadeDmgHits"]++;}
                         else{%sourceDT.stat["grenadeDmgHits"]++;}
                         %sourceDT.stat["grenadeACC"] = (%sourceDT.stat["grenadeHits"] / (%sourceDT.stat["grenadeShotsFired"] ? %sourceDT.stat["grenadeShotsFired"] : 1)) * 100;
                         %sourceDT.stat["grenadeDmgACC"] = (%sourceDT.stat["grenadeDmgHits"] / (%sourceDT.stat["grenadeShotsFired"] ? %sourceDT.stat["grenadeShotsFired"] : 1)) * 100;
                         if(%sourceDT.stat["grenadeHitDist"] < %dis){%sourceDT.stat["grenadeHitDist"] = %dis;}
+                        if(%sourceDT.stat["grenadeHitSV"] < %sv){%sourceDT.stat["grenadeHitSV"]  = %sv;}
                         if(%rayTest >= $dtStats::midAirHeight){
-                           if(%sourceDT.stat["grenadeMAHitDist"] < %dis){%sourceDT.stat["grenadeMAHitDist"] = %dis;}
                            if(%directHit){
-                              dtMidAirMessage(%sourceClient, "Grenade Launcher", %dis);
+                              if(%sourceDT.stat["grenadeMAHitDist"] < %dis){%sourceDT.stat["grenadeMAHitDist"] = %dis;}
                               %sourceDT.stat["grenadeMA"]++;
+                              dtMidAirMessage(%sourceClient, "Grenade Launcher", %dis, %sourceDT.stat["grenadeMA"]);
+                              dtMinMax("grenadeMA", "ma", 1, %sourceDT.stat["grenadeMA"], %sourceClient);
+                              dtMinMax("grenadeMAHitDist", "ma", 1, %sourceDT.stat["grenadeMAHitDist"], %sourceClient);
                            }
                         }
-                        dtMinMax("grenadeDmg", "wep", 1, %sourceDT.stat["grenadeDmg"], %sourceClient);
-                        dtMinMax("grenadeMA", "ma", 1, %sourceDT.stat["grenadeMA"], %sourceClient);
-                        dtMinMax("grenadeMAHitDist", "ma", 1, %sourceDT.stat["grenadeMAHitDist"], %sourceClient);
                      }
                   case $DamageType::Laser:
                      if(%targetObject.getClassName() $= "Player"){
@@ -7039,12 +7071,17 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
                         if(getWord(%damLoc,0) $= "head" && %sourceClient.team != %targetClient.team){
                            %sourceDT.stat["laserHeadShot"]++;
                            %sourceDT.lastHeadShotTime = getSimTime();
+                           dtHeadShotMessage(%sourceClient, %dis);
+                        }
+                        else{
+                           dtLaserShotMessage(%sourceClient, %dis);
                         }
                      }
                      %sourceDT.stat["laserDmg"] += %amount;
                      %sourceDT.stat["laserHits"]++;
                      %sourceDT.stat["laserACC"] = (%sourceDT.stat["laserHits"] / (%sourceDT.stat["laserShotsFired"] ? %sourceDT.stat["laserShotsFired"] : 1)) * 100;
                      if(%sourceDT.stat["laserHitDist"] < %dis){%sourceDT.stat["laserHitDist"] = %dis;}
+                     if(%sourceDT.stat["laserHitSV"] < %sv){%sourceDT.stat["laserHitSV"]  = %sv;}
                      if(%sourceDT.stat["weaponHitDist"] < %dis){%sourceDT.stat["weaponHitDist"] = %dis;}
                      if(%rayTest >= $dtStats::midAirHeight){
                         if(%sourceDT.stat["laserMAHitDist"] < %dis){%sourceDT.stat["laserMAHitDist"] = %dis;}
@@ -7055,35 +7092,39 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
                      dtMinMax("laserDmg", "wep", 1, %sourceDT.stat["laserDmg"], %sourceClient);
                   case $DamageType::Mortar:
                      %sourceDT.stat["mortarDmg"] += %amount;
+                     dtMinMax("mortarDmg","wep",  1, %sourceDT.stat["mortarDmg"], %sourceClient);
+                     %directHit = testHit2(%sourceClient,%targetObject.client);
                      if(%directHit){%sourceDT.stat["mortarHits"]++;%sourceDT.stat["mortarDmgHits"]++;}
                      else{%sourceDT.stat["mortarDmgHits"]++;}
                      %sourceDT.stat["mortarACC"] = (%sourceDT.stat["mortarHits"] / (%sourceDT.stat["mortarShotsFired"] ? %sourceDT.stat["mortarShotsFired"] : 1)) * 100;
                      %sourceDT.stat["mortarDmgACC"] = (%sourceDT.stat["mortarDmgHits"] / (%sourceDT.stat["mortarShotsFired"] ? %sourceDT.stat["mortarShotsFired"] : 1)) * 100;
                      if(%sourceDT.stat["mortarHitDist"] < %dis){%sourceDT.stat["mortarHitDist"] = %dis;}
+                     if(%sourceDT.stat["mortarHitSV"] < %sv){%sourceDT.stat["mortarHitSV"]  = %sv;}
                      if(%sourceDT.stat["weaponHitDist"] < %dis){%sourceDT.stat["weaponHitDist"] = %dis;}
                      if(%rayTest >= $dtStats::midAirHeight){
-                        if(%sourceDT.stat["mortarMAHitDist"] < %dis){%sourceDT.stat["mortarMAHitDist"] = %dis;}
                         if(%directHit){
-                           dtMidAirMessage(%sourceClient,"Fusion Mortar", %dis);
+                           if(%sourceDT.stat["mortarMAHitDist"] < %dis){%sourceDT.stat["mortarMAHitDist"] = %dis;}
                            %sourceDT.stat["mortarMA"]++;
+                           dtMidAirMessage(%sourceClient,"Fusion Mortar", %dis, %sourceDT.stat["mortarMA"]);
+                           dtMinMax("mortarMA", "ma", 1, %sourceDT.stat["mortarMA"], %sourceClient);
+                           dtMinMax("mortarMAHitDist", "ma", 1, %sourceDT.stat["mortarMAHitDist"], %sourceClient);
                         }
                      }
-                     dtMinMax("mortarDmg","wep",  1, %sourceDT.stat["mortarDmg"], %sourceClient);
-                     dtMinMax("mortarMA", "ma", 1, %sourceDT.stat["mortarMA"], %sourceClient);
-                     dtMinMax("mortarMAHitDist", "ma", 1, %sourceDT.stat["mortarMAHitDist"], %sourceClient);
                   case $DamageType::Missile:
                      %sourceDT.stat["missileDmg"] += %amount;
+                     dtMinMax("missileDmg", "wep", 1, %sourceDT.stat["missileDmg"], %sourceClient);
                      %sourceDT.stat["missileHits"]++;
                      %sourceDT.stat["missileACC"] = (%sourceDT.stat["missileHits"] / (%sourceDT.stat["missileShotsFired"] ? %sourceDT.stat["missileShotsFired"] : 1)) * 100;
                      if(%sourceDT.stat["missileHitDist"] < %dis){%sourceDT.stat["missileHitDist"] = %dis;}
                      if(%sourceDT.stat["weaponHitDist"] < %dis){%sourceDT.stat["weaponHitDist"] = %dis;}
+                     if(%sourceDT.stat["missileHitSV"] < %sv){%sourceDT.stat["missileHitSV"]  = %sv;}
                      if(%rayTest >= $dtStats::midAirHeight){
                         if(%sourceDT.stat["missileMAHitDist"] < %dis){%sourceDT.stat["missileMAHitDist"] = %dis;}
                         %sourceDT.stat["missileMA"]++;
                      }
-                     dtMinMax("missileDmg", "wep", 1, %sourceDT.stat["missileDmg"], %sourceClient);
                   case $DamageType::ShockLance:
-                     if(%targetClient.rearshot){
+                      %dot = vectorDot(%sourceObject.getForwardVector(), %targetObject.getForwardVector());
+                     if(%dot >= mCos(1.05)){
                         %sourceDT.stat["shockRearShot"]++;
                          dtMinMax("shockRearShot", "misc", 1, %sourceDT.stat["shockRearShot"], %sourceClient);
                      }
@@ -7092,9 +7133,13 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
                      %sourceDT.stat["shockACC"] = (%sourceDT.stat["shockHits"] / (%sourceDT.stat["shockShotsFired"] ? %sourceDT.stat["shockShotsFired"] : 1)) * 100;
                      if(%sourceDT.stat["shockHitDist"] < %dis){%sourceDT.stat["shockHitDist"] = %dis;}
                      if(%sourceDT.stat["weaponHitDist"] < %dis){%sourceDT.stat["weaponHitDist"] = %dis;}
+                     if(%sourceDT.stat["shockHitSV"] < %sv){%sourceDT.stat["shockHitSV"]  = %sv;}
                      if(%rayTest >= $dtStats::midAirHeight){
                         if(%sourceDT.stat["shockMAHitDist"] < %dis){%sourceDT.stat["shockMAHitDist"] = %dis;}
                         %sourceDT.stat["shockMA"]++;
+                        if(Game.class $= "ArenaGame"){
+                           dtMidAirMessage(%sourceClient, "Shocklance", %dis, %sourceDT.stat["shockMA"]);
+                        }
                      }
                      dtMinMax("shockDmg", "wep", 1, %sourceDT.stat["shockDmg"], %sourceClient);
                   case $DamageType::Mine:
@@ -7102,6 +7147,7 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
                      %sourceDT.stat["mineHits"]++;
                      %sourceDT.stat["mineACC"] = (%sourceDT.stat["mineHits"] / (%sourceDT.stat["mineShotsFired"] ? %sourceDT.stat["mineShotsFired"] : 1)) * 100;
                      if(%sourceDT.stat["mineHitDist"] < %dis){%sourceDT.stat["mineHitDist"] = %dis;}
+                     if(%sourceDT.stat["mineHitVV"] < %vv){%sourceDT.stat["mineHitVV"]  = %vv;}
                      %sourceClient.mdHit = 0;
                      if((getSimTime() - %targetClient.mdTime2) < 256){%sourceDT.stat["minePlusDisc"]++; %sourceClient.mdHit = 1;}
                      %targetClient.mdTime1 = getSimTime();
@@ -7116,6 +7162,7 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
                      %sourceDT.stat["satchelHits"]++;
                      %sourceDT.stat["satchelACC"] = (%sourceDT.stat["satchelHits"] / (%sourceDT.stat["satchelShotsFired"] ? %sourceDT.stat["satchelShotsFired"] : 1)) * 100;
                      if(%sourceDT.stat["satchelHitDist"] < %dis){%sourceDT.stat["satchelHitDist"] = %dis;}
+                     if(%sourceDT.stat["satchelHitVV"] < %vv){%sourceDT.stat["satchelHitVV"]  = %vv;}
                      if(%rayTest >= $dtStats::midAirHeight){%sourceDT.stat["satchelMA"]++;}
                      dtMinMax("satchelDmg", "wep", 1, %sourceDT.stat["satchelDmg"], %sourceClient);
                   case $DamageType::Impact:
@@ -7149,15 +7196,30 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
    }
 }
 
-function dtMidAirMessage(%client,%porjName,%distance){
+function dtMidAirMessage(%client,%porjName,%distance, %count){
    if($dtStats::midAirMessage && Game.class !$= "LakRabbitGame" && !%client.isAIControlled()){
-      %client.scoreMidAir++;
-      bottomPrint(%client, "Midair Disk (" @ %client.scoreMidAir @ ")! Distance is " @ %distance @ " meters.", 3);
-      messageClient(%client, 'MsgMidAir', '\c0You received a %1 point bonus for a successful mid air shot. [%2m, %3]~wfx/misc/bounty_bonus.wav', Game.SCORE_PER_MIDAIR, mFloor(%distance), %porjName);
-      messageTeamExcept(%client, 'MsgMidAir', '\c5%1 hit a mid air shot. [%2m, %3]', %client.name, mFloor(%distance), %porjName);
-      Game.recalcScore(%client);
+      bottomPrint(%client, "Midair" SPC %porjName SPC "(" @ %count @ ") Distance of " @ mFloor(%distance) @ " meters.", 4);
+      messageClient(%client, 'MsgMidAir', '~wfx/misc/bounty_bonus.wav');
+      if(%porjName !$= "Blaster"){
+         messageTeamExcept(%client, 'MsgMidAir', '\c5%1 hit a mid air shot. [%2m, %3]', %client.name, mFloor(%distance), %porjName);
+      }
+      Game.recalcScore(%client);  
    }
-}
+} 
+
+function dtHeadShotMessage(%client,%distance){
+   if($dtStats::midAirMessage && Game.class !$= "LakRabbitGame" && !%client.isAIControlled()){
+      bottomPrint(%client, "Headshot! Distance of " @ mFloor(%distance) @ " meters.", 4);
+      messageClient(%client, 'MsgMidAir', '\c0Headshot distance of [%1m]~wfx/misc/bounty_bonus.wav', mFloor(%distance));
+      //messageTeamExcept(%client, 'MsgMidAir', '\c5%1 hit a head shot. [%2m, %3]', %client.name, mFloor(%distance), %porjName);
+   }
+} 
+function dtLaserShotMessage(%client,%distance){
+   if($dtStats::midAirMessage && Game.class !$= "LakRabbitGame" && !%client.isAIControlled()){
+      bottomPrint(%client, "HIT! Distance is " @ mFloor(%distance) @ " meters.", 4);      
+      //messageTeamExcept(%client, 'MsgMidAir', '\c5%1 hit a head shot. [%2m, %3]', %client.name, mFloor(%distance), %porjName);
+   }
+} 
 
 
 function clientShotsFired(%data, %sourceObject, %projectile){ // could do a fov check to see if we are trying to aim at a player
@@ -7179,7 +7241,7 @@ function clientShotsFired(%data, %sourceObject, %projectile){ // could do a fov 
 
    %dtStats.stat["shotsFired"]++;
    %sourceClient.dtShotSpeed = %projectile.dtShotSpeed = mFloor(vectorLen(%sourceObject.getVelocity()) * 3.6);
-
+   
    switch$(%damageType){// list of all damage types to track see damageTypes.cs
       case $DamageType::Bullet:
          %dtStats.stat["cgShotsFired"]++;
@@ -7242,16 +7304,16 @@ function getArmorBreakDown(%game,%dtStats){
    return mFloor((%avg[0]/%total)*100) TAB  mFloor((%avg[1]/%total)*100) TAB  mFloor((%avg[2]/%total)*100) TAB  mFloor((%avg[%l]/%total)*100) TAB %armor[%l];
 }
 function getGameDataAvg(%game,%dtStats,%var){
-   if(%dtStats.gameData[%game] && %dtStats.gameStats["totalGames","g",%game] != 0){
+   if(%dtStats.gameData[%game,$dtStats::tmMode] && %dtStats.gameStats["totalGames","g",%game,$dtStats::tmMode] != 0){
       %c = 0;
-      %x = %dtStats.gameStats["statsOverWrite","g",%game];
+      %x = %dtStats.gameStats["statsOverWrite","g",%game,$dtStats::tmMode];
       for(%i=0; %i < 32; %i++){
          %v = %x - %i;
          if(%v < 0)
             %v = $dtStats::MaxNumOfGames + %v;
-         %pct = getField(%dtStats.gameStats["gamePCT","g",%game],%v);
+         %pct = getField(%dtStats.gameStats["gamePCT","g",%game,$dtStats::tmMode],%v);
          if(%pct > 90){
-            %num = getField(%dtStats.gameStats[%var,"g",%game],%v);
+            %num = getField(%dtStats.gameStats[%var,"g",%game,$dtStats::tmMode],%v);
             if(%num){
                %val += %num;
                %c++;
@@ -7268,14 +7330,14 @@ function getGameDataAvg(%game,%dtStats,%var){
 
 function getGameData(%game,%client,%var,%type,%value){
    if(%type $= "game"){
-      %total = getField(%client.dtStats.gameStats[%var,"g",%game],%value);
+      %total = getField(%client.dtStats.gameStats[%var,"g",%game,$dtStats::tmMode],%value);
       if(%total !$= "")
          return mFloatLength(%total,2) + 0;
       else
          error("Error getGameData" SPC %game SPC %client SPC %var SPC %type SPC %value);
    }
    else if(%type $= "total"){
-      %total = getField(%client.dtStats.gameStats[%var,"t",%game],%value);
+      %total = getField(%client.dtStats.gameStats[%var,"t",%game,$dtStats::tmMode],%value);
       if(strpos(%total,"%a") != -1){
         %total = getField(strreplace(%total,"%a","\t"),0);
       }
@@ -7285,14 +7347,14 @@ function getGameData(%game,%client,%var,%type,%value){
          error("Error getGameData" SPC %game SPC %client SPC %var SPC %type SPC %value);
    }
    else if(%type $= "avg"){
-      if(%client.dtStats.gameStats["totalGames","g",%game] != 0){
+      if(%client.dtStats.gameStats["totalGames","g",%game,$dtStats::tmMode] != 0){
       %c = 0;
-      %x = %client.dtStats.gameStats["statsOverWrite","g",%game];
+      %x = %client.dtStats.gameStats["statsOverWrite","g",%game,$dtStats::tmMode];
       for(%i=0; %i < 16; %i++){
          %v = %x - %i;
          if(%v < 0)
             %v = $dtStats::MaxNumOfGames + %v;
-         %num = getField(%client.dtStats.gameStats[%var,"g",%game],%v);
+         %num = getField(%client.dtStats.gameStats[%var,"g",%game,$dtStats::tmMode],%v);
          if(%num $= ""){
             error("Error getGameData" SPC %game SPC %client SPC %var SPC %type SPC %value);
             break;
@@ -7376,21 +7438,21 @@ function statsMenu(%client,%game){
       case "View":
          messageClient( %client, 'SetScoreHudHeader', "", "<just:center>" @  getTaggedString(0.name) @ "'s Stats");
          messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tReset\t%1>  Back</a>',0);
-
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>View Player and Game Stats at <a:URL>https://stats.playt2.com/</a>");
+         
+         messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>View Player and Game Stats at <a:URL>https://stats.playt2.com/</a>");  
          messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
 
          if(%isAdmin && %game $= "CTFGame")
             messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tSZ\t%1\t1\t1-1>  + Running Game Averages (Experimental)</a>',0);
-
+            
          if(%isAdmin && %game $= "CTFGame")
             messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tTB\t%1\t1\t1>  + Team Ballance (Experimental)</a>',0);
-
+            
          if(%client.isSuperAdmin && $dtStats::liveStats)// for testing
             messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tLIVE\t%1>  + %2 Live Stats</a>',0,$dtStats::gtNameShort[%game]);
 
          messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tMAPLIST\t%1\t1\t%2-%3>  + PUGs/Tournaments/Recorded Games',0,%game,$dtStats::curMonth);
-
+           
          if($dtStats::day > 1)
             messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tLBOARDS\t%1\tday-%2\t0>  + %3 Daily Leaderboards </a>',0,%game,$dtStats::gtNameShort[%game]);
          if($dtStats::week > 1)
@@ -7410,6 +7472,224 @@ function statsMenu(%client,%game){
          for(%v = %index; %v < 15; %v++)
             messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
          messageClient( %client, 'SetLineHud', "", %tag, %index++, '<just:center>Stats Update Daily.');
+      case "TBX":
+         %opt0 = %client.GlArg3;
+         %opt1 = %client.GlArg4;
+         %opt2 = %client.GlArg5;
+         if(%client.tgame $= ""){
+            %client.tgame = $dtStats::gtNameShort[%game];   
+         }
+         if($TB::statGroupCount[%client.tgame] $= ""){
+            $TB::statGroupCount[%client.tgame] = 1;   
+         }
+         switch$(%opt0){
+            case "AG":
+               $TB::statGroupCount[%client.tgame]++;
+               if($TB::statGroupCount[%client.tgame] > 7){//cap it no need for this many 
+                  $TB::statGroupCount[%client.tgame] = 8;   
+               }
+            case "RG":
+               $TB::statGroupCount[%client.tgame]--;
+               if($TB::statGroupCount[%client.tgame] < 0){
+                  $TB::statGroupCount[%client.tgame] = 0;
+               }
+            case "G":
+               %client.tgame = %opt1;   
+         }
+         %client.GlArg3 = 0;
+         %client.GlArg4 = 0;
+         %client.GlArg5 = 0;
+         %line = '<just:center>Team Balancer';
+         messageClient( %client, 'SetScoreHudHeader', "",%line);
+         %line = '<a:gamelink\tS\tSP\t%1>  Back</a>   -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>';
+         messageClient( %client, 'SetScoreHudSubheader', "",%line);
+         
+         if(%client.tgame $= "CTF"){
+            %line = '<just:center><color:00ff00>[CTF]<color:0befe7>  <a:gamelink\tS\tTBX\tG\tLCTF\t0>[LCTF]</a>  <a:gamelink\tS\tTBX\tG\tArena\t0>[Arena]</a>';
+            messageClient(%client, 'SetLineHud', "", %tag, %index++, %line);
+         }
+         else if(%client.tgame $= "LCTF"){
+            %line = '<just:center><a:gamelink\tS\tTBX\tG\tCTF\t0>[CTF]</a>  <color:00ff00>[LCTF]<color:0befe7>  <a:gamelink\tS\tTBX\tG\tArena\t0>[Arena]</a>  ';
+            messageClient(%client, 'SetLineHud', "", %tag, %index++, %line);
+         }
+         else if(%client.tgame $= "Arena"){
+            %line = '<just:center><a:gamelink\tS\tTBX\tG\tCTF\t0>[CTF]</a>  <a:gamelink\tS\tTBX\tG\tLCTF\t0>[LCTF]</a>  <color:00ff00>[Arena]<color:0befe7> ';
+            messageClient(%client, 'SetLineHud', "", %tag, %index++, %line);
+         }
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Group 0 is the default genaric catch all group");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Group 1-7 is your roles in the game type, with 1 being most important");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Less groups is going to be better for smaller player counts and role ballencing");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Avoid using the same stats in every group other then group 0");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "This could cause players to be stolen from other groups/roles");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "");
+         %line = 'Add Groups/Roles - 8 Max <a:gamelink\tS\tTBX\tRG\t0\t0><</a>%1<a:gamelink\tS\tTBX\tAG\t0\t0>></a> ';
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, %line, $TB::statGroupCount[%client.tgame]);
+         
+         for(%i = 0; %i < $TB::statGroupCount[%client.tgame]; %i++){
+            if((%i % 4) == 0){
+               %line = "<tab:150,300,450>Group" SPC %i SPC "\t";
+               %line2 = "<tab:150,300,450><a:gamelink\tS\tTBV\tX\t" @ %i @"\t0>  [Edit]\t";
+            }
+            else if((%i % 4) == 3){
+               %line =  %line @ "Group" SPC %i SPC "\t";
+               %line2 = %line2  @ "<a:gamelink\tS\tTBV\tX\t" @ %i @"\t0>  [Edit]\t";
+               messageClient(%client, 'SetLineHud', "", %tag, %index++, %line);
+               messageClient(%client, 'SetLineHud', "", %tag, %index++, %line2);
+               messageClient(%client, 'SetLineHud', "", %tag, %index++, "");
+            }
+            else{
+               %line =  %line @ "Group" SPC %i SPC "\t";
+               %line2 = %line2  @ "<a:gamelink\tS\tTBV\tX\t" @ %i @"\t0>[Edit]\t";
+            }
+         }
+         if((%i % 4) != 0){
+            messageClient(%client, 'SetLineHud', "", %tag, %index++, %line);
+            messageClient(%client, 'SetLineHud', "", %tag, %index++, %line2);
+         }
+         
+      case "TBV":
+         %opt0 = %client.GlArg3;
+         %opt1 = %client.GlArg4;
+         %opt2 = %client.GlArg5;
+         if(!%client.curPage){
+            %client.curPage = 1;
+         }
+         if(%client.tgame $= ""){
+            %client.tgame = $dtStats::gtNameShort[%game];   
+         }
+         if(%client.arrowRes $= ""){
+            %client.arrowRes = 1;   
+         }
+         if(%client.editGrp $= ""){
+            %client.editGrp = 0;   
+         }
+         %perPage = 16;// num of games listed per page
+         
+         switch$(%opt0){
+            case "X":
+               %client.editGrp = %opt1;
+            case "G":
+               %client.tgame = %opt1;
+            case "AW":
+               %var = $statsVars::varName[%opt1, $dtStats::gtNameType[%client.tgame]];
+               %sindex = $TB::statIndex[%var, %client.tgame];
+               $TB::statWeight[%sindex, %client.tgame] += %opt2;
+            case "RW":
+               %var = $statsVars::varName[%opt1, $dtStats::gtNameType[%client.tgame]];
+               %sindex = $TB::statIndex[%var, %client.tgame];
+               $TB::statWeight[%sindex,%client.tgame] -= %opt2;
+            case "AS":
+               %var = $statsVars::varName[%opt1, $dtStats::gtNameType[%client.tgame]];
+               if($TB::statCount[%client.tgame] $= ""){
+                  $TB::statCount[%client.tgame] = 0;
+               }
+               if($TB::statWeight[%var,%client.tgame] $= ""){
+                  $TB::statName[$TB::statCount[%client.tgame],%client.tgame] = %var @ %cat;
+                  $TB::statWeight[$TB::statCount[%client.tgame],%client.tgame] = 100;
+                  $TB::statGroup[$TB::statCount[%client.tgame],%client.tgame] = 0;
+                  $TB::statIndex[%var, %client.tgame] = $TB::statCount[%client.tgame];
+                  $TB::statCount[%client.tgame]++;
+               }
+            case "RS":
+               %var = $statsVars::varName[%opt1, %client.tgame];
+               %sindex = $TB::statIndex[%var, %client.tgame];
+
+               if (%sindex !$= "") {
+                  // Shift all elements down
+                  for (%i = %sindex; %i < $TB::statCount[%client.tgame] - 1; %i++) {
+                     $TB::statName[%i, %client.tgame] = $TB::statName[%i + 1, %client.tgame];
+                     $TB::statWeight[%i, %client.tgame] = $TB::statWeight[%i + 1, %client.tgame];
+                     $TB::statGroup[%i, %client.tgame] = $TB::statGroup[%i + 1, %client.tgame];
+                     // Update index for the moved stat
+                     %movedVar = $TB::statName[%i, %client.tgame]; 
+                     $TB::statIndex[%movedVar, %client.tgame] = %i;
+                  }
+
+                  // Clear last index after shifting
+                  %last = $TB::statCount[%client.tgame] - 1;
+                  $TB::statName[%last, %client.tgame] = "";
+                  $TB::statWeight[%last, %client.tgame] = "";
+                  $TB::statGroup[%last, %client.tgame] = "";
+                  
+                  // Remove reference from index mapping
+                  $TB::statIndex[%var, %client.tgame] = "";
+
+                  // Decrease weight count
+                  $TB::statCount[%client.tgame]--;
+               }
+            case "N":
+               %client.curPage++;
+               if(%client.curPage * %perPage > $statsVars::count[$dtStats::gtNameType[%client.tgame]]){
+                  %client.curPage--;
+               }
+            case "B":
+               %client.curPage--;
+               if(%client.curPage < 1){
+                  %client.curPage  = 1;   
+               }
+            case "R": 
+               %client.curPage = 1; 
+            case "AR":
+               %client.arrowRes = %opt1;
+         }
+         %client.GlArg3 = 0;
+         %client.GlArg4 = 0;
+         %client.GlArg5 = 0;
+         if(%client.arrowRes == 1){
+            %line = '<color:00ff00> 0.01 <color:0befe7><a:gamelink\tS\tTBV\tAR\t10\t0> 0.1</a> <a:gamelink\tS\tTBV\tAR\t100\t0> 1.0</a><lmargin:250>Stat Weights';
+         }
+         else if(%client.arrowRes == 10){
+            %line = '<a:gamelink\tS\tTBV\tAR\t1\t0> 0.01</a> <color:00ff00> 0.1<color:0befe7> <a:gamelink\tS\tTBV\t%AR\t100\t0> 1.0</a><lmargin:250>Stat Weights';
+         }
+         else if(%client.arrowRes == 100){
+            %line = '<a:gamelink\tS\tTBV\tAR\t1\t0> 0.01</a> <a:gamelink\tS\tTBV\tAR\t10\t0> 0.1</a> <color:00ff00> 1.0<color:0befe7><lmargin:250>Stat Weights';
+         }
+         messageClient( %client, 'SetScoreHudHeader', "",%line);
+         if(%client.curPage == 1){
+            %line = '<a:gamelink\tS\tSP\t%1>  Back</a>   -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tTBV\tN\t0> Next Page ></a>';
+            messageClient( %client, 'SetScoreHudSubheader', "",%line);
+         }
+         else if(%client.curPage * %perPage > $statsVars::count[$dtStats::gtNameType[%client.tgame]]){
+            %line = '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tTBV\tB\t0> < Back Page</a> <a:gamelink\tS\tTBV\tR\t0><First page>';
+            messageClient( %client, 'SetScoreHudSubheader', "",%line);
+         }
+         else if(%client.curPage > 1){
+            %line = '<a:gamelink\tS\tSP\t%1>  Back</a>   -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> -<a:gamelink\tS\tTBV\tB\t0\> < Back Page </a>|<a:gamelink\tS\tTBV\tN\t0> Next Page ></a> <a:gamelink\tS\tTBV\tR\t0><First Page></a>';
+            messageClient( %client, 'SetScoreHudSubheader', "",%line);
+         }
+         
+         %line = 'Variable Name<lmargin:200>Add/Remove<lmargin:300>Adjust Weight<lmargin:430> Adjust Group';
+         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
+         %gc = $statsVars::count[$dtStats::gtNameType[%client.tgame]];
+         %displayedCount = 0; // Track how many valid entries we've displayed
+         %startIndex = (%client.curPage - 1) * %perPage;
+         %indexInArray = %startIndex;
+
+         while (%displayedCount < %perPage && %indexInArray < %gc) {
+             %var = $statsVars::varName[%indexInArray, $dtStats::gtNameType[%client.tgame]];
+             %cat = $statsVars::varType[%var, $dtStats::gtNameType[%client.tgame]];
+             %sindex = $TB::statIndex[%var, %client.tgame];
+
+             // Skip over "Game" category variables but continue looping
+             if (%cat !$= "Game") {
+                 error(%sindex SPC %var); // Debugging log
+
+                 if (%sindex $= "") { 
+                     %line = '   %3<a:gamelink\tS\tTBV\t%1\t%2\t0><lmargin:200>ADD</a>';
+                     messageClient(%client, 'SetLineHud', "", %tag, %index++, %line, "AS", %indexInArray, %var);
+                 } else {
+                     %w = $TB::statWeight[%sindex, %client.tgame];
+                     %g = $TB::statGroup[%sindex,%client.tgame];
+                     %line = '<tab:200,300,450>   %3<a:gamelink\tS\tTBV\t%1\t%2\t0>\tRmv</a>\t <a:gamelink\tS\tTBV\tRW\t%2\t%5><</a>%4<a:gamelink\tS\tTBV\tAW\t%2\t0>></a> \t<a:gamelink\tS\tTBV\tRG\t%2\t%5><</a>6<a:gamelink\tS\tTBV\t%AG\t%2\t0>></a> ';
+                     messageClient(%client, 'SetLineHud', "", %tag, %index++, %line, "RS", %indexInArray, %var, mFormatFloat(%w / 100, "%.2f"),%client.arrowRes,%g);
+                 }
+
+                 %displayedCount++; // Increase count only for valid entries
+             }
+
+             %indexInArray++; // Always increase this to scan through full dataset
+         }
       case "TB":
          %inc = %client.GlArg4;
          %cycle = %client.GlArg5;
@@ -7419,16 +7699,16 @@ function statsMenu(%client,%game){
          %LOArmorCount[2] = %LDArmorCount[2] =  %MOArmorCount[2] = %MDArmorCount[2] = %HOArmorCount[2] = %HDArmorCount[2] = 0;
          %Offensive[1] = %Offensive[2] = %Defensive[1] = %Defensive[2] =  0;
          %capperCount[1] = %capperCount[2] = %baseOpCount[1] = %baseOpCount[2] = 0;
-
+         
          %SLOArmorCount[1] = %SLDArmorCount[1] =  %SMOArmorCount[1] = %SMDArmorCount[1] = %SHOArmorCount[1] = %SHDArmorCount[1] = 0;
          %SLOArmorCount[2] = %SLDArmorCount[2] =  %SMOArmorCount[2] = %SMDArmorCount[2] = %SHOArmorCount[2] = %SHDArmorCount[2] = 0;
          %SOffensive[1] = %SOffensive[2] = %SDefensive[1] = %SDefensive[2] =  0;
          %ScapperCount[1] = %ScapperCount[2] = %SbaseOpCount[1] = %SbaseOpCount[2] = 0;
          for(%i =0; %i < ClientGroup.getCount(); %i++){
-            %client = ClientGroup.getObject(%i);
+            %client = ClientGroup.getObject(%i); 
             %dtStats = %client.dtStats;
             %team = %client.team;
-
+            
             if(isObject(%dtStats)){
                %armorBD = getField(getArmorBreakDown(%game, %dtStats),4);
                %offKills = getGameDataAvg(%game,%dtStats,"OffKillsTG");
@@ -7448,12 +7728,12 @@ function statsMenu(%client,%game){
                      %ScapperCount[%team]++;
                   }
                   else if( %offKills > %defKills){ // off
-                     %SLOArmorClients[%SLOArmorCount[%team],%team] = %client;
+                     %SLOArmorClients[%SLOArmorCount[%team],%team] = %client; 
                      %SLOArmorCount[%team]++;
                      %SOffensive[%team]++;
                   }
                   else if( %offKills <%defKills){// def
-                     %SLDArmorClients[%SLDArmorCount[%team],%team] = %client;
+                     %SLDArmorClients[%SLDArmorCount[%team],%team] = %client; 
                      %SLDArmorCount[%team]++;
                      %SDefensive[%team]++;
                   }
@@ -7464,12 +7744,12 @@ function statsMenu(%client,%game){
                      %SbaseOpCount[%team]++;
                   }
                   else if(%offKills > %defKills){ // off
-                     %SMOArmorClients[%MOArmorCount[%team],%team] = %client;
+                     %SMOArmorClients[%MOArmorCount[%team],%team] = %client; 
                      %SMOArmorCount[%team]++;
                      %SOffensive[%team]++;
                   }
                   else if(%offKills < %defKills){// def
-                     %SMDArmorClients[%SMDArmorCount[%team],%team] = %client;
+                     %SMDArmorClients[%SMDArmorCount[%team],%team] = %client; 
                      %SMDArmorCount[%team]++;
                      %SDefensive[%team]++;
                   }
@@ -7480,19 +7760,19 @@ function statsMenu(%client,%game){
                      %SbaseOpCount[%team]++;
                   }
                   else if(%offKills > %defKills){ // off
-                     %SHOArmorClients[%SHOArmorCount[%team],%team] = %client;
+                     %SHOArmorClients[%SHOArmorCount[%team],%team] = %client; 
                      %SHOArmorCount[%team]++;
                      %SOffensive[%team]++;
                   }
                   else if(%offKills < %defKills){// def
-                     %SHDArmorClients[%SHDArmorCount[%team],%team] = %client;
+                     %SHDArmorClients[%SHDArmorCount[%team],%team] = %client; 
                      %SHDArmorCount[%team]++;
                      %SDefensive[%team]++;
                   }
                }
             }
-
-
+            
+            
             if(isObject(%client.player)){
                %armor = %client.player.getArmorSize();
                if(%armor $= "Light"){
@@ -7505,12 +7785,12 @@ function statsMenu(%client,%game){
                      %capperCount[%team]++;
                   }
                   else if(%dtStats.stat["OffKills"] > %dtStats.stat["DefKills"]){ // off
-                     %LOArmorClients[%LOArmorCount[%team],%team] = %client;
+                     %LOArmorClients[%LOArmorCount[%team],%team] = %client; 
                      %LOArmorCount[%team]++;
                      %Offensive[%team]++;
                   }
                   else if(%dtStats.stat["OffKills"] < %dtStats.stat["DefKills"]){// def
-                     %LDArmorClients[%LDArmorCount[%team],%team] = %client;
+                     %LDArmorClients[%LDArmorCount[%team],%team] = %client; 
                      %LDArmorCount[%team]++;
                      %Defensive[%team]++;
                   }
@@ -7521,12 +7801,12 @@ function statsMenu(%client,%game){
                      %baseOpCount[%team]++;
                   }
                   else if(%dtStats.stat["OffKills"] > %dtStats.stat["DefKills"]){ // off
-                     %MOArmorClients[%MOArmorCount[%team],%team] = %client;
+                     %MOArmorClients[%MOArmorCount[%team],%team] = %client; 
                      %MOArmorCount[%team]++;
                      %Offensive[%team]++;
                   }
                   else if(%dtStats.stat["OffKills"] < %dtStats.stat["DefKills"]){// def
-                     %MDArmorClients[%MDArmorCount[%team],%team] = %client;
+                     %MDArmorClients[%MDArmorCount[%team],%team] = %client; 
                      %MDArmorCount[%team]++;
                      %Defensive[%team]++;
                   }
@@ -7537,12 +7817,12 @@ function statsMenu(%client,%game){
                      %baseOpCount[%team]++;
                   }
                   else if(%dtStats.stat["OffKills"] > %dtStats.stat["DefKills"]){ // off
-                     %HOArmorClients[%HOArmorCount[%team],%team] = %client;
+                     %HOArmorClients[%HOArmorCount[%team],%team] = %client; 
                      %HOArmorCount[%team]++;
                      %Offensive[%team]++;
                   }
                   else if(%dtStats.stat["OffKills"] < %dtStats.stat["DefKills"]){// def
-                     %HDArmorClients[%HDArmorCount[%team],%team] = %client;
+                     %HDArmorClients[%HDArmorCount[%team],%team] = %client; 
                      %HDArmorCount[%team]++;
                      %Defensive[%team]++;
                   }
@@ -7552,7 +7832,7 @@ function statsMenu(%client,%game){
 
          %line = '<tab:114,164,214,284,334,384,464,464><color:0befe7><font:univers condensed:18>%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
          messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, "Current",  "Team 1", "Team 2", "Stats Calc", "Team 1", "Team 2");
-
+         
          %line = '<tab:114,164,214,284,334,384,464,464><color:0befe7><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
          %na = 0;
          messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"Light Off", %LOArmorCount[1], %LOArmorCount[2], "|", %SLOArmorCount[1], %SLOArmorCount[2],"","","");
@@ -7570,7 +7850,7 @@ function statsMenu(%client,%game){
       case "SP":
          if(!%client.isSuperAdmin){
             error(%client.nameBase SPC "failed to access server panel");
-            return;
+            return;  
          }
          %opt1 = %client.GlArg4;
          %opt2 = %client.GlArg5;
@@ -7588,11 +7868,11 @@ function statsMenu(%client,%game){
                //$dtJoinListCount++;
                 if(!%client.curPage)
                   %client.curPage = 1;
-
+            
                messageClient(%client, 'SetScoreHudHeader', "", "<just:center>Auth Queue");
-
+               
                //rmvFailJoin(%index)
-
+               
                if(getWord(%opt2,0) $= "GUID"){
                   %data = $dtJoinList[getWord(%opt2,1)];
                   //$dtJoinList[0] = %name TAB %guid TAB %ip TAB %reason TAB %type;
@@ -7604,8 +7884,8 @@ function statsMenu(%client,%game){
                   }
                   %client.GlArg5 = 0;
                   %f = 48 * (%client.curPage - 1);
-               }
-               else{
+               }  
+               else{          
                   switch$(%opt2){
                      case "NP"://next page
                         %client.curPage++;
@@ -7616,19 +7896,19 @@ function statsMenu(%client,%game){
                         %client.GlArg5 = 0;
                         %f = 48 * (%client.curPage - 1);
                      case "CLR"://back page
-                        deleteVariables("$dtJoinList*");
+                        deleteVariables("$dtJoinList*");  
                         $dtJoinListCount = 0;
                         %client.curPage = 1;
                         %client.GlArg5 = 0;
                         %f = 0;
                      case "CLRP":
-                        for(%x = 0; %x < $dtJoinListCount ; %x++) {
+                        for(%x = 0; %x < $dtJoinListCount ; %x++) { 
                            %guid = getField($dtJoinList[%x],1);
                            if(isObject($dtWhtList::WhiteList[%guid])){
                               $dtJoinListGuid[%guid] = "";
-                              for(%i = %x; %i < $dtJoinListCount - 1; %i++) {
-                                  $dtJoinList[%i] =$dtJoinList[%i+1];
-                              }
+                              for(%i = %x; %i < $dtJoinListCount - 1; %i++) { 
+                                  $dtJoinList[%i] =$dtJoinList[%i+1]; 
+                              }  
                               $dtJoinList[%i] = "";
                               $dtJoinListCount--;
                                %x--;
@@ -7638,16 +7918,16 @@ function statsMenu(%client,%game){
                         %client.GlArg5 = 0;
                      default:
                         %client.curPage = 1;
-                        %f = 0;
-
+                        %f = 0;  
+                     
                   }
                }
-
+               
                %amount = $dtJoinListCount;
                %lns = mFloor(%amount/3);
                %leftOver = %amount - (%lns * 3);
                %numPages = mCeil(%amount/48);
-
+               
                if(%numPages  > 1){
                   if(%client.curPage < %numPages && %client.curPage == 1){//<a:gamelink\tS\tSP\t%1\t%2\t%7>
                       %line = '<a:gamelink\tS\tSP\t%1\tWHITELIST>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tSP\t%1\t%2\tNP> Next Page ></a>';
@@ -7661,24 +7941,24 @@ function statsMenu(%client,%game){
                      %line = '<a:gamelink\tS\tSP\t%1\tWHITELIST>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tSP\t%1\t%2\tBP> < Back Page</a>';
                       messageClient( %client, 'SetScoreHudSubheader', "", %line ,0, "WLQUEUE");
                   }
-
+                  
                }
                else{
-                  messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>',0);
+                  messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>',0);  
                }
                %line = 'Sorted recent to old with a rolling cap of %4 <a:gamelink\tS\tSP\t%1\t%2\t%3><Clear All></a> <a:gamelink\tS\tSP\t%1\t%2\t%5><Clear Approved></a>';
                messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"WLQUEUE","CLR",$dtStats::joinHist,"CLRP");
-
+               
                for(%i = (%client.curPage - 1) * 16; %i < %client.curPage * 16 && %i < %lns; %i++){
                   %vsc1 = %f; %f++; %vsc2 = %f; %f++; %vsc3 = %f; %f++;
-
+                  
                   %AR1 = isObject($dtWhtList::WhiteList[getField($dtJoinList[%vsc1],1)]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                  %plr1 = %vsc1 @ ":" @ getField($dtJoinList[%vsc1],0) SPC %AR1;
+                  %plr1 = %vsc1 @ ":" @ getField($dtJoinList[%vsc1],0) SPC %AR1; 
                   %AR2 = isObject($dtWhtList::WhiteList[getField($dtJoinList[%vsc2],1)]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                  %plr2 = %vsc2 @ ":" @ getField($dtJoinList[%vsc2],0) SPC %AR2;
+                  %plr2 = %vsc2 @ ":" @ getField($dtJoinList[%vsc2],0) SPC %AR2; 
                   %AR3 = isObject($dtWhtList::WhiteList[getField($dtJoinList[%vsc3],1)]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
                   %plr3 = %vsc3 @ ":" @ getField($dtJoinList[%vsc3],0) SPC %AR3;
-
+                  
                   %line = '<tab:1,198,395><font:univers condensed:18>\t<a:gamelink\tS\tSP\t%1\t%2\t%6><clip:197>%3</clip></a><color:0befe7>\t<a:gamelink\tS\tSP\t%1\t%2\t%7><clip:197>%4</clip><color:0befe7></a>\t<a:gamelink\tS\tSP\t%1\t%2\t%8><clip:197>%5</clip></a>';
                   messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "WLQUEUE", %plr1, %plr2, %plr3, "GUID" SPC %vsc1, "GUID" SPC %vsc2, "GUID" SPC %vsc3, 1);
                }
@@ -7686,27 +7966,27 @@ function statsMenu(%client,%game){
                   if(%leftOver == 2){
                      %vsc1 = %f; %f++; %vsc2 = %f; %f++;
                      %AR1 = isObject($dtWhtList::WhiteList[getField($dtJoinList[%vsc1],1)]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                     %plr1 = %vsc1 @ ":" @ getField($dtJoinList[%vsc1],0) SPC %AR1;
+                     %plr1 = %vsc1 @ ":" @ getField($dtJoinList[%vsc1],0) SPC %AR1; 
                      %AR2 = isObject($dtWhtList::WhiteList[getField($dtJoinList[%vsc2],1)]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
                      %plr2 = %vsc2 @ ":" @ getField($dtJoinList[%vsc2],0)  SPC %AR2;
                      %line = '<tab:1,198,395><font:univers condensed:18>\t<a:gamelink\tS\tSP\t%1\t%2\t%6><clip:197>%3</clip></a><color:0befe7>\t<a:gamelink\tS\tSP\t%1\t%2\t%7><clip:197>%4</clip></a>\t<clip:197>%5</clip>';
                      messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "WLQUEUE", %plr1, %plr2, "", "GUID" SPC %vsc1, "GUID" SPC %vsc2, "");
-                  }
+                  } 
                   else  if(%leftOver == 1){
                      %vsc1 = %f; %f++;
                      %AR1 = isObject($dtWhtList::WhiteList[getField($dtJoinList[%vsc1],1)]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                     %plr1 = %vsc1 @ ":" @ getField($dtJoinList[%vsc1],0) SPC %AR1;
+                     %plr1 = %vsc1 @ ":" @ getField($dtJoinList[%vsc1],0) SPC %AR1; 
                      %line = '<tab:1,198,395><font:univers condensed:18>\t<a:gamelink\tS\tSP\t%1\t%2\t%6><clip:197>%3</clip></a>\t<clip:197>%4</clip>\t<clip:197>%5</clip>';
                      messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "WLQUEUE", %plr1, "", "", "GUID" SPC %vsc1, "", "");
                   }
-               }
+               } 
                return;
             case "STATS"://add from stats
                if(!%client.curPage)
                   %client.curPage = 1;
 
                messageClient(%client, 'SetScoreHudHeader', "", "<just:center>White List Add From Stats");
-
+                                      
                if(getWord(%opt2,0) $= "GUID"){// make sure its valid client and guid
                   if(!isObject($dtWhtList::WhiteList[getWord(%opt2,1)]))
                      pushWhiteList(getWord(%opt2,1), getField($guidInfo[getWord(%opt2,1)],0));
@@ -7714,8 +7994,8 @@ function statsMenu(%client,%game){
                      rmvWhiteListGuid(getWord(%opt2,1));
                   %client.GlArg5 = 0;
                   %f = 45 * (%client.curPage - 1);
-               }
-               else{
+               } 
+               else{           
                   switch$(%opt2){
                      case "NP"://next page
                         %client.curPage++;
@@ -7764,7 +8044,7 @@ function statsMenu(%client,%game){
                            if(%gameCountM >= 48){
                               pushWhiteList(%guid, getField($guidInfo[%guid],0));
                            }
-                        }
+                        }   
                      case "A64":
                         for(%i = 0; %i < $guidListCount; %i++){
                            %guid = $guidList[%i];
@@ -7774,22 +8054,22 @@ function statsMenu(%client,%game){
                            }
                         }
                      default:
-                        %client.curPage = 1;
-                        %f = 0;
+                        %client.curPage = 1; 
+                        %f = 0;  
                   }
                }
-
+               
                %line = 'Add all, games played monthly - <a:gamelink\tS\tSP\t%1\t%2\tA8><8></a><a:gamelink\tS\tSP\t%1\t%2\tA16><16></a><a:gamelink\tS\tSP\t%1\t%2\tA24><24></a><a:gamelink\tS\tSP\t%1\t%2\tA32><32></a><a:gamelink\tS\tSP\t%1\t%2\tA48><48></a><a:gamelink\tS\tSP\t%1\t%2\tA64><64></a>';
-               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"STATS");
-
+               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"STATS");    
+                          
                %line = 'Game count: Player Name,  Server averages: Day %3, Week %4, Month %5.';
                messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"STATS",getField($guidAvgs,0),getField($guidAvgs,1),getField($guidAvgs,2));
-
+               
                %amount = $guidListCount;// safer method instead of client group do to how offton it changes
                %lns = mFloor(%amount/3);
                %leftOver = %amount - (%lns * 3);
                %numPages = mCeil(%amount/45);
-
+               
                if(%numPages  > 1){
                   if(%client.curPage < %numPages && %client.curPage == 1){//<a:gamelink\tS\tSP\t%1\t%2\t%7>
                       %line = '<a:gamelink\tS\tSP\t%1\tWHITELIST>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tSP\t%1\t%2\tNP> Next Page ></a>';
@@ -7803,22 +8083,22 @@ function statsMenu(%client,%game){
                      %line = '<a:gamelink\tS\tSP\t%1\tWHITELIST>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tSP\t%1\t%2\tBP> < Back Page</a>';
                       messageClient( %client, 'SetScoreHudSubheader', "", %line ,0, "STATS");
                   }
-
+                  
                }
                else{
-                  messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tSP\t%1\t%2>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>', 0, "WHITELIST");
+                  messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tSP\t%1\t%2>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>', 0, "WHITELIST");  
                }
-
+               
                for(%i = (%client.curPage - 1) * 15; %i < %client.curPage * 15 && %i < %lns; %i++){
                   %vsc1 = %f; %f++; %vsc2 = %f; %f++; %vsc3 = %f; %f++;
-
+                  
                   %AR1 = isObject($dtWhtList::WhiteList[$guidList[%vsc1]]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                  %plr1 = getField($guidInfo[$guidList[%vsc1]],3) @ ":" @ getField($guidInfo[$guidList[%vsc1]],0)  SPC %AR1;
+                  %plr1 = getField($guidInfo[$guidList[%vsc1]],3) @ ":" @ getField($guidInfo[$guidList[%vsc1]],0)  SPC %AR1; 
                   %AR2 = isObject($dtWhtList::WhiteList[$guidList[%vsc2]]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                  %plr2 = getField($guidInfo[$guidList[%vsc2]],3) @ ":" @ getField($guidInfo[$guidList[%vsc2]],0)  SPC %AR2;
+                  %plr2 = getField($guidInfo[$guidList[%vsc2]],3) @ ":" @ getField($guidInfo[$guidList[%vsc2]],0)  SPC %AR2; 
                   %AR3 = isObject($dtWhtList::WhiteList[$guidList[%vsc3]]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
                   %plr3 = getField($guidInfo[$guidList[%vsc3]],3) @ ":" @ getField($guidInfo[$guidList[%vsc3]],0)  SPC %AR3;
-
+                  
                   %line = '<tab:1,198,395><font:univers condensed:18>\t<a:gamelink\tS\tSP\t%1\t%2\t%6><clip:197>%3</clip><color:0befe7></a>\t<a:gamelink\tS\tSP\t%1\t%2\t%7><clip:197>%4</clip><color:0befe7></a>\t<a:gamelink\tS\tSP\t%1\t%2\t%8><clip:197>%5</clip></a>';
                   messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "STATS", %plr1, %plr2, %plr3, "GUID" SPC $guidList[%vsc1], "GUID" SPC $guidList[%vsc2], "GUID" SPC $guidList[%vsc3]);
                }
@@ -7826,16 +8106,16 @@ function statsMenu(%client,%game){
                   if(%leftOver == 2){
                      %vsc1 = %f; %f++; %vsc2 = %f; %f++;
                      %AR1 = isObject($dtWhtList::WhiteList[$guidList[%vsc1]]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                     %plr1 = getField($guidInfo[$guidList[%vsc1]],3) @ ":" @ getField($guidInfo[$guidList[%vsc1]],0)  SPC %AR1;
+                     %plr1 = getField($guidInfo[$guidList[%vsc1]],3) @ ":" @ getField($guidInfo[$guidList[%vsc1]],0)  SPC %AR1; 
                      %AR2 = isObject($dtWhtList::WhiteList[$guidList[%vsc2]]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
                      %plr2 = getField($guidInfo[$guidList[%vsc2]],3) @ ":" @ getField($guidInfo[$guidList[%vsc2]],0)  SPC %AR2;
                      %line = '<tab:1,198,395><font:univers condensed:18>\t<a:gamelink\tS\tSP\t%1\t%2\t%6><clip:197>%3</clip><color:0befe7></a>\t<a:gamelink\tS\tSP\t%1\t%2\t%7><clip:197>%4</clip></a>\t<clip:197>%5</clip>';
                      messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "STATS", %plr1, %plr2, "", "GUID" SPC $guidList[%vsc1], "GUID" SPC $guidList[%vsc2], "");
-                  }
+                  } 
                   else  if(%leftOver == 1){
                      %vsc1 = %f; %f++;
                      %AR1 = isObject($dtWhtList::WhiteList[$guidList[%vsc1]]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                     %plr1 = getField($guidInfo[$guidList[%vsc1]],3) @ ":" @ getField($guidInfo[$guidList[%vsc1]],0)  SPC %AR1;
+                     %plr1 = getField($guidInfo[$guidList[%vsc1]],3) @ ":" @ getField($guidInfo[$guidList[%vsc1]],0)  SPC %AR1;  
                      %line = '<tab:1,198,395><font:univers condensed:18>\t<a:gamelink\tS\tSP\t%1\t%2\t%6><clip:197>%3</clip></a>\t<clip:197>%4</clip>\t<clip:197>%5</clip>';
                      messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "STATS", %plr1, "", "", "GUID" SPC $guidList[%vsc1], "", "");
                   }
@@ -7844,9 +8124,9 @@ function statsMenu(%client,%game){
             case "SERVER"://add from current server
                if(!%client.curPage)
                   %client.curPage = 1;
-
+            
                messageClient(%client, 'SetScoreHudHeader', "", "<just:center>White List Add From Server");
-
+               
                if(getWord(%opt2,0) $= "RMV"){// make sure its valid client and guid
                   %clObj = getWord(%opt2,1);
                   if(!isObject($dtWhtList::WhiteList[%clObj.guid]))
@@ -7856,7 +8136,7 @@ function statsMenu(%client,%game){
                   %client.GlArg5 = 0;
                   %f = 51 * (%client.curPage - 1);
                }
-               else{
+               else{            
                   switch$(%opt2){
                      case "NP"://next page
                         %client.curPage++;
@@ -7870,16 +8150,16 @@ function statsMenu(%client,%game){
                      case "RM":
                      default:
                         %client.curPage = 1;
-                        %f = 0;
-
+                        %f = 0;  
+                     
                   }
                }
-
+               
                %amount = isObject(statsGroup) ? statsGroup.getCount() : 0;// safer method instead of client group do to how offton it changes
                %lns = mFloor(%amount/3);
                %leftOver = %amount - (%lns * 3);
                %numPages = mCeil(%amount/51);
-
+               
                if(%numPages  > 1){
                   if(%client.curPage < %numPages && %client.curPage == 1){//<a:gamelink\tS\tSP\t%1\t%2\t%7>
                       %line = '<a:gamelink\tS\tSP\t%1\tWHITELIST>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tSP\t%1\t%2\tNP> Next Page ></a> <a:gamelink\tS\tSP\t%1\t%2\tAD><Add All></a> - <a:gamelink\tS\tSP\t%1\t%2\tRM><Remove All></a>';
@@ -7893,22 +8173,22 @@ function statsMenu(%client,%game){
                      %line = '<a:gamelink\tS\tSP\t%1\tWHITELIST>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tSP\t%1\t%2\tBP> < Back Page</a> <a:gamelink\tS\tSP\t%1\t%2\tAD><Add All></a> - <a:gamelink\tS\tSP\t%1\t%2\tRM><Remove All></a>';
                       messageClient( %client, 'SetScoreHudSubheader', "", %line ,0, "SERVER");
                   }
-
+                  
                }
                else{
-                  messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tSP\t%1\t%2>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> <a:gamelink\tS\tSP\t%1\tSERVER\tAD><Add All></a> - <a:gamelink\tS\tSP\t%1\tSERVER\tRM><Remove All></a>',0, "WHITELIST");
+                  messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tSP\t%1\t%2>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> <a:gamelink\tS\tSP\t%1\tSERVER\tAD><Add All></a> - <a:gamelink\tS\tSP\t%1\tSERVER\tRM><Remove All></a>',0, "WHITELIST");  
                }
-
+               
                for(%i = (%client.curPage - 1) * 17; %i < %client.curPage * 17 && %i < %lns; %i++){
                   %vsc1 = %f; %f++; %vsc2 = %f; %f++; %vsc3 = %f; %f++;
-
+                  
                   %AR1 = isObject($dtWhtList::WhiteList[statsGroup.getObject(%vsc1).guid]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                  %plr1 = %vsc1 @ ":" @ statsGroup.getObject(%vsc1).name  SPC %AR1;
+                  %plr1 = %vsc1 @ ":" @ statsGroup.getObject(%vsc1).name  SPC %AR1; 
                   %AR2 = isObject($dtWhtList::WhiteList[statsGroup.getObject(%vsc2).guid]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                  %plr2 = %vsc2 @ ":" @ statsGroup.getObject(%vsc2).name  SPC %AR2;
+                  %plr2 = %vsc2 @ ":" @ statsGroup.getObject(%vsc2).name  SPC %AR2; 
                   %AR3 = isObject($dtWhtList::WhiteList[statsGroup.getObject(%vsc3).guid]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
                   %plr3 = %vsc3 @ ":" @ statsGroup.getObject(%vsc3).name  SPC %AR3;
-
+                  
                   %line = '<tab:1,198,395><font:univers condensed:18>\t<a:gamelink\tS\tSP\t%1\t%2\t%6><clip:197>%3</clip><color:0befe7></a>\t<a:gamelink\tS\tSP\t%1\t%2\t%7><clip:197>%4</clip><color:0befe7></a>\t<a:gamelink\tS\tSP\t%1\t%2\t%8><clip:197>%5</clip></a>';
                   messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "SERVER", %plr1, %plr2, %plr3,  "RMV" SPC statsGroup.getObject(%vsc1),  "RMV" SPC statsGroup.getObject(%vsc2),  "RMV" SPC statsGroup.getObject(%vsc3));
                }
@@ -7916,16 +8196,16 @@ function statsMenu(%client,%game){
                   if(%leftOver == 2){
                      %vsc1 = %f; %f++; %vsc2 = %f; %f++;
                      %AR1 = isObject($dtWhtList::WhiteList[statsGroup.getObject(%vsc1).guid]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                     %plr1 = %vsc1 @ ":" @ statsGroup.getObject(%vsc1).name  SPC %AR1;
+                     %plr1 = %vsc1 @ ":" @ statsGroup.getObject(%vsc1).name  SPC %AR1; 
                      %AR2 = isObject($dtWhtList::WhiteList[statsGroup.getObject(%vsc2).guid]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                     %plr2 = %vsc2 @ ":" @ statsGroup.getObject(%vsc2).name  SPC %AR2;
+                     %plr2 = %vsc2 @ ":" @ statsGroup.getObject(%vsc2).name  SPC %AR2;  
                      %line = '<tab:1,198,395><font:univers condensed:18>\t<a:gamelink\tS\tSP\t%1\t%2\t%6><clip:197>%3</clip></a>\t<a:gamelink\tS\tSP\t%1\t%2\t%7><clip:197>%4</clip><color:0befe7></a>\t<clip:197>%5</clip>';
                      messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "SERVER", %plr1, %plr2, "", "RMV" SPC statsGroup.getObject(%vsc1),  "RMV" SPC statsGroup.getObject(%vsc2), "");
-                  }
+                  } 
                   else  if(%leftOver == 1){
                      %vsc1 = %f; %f++;
                      %AR1 = isObject($dtWhtList::WhiteList[statsGroup.getObject(%vsc1).guid]) ? "<color:fb3939>Remove" : "<color:00ff00>Add";
-                     %plr1 = %vsc1 @ ":" @ statsGroup.getObject(%vsc1).name  SPC %AR1;
+                     %plr1 = %vsc1 @ ":" @ statsGroup.getObject(%vsc1).name  SPC %AR1; 
                      %line = '<tab:1,198,395><font:univers condensed:18>\t<a:gamelink\tS\tSP\t%1\t%2\t%6><clip:197>%3</clip></a>\t<clip:197>%4</clip>\t<clip:197>%5</clip>';
                      messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "SERVER", %plr1, "", "", "RMV" SPC statsGroup.getObject(%vsc1), "", "");
                   }
@@ -7934,15 +8214,15 @@ function statsMenu(%client,%game){
             case "WHITELIST":
                if(!%client.curPage)
                   %client.curPage = 1;
-
+            
                messageClient( %client, 'SetScoreHudHeader', "", "<just:center>White List");
-
+                         
                if(getWord(%opt2,0) $= "RMV" && isObject(serverSafeList.getObject(getWord(%opt2,1)))){
                   rmvWhiteListIndex(getWord(%opt2,1));
                   %client.GlArg5 = 0;
                   %f = 51 * (%client.curPage - 1);
-               }
-               else{
+               } 
+               else{           
                   switch$(%opt2){
                      case "NP"://next page
                         %client.curPage++;
@@ -7954,15 +8234,15 @@ function statsMenu(%client,%game){
                         %f = 51 * (%client.curPage - 1);
                      default:
                         %client.curPage = 1;
-                        %f = 0;
+                        %f = 0;  
                   }
                }
-
+               
                %amount = isObject(serverSafeList) ? serverSafeList.getCount() : 0;
                %lns = mFloor(%amount/3);
                %leftOver = %amount - (%lns * 3);
                %numPages = mCeil(%amount/51);
-
+               
                if(%numPages  > 1){
                   if(%client.curPage < %numPages && %client.curPage == 1){//<a:gamelink\tS\tSP\t%1\t%2\t%7>
                       %line = '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tSP\t%1\t%2\tNP> Next Page ></a> - Add/Rmv From <a:gamelink\tS\tSP\t%1\tSERVER\t0><Server></a> <a:gamelink\tS\tSP\t%1\tSTATS\t0><Stats></a>';
@@ -7976,32 +8256,32 @@ function statsMenu(%client,%game){
                      %line = '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tSP\t%1\t%2\tBP> < Back Page</a>';
                       messageClient( %client, 'SetScoreHudSubheader', "", %line ,0, "WHITELIST");
                   }
-
+                  
                }
                else{
-                  messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - Add/Rmv From <a:gamelink\tS\tSP\t%1\tSERVER\t0><Server></a> <a:gamelink\tS\tSP\t%1\tSTATS\t0><Stats></a>',0);
+                  messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - Add/Rmv From <a:gamelink\tS\tSP\t%1\tSERVER\t0><Server></a> <a:gamelink\tS\tSP\t%1\tSTATS\t0><Stats></a>',0);  
                }
-
+               
                for(%i = (%client.curPage - 1) * 17; %i < %client.curPage * 17 && %i < %lns; %i++){
                   %vsc1 = %f; %f++; %vsc2 = %f; %f++; %vsc3 = %f; %f++;
-                  %plr1 = %vsc1 @ ":" @ serverSafeList.getObject(%vsc1).name  SPC "<color:fb3939>Remove";
-                  %plr2 = %vsc2 @ ":" @ serverSafeList.getObject(%vsc2).name  SPC "<color:fb3939>Remove";
+                  %plr1 = %vsc1 @ ":" @ serverSafeList.getObject(%vsc1).name  SPC "<color:fb3939>Remove"; 
+                  %plr2 = %vsc2 @ ":" @ serverSafeList.getObject(%vsc2).name  SPC "<color:fb3939>Remove"; 
                   %plr3 = %vsc3 @ ":" @ serverSafeList.getObject(%vsc3).name  SPC "<color:fb3939>Remove";
-
+                  
                   %line = '<tab:1,198,395><font:univers condensed:18>\t<a:gamelink\tS\tSP\t%1\t%2\t%6><clip:197>%3</clip><color:0befe7></a>\t<a:gamelink\tS\tSP\t%1\t%2\t%7><clip:197>%4</clip><color:0befe7></a>\t<a:gamelink\tS\tSP\t%1\t%2\t%8><clip:197>%5</clip></a>';
                   messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "WHITELIST", %plr1, %plr2, %plr3, "RMV" SPC %vsc1, "RMV" SPC %vsc2, "RMV" SPC %vsc3);
                }
                if(%numPages == %client.curPage){
                   if(%leftOver == 2){
                       %vsc1 = %f; %f++; %vsc2 = %f; %f++;
-                     %plr1 = %vsc1 @ ":" @ serverSafeList.getObject(%vsc1).name  SPC "<color:fb3939>Remove";
-                     %plr2 = %vsc2 @ ":" @ serverSafeList.getObject(%vsc2).name  SPC "<color:fb3939>Remove";
+                     %plr1 = %vsc1 @ ":" @ serverSafeList.getObject(%vsc1).name  SPC "<color:fb3939>Remove"; 
+                     %plr2 = %vsc2 @ ":" @ serverSafeList.getObject(%vsc2).name  SPC "<color:fb3939>Remove"; 
                      %line = '<tab:1,198,395><font:univers condensed:18>\t<a:gamelink\tS\tSP\t%1\t%2\t%6><clip:197>%3</clip><color:0befe7></a>\t<a:gamelink\tS\tSP\t%1\t%2\t%7><clip:197>%4</clip></a>\t<clip:197>%5</clip>';
                      messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "WHITELIST", %plr1, %plr2, "", "RMV" SPC %vsc1, "RMV" SPC %vsc2, "");
-                  }
+                  } 
                   else  if(%leftOver == 1){
                      %vsc1 = %f; %f++;
-                     %plr1 = %vsc1 @ ":" @ serverSafeList.getObject(%vsc1).name  SPC "<color:fb3939>Remove";
+                     %plr1 = %vsc1 @ ":" @ serverSafeList.getObject(%vsc1).name  SPC "<color:fb3939>Remove";  
                      %line = '<tab:1,198,395><font:univers condensed:18>\t<a:gamelink\tS\tSP\t%1\t%2\t%6><clip:197>%3</clip></a>\t<clip:197>%4</clip>\t<clip:197>%5</clip>';
                      messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "WHITELIST", %plr1, "", "", "RMV" SPC %vsc1, "", "");
                   }
@@ -8010,9 +8290,9 @@ function statsMenu(%client,%game){
             case "BL":
                if(!%client.curPage)
                   %client.curPage = 1;
-
+            
                messageClient( %client, 'SetScoreHudHeader', "", "<just:center>Ban/Kick List");
-
+                           
                if(getWord(%opt2,0) $= "RMV" && dtBanList.getObject(getWord(%opt2,0) != -1)){
                   unbanUserObj(dtBanList.getObject(getWord(%opt2,1)));//function makes echo report
                   %client.GlArg5 = 0;
@@ -8025,19 +8305,19 @@ function statsMenu(%client,%game){
                   saveBanList();
                }
 
-               messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>',0);
-
+               messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>',0);  
+    
                %banlistCount = 0;
                for(%i = 0; %i < dtBanList.getCount(); %i++){
                   %banObj = dtBanList.getObject(%i);
                   if(!%banObj.hide){
                      if(!(%banlistCount % 3)){
-                        %plrLine = "<tab:1,198,395><color:02d404>\t" @ %banObj.name @ ":" @ numReduce(%banObj.banLengthMin - getBanCount(%banObj.banDateTime),0);
+                        %plrLine = "<tab:1,198,395><color:02d404>\t" @ %banObj.name @ ":" @ numReduce(%banObj.banLengthMin - getTimeDelta(%banObj.banDateTime),0);
                         %line =  "<tab:1,198,395>\t<a:gamelink\tS\tSP\t0\tBL\tRMV" SPC %i @ ">Unban</a> - <a:gamelink\tS\tSP\t0\tBL\tHID" SPC %i @ ">Perma</a>";
                      }
                      else{
-                        %plrLine = %plrLine @ "\t" @ %banObj.name @ ":" @ numReduce(%banObj.banLengthMin - getBanCount(%banObj.banDateTime),0);
-                        %line = %line  @ "\t<a:gamelink\tS\tSP\t0\tBL\tRMV" SPC %i @ ">Unban</a> - <a:gamelink\tS\tSP\t0\tBL\tHID" SPC %i @ ">Perma</a>";
+                        %plrLine = %plrLine @ "\t" @ %banObj.name @ ":" @ numReduce(%banObj.banLengthMin - getTimeDelta(%banObj.banDateTime),0);
+                        %line = %line  @ "\t<a:gamelink\tS\tSP\t0\tBL\tRMV" SPC %i @ ">Unban</a> - <a:gamelink\tS\tSP\t0\tBL\tHID" SPC %i @ ">Perma</a>";   
                      }
                      %banlistCount++;
                      if(!(%banlistCount % 3)){
@@ -8052,7 +8332,7 @@ function statsMenu(%client,%game){
                   messageClient( %client, 'SetLineHud', "", %tag, %index++, %plrLine);
                   messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
                }
-
+               
                return;
             case "RESET":
                %client.GlArg4 = 0;
@@ -8064,11 +8344,11 @@ function statsMenu(%client,%game){
             case "WLRESET":
                messageClient( %client, 'SetScoreHudHeader', "", "<just:center>Confirm?");
                messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>',0);
-               messageClient( %client, 'SetLineHud', "", %tag, %index++, '');
+               messageClient( %client, 'SetLineHud', "", %tag, %index++, ''); 
                %line = '<color:FF9A00> <just:center> DELETE WHITELIST? <a:gamelink\tS\tSP\t%1\t%2\t%3> <YES> </a>   <a:gamelink\tS\tSP\t%1><NO></a>';
                messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"WLRESETSTEP2");
             return;
-
+            
             case "buildStats":
                if(!$dtStats::building){
                   compileStats();
@@ -8079,14 +8359,7 @@ function statsMenu(%client,%game){
                   $dtStats::tmMode = 0;
                else
                   $dtStats::tmMode = 1;
-
-               $dtStats::tmModeGC = 0;
-               %client.GlArg4 = 0;
-            case "tmCompile":
-               if(!$dtStats::tmCompile){
-                  preLoadTurStats(0);
-                  messageAll('MsgStats', '\c3Tournament stats build started, server preformance may degrade for a few minutes~wfx/misc/hunters_greed.wav');
-               }
+                  
                %client.GlArg4 = 0;
             case "plotEnable":
                %start = startPlayerPlot(%client.GlArg5*1000);
@@ -8128,49 +8401,69 @@ function statsMenu(%client,%game){
          }
 //------------------------------------------------------------------------------
          if(%game $= "CTFGame" || %game $= "LCTFGame" || %game $= "SCtFGame"){
-            if(!$Host::TournamentMode){
-               if(!$dtStats::tmMode){
-                  %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  + Enable Tournament Map Stats</a> - Auto enables with tournament mode';
-                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"tmEnable");
+            if(!$dtStats::tmMode){
+               %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  + Enable Tournament Map Stats - records to separate stats</a>';
+               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"tmEnable");
+            }
+            else{
+               %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  + Disable Tournament Map Stats</a> - records to normal stats';
+               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"tmEnable");
+            }
+            %tlist = 0;
+            for(%i = 0; %i < pugList.getCount(); %i++){
+               %gobj =  pugList.getObject(%i);
+               %tlist += %gobj.getCount();
+            }
+            if(%tlist > 0){
+               if(!$Host::TournamentMode){
+                  if(!$dtStats::tmCompile){
+                     %line = '<a:gamelink\tS\tCST\t0>  + Compile Tournament Stats</a> - %1 games await compiling ';
+                     messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"tmCompile", %tlist);
+                  }
+                  else{
+                     %line = '  + Tournament Stats Compiling ';
+                     messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"tmCompile");
+                  }
                }
                else{
-                  %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  + Disable Tournament Map Stats</a> - Auto disables after 6 games';
-                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"tmEnable");
+                  %line = '  + Disable tournament mode to compile stats'; 
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);  
                }
             }
             else{
-                %line = '  + Map Stats - already enabled because of tournament bode';
-               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
+               %line = '  + No Tournament Map Stats To Compile'; 
+               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);    
             }
-         }
-         else{
-            %line = '  + Map Stats - can only be enabled in CTF or LCTF</a>';
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
-         }
-         if(getFieldCount($dtServerVars::pugIDS["CTFGame"]) || getFieldCount($dtServerVars::pugIDS["LCTFGame"]) || getFieldCount($dtServerVars::pugIDS["SCtFGame"]) ){
-            if(!$Host::TournamentMode && !$dtStats::tmMode){
-               if(!$dtStats::tmCompile){
-                  %line = '<a:gamelink\tS\tSP\t0\t%1\t%3>  + Compile Tournament Stats</a> - %2 Games await compiling ';
-                  %gameAmount += getFieldCount($dtServerVars::pugIDS["CTFGame"]);
-                  %gameAmount += getFieldCount($dtServerVars::pugIDS["LCTFGame"]);
-                  %gameAmount += getFieldCount($dtServerVars::pugIDS["SCtFGame"]);
-                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"tmCompile",%gameAmount);
+            %glist = 0;
+            for(%i = 0; %i < pubList.getCount(); %i++){
+               %gobj =  pubList.getObject(%i);
+               %glist += %gobj.getCount();
+            }   
+            if(%glist > 0){
+               if(!$Host::TournamentMode){
+                  if(!$dtStats::tmCompile){
+                     %line = '<a:gamelink\tS\tCSG\t0>  + Compile Map Stats</a> - %1 games await compiling ';
+                     messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, %glist);
+                  }
+                  else{
+                     %line = '  + Stats Compiling ';
+                     messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
+                  }
                }
                else{
-                  %line = '  + Tournament Stats Compiling ';
-                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"tmCompile");
+                  %line = '  + Disable tournament mode to compile stats'; 
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);  
                }
             }
             else{
-               %line = '  + No Compiling Tournament Map Stats At This Time';
-               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
+               %line = '  + No Map Stats To Compile'; 
+               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);    
             }
          }
          else{
-            %line = '  + No Tournament Map Stats To Compile';
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
+            %line = '  + Map stats can only be enabled in CTF - LCTF</a>';
+            messageClient( %client, 'SetLineHud', "", %tag, %index++, %line); 
          }
-
 
          %line = '<a:gamelink\tS\tSV\t%1\t1\t%2-%3>  + Map Play Statistics</a>';
          messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%game,1);
@@ -8178,12 +8471,13 @@ function statsMenu(%client,%game){
          messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,1, ML.TypeIndex[$CurrentMissionType]);
 //------------------------------------------------------------------------------
          // messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
-
-
+         
          %line = '<a:gamelink\tS\tEV\t1\t1\t0>  + Server Health Info - Last Event = %1 Minutes</a>';
          %evTime = ((getSimTime() - $dtStats:lastEvent)/1000)/60;
          messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,%evTime);
-
+         
+         %line = '<a:gamelink\tS\tTBX\t0\t0\t0>  + Team Balancer</a>';
+         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
          // if(!$pathMaps::running){
          //    %line = '  Start Player Plot  <a:gamelink\tS\tSP\t%1\t%2\t30>+ 30k</a> <a:gamelink\tS\tSP\t%1\t%2\t60>+ 60k</a> <a:gamelink\tS\tSP\t%1\t%2\t90>+ 90k</a> <a:gamelink\tS\tSP\t%1\t%2\t120>+ 120k</a>';
          //    messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"plotEnable");
@@ -8192,10 +8486,10 @@ function statsMenu(%client,%game){
          //    %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  + Stop Player Plot</a>';
          //    messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"plotDisable");
          // }
-
+         
          messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
-
-
+         
+         
          if($dtServerVars::WhiteListMode){
             %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  <color:fb3939>+ Disable Whitelist</a><color:0befe7> - Disabling will open the server to anyone';
             messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"LISTENABLE",0);
@@ -8204,7 +8498,7 @@ function statsMenu(%client,%game){
             %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  <color:00ff00>+ Enable Whitelist</a><color:0befe7> - Enabling will locked the server to approve accounts only';
             messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"LISTENABLE",1);
          }
-
+         
          if(isFile($dtStats::IPBanListFile)){
             if($dtServerVars::IPBanListMode){
                %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  <color:fb3939>+ Disable IP Ban List</a><color:0befe7> - Disables only this feature';
@@ -8215,23 +8509,152 @@ function statsMenu(%client,%game){
                messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"IPBANLISTENABLE",1);
             }
          }
-
+          
          %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  + View Ban List</a> - Unban a player';
          messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, 0, "BL", "RS");
-
+         
          %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  + View White List</a> - Add or Remove player from list, ban/kick auto removes';
          messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"WHITELIST", "RS");
-
+         
          %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  + White List Queue</a> - There are %4 accounts that need approval';
          messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"WLQUEUE", "RS",$dtJoinListCount);
-
+         
          messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
-
+                 
          %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  <color:fb3939>+ Reset White List - Clears everything</a>';
          messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"WLRESET",0);
-
+         
          messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
+         
+         
+      case "CST":
+         %opt0 = %client.GlArg3;
+         %opt1 = %client.GlArg4;
+         %opt2 = %client.GlArg5;
+         
+         switch$(%opt0){
+            case "tmc":
+               if(!$dtStats::tmCompile){
+                  buildTest(0);
+                  messageAll('MsgStats', '\c3Tournament stats build started, server preformance will degrade for a few minutes~wfx/misc/hunters_greed.wav');
+               }
+              %client.GlArg3 = 0;
+            case "rmv":
+               %opt1.select = 0;
+            case "add":
+               %opt1.select = 1;  
+            case "del":
+               if(isObject(%opt1)){
+                  %opt1.delete();
+                  pugList.schedule(1000,"save","serverStats/pugLog.cs", 0);
+               }
+         }
+  
+         messageClient( %client, 'SetScoreHudHeader', "", "<just:center>Map Stats Compile");
+         if($dtStatsImgBuild || $dtStats::tmCompile){
+            %line = '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> Stats Compiling ';
+            messageClient( %client, 'SetScoreHudSubheader', "", %line,0);
+         }
+         else{
+            if(($HostGamePlayerCount - $HostGameBotCount) <  6){
+               %line = '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> <a:gamelink\tS\tCST\ttmc\t>Compile Selected Stats</a>';
+               messageClient( %client, 'SetScoreHudSubheader', "", %line,0);    
+            }
+            else{
+               %line = '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> Compile Stats Locked';
+               messageClient( %client, 'SetScoreHudSubheader', "", %line,0);
+            }
+         }
+   
 
+         %hasCount = 0;  %line = ""; 
+         for(%i = 0; %i < pugList.getCount(); %i++){
+            %grpObj = pugList.getObject(%i);
+            for(%x = 0; %x < %grpObj.getCount(); %x++){
+               %mid = %grpObj.getObject(%x);
+               if(%client.statSlot == %mid.statSlot){
+                  %line =  %mid.mapName SPC %mid.teamOne SPC %mid.teamTwo SPC %mid.gameType SPC %mid.date;
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line); 
+                  if(!%mid.select){  
+                     %line = "<a:gamelink\tS\tCST\tadd\t" @ %mid @ "\t0><color:00ff00> <Add> </a> <a:gamelink\tS\tCST\tdel\t" @ %mid @ "\t0><color:00dcd4> <delete> </a>";
+                  }
+                  else{
+                    %line = "<a:gamelink\tS\tCST\trmv\t" @ %mid @ "\t0><color:ff0000> <Remove> </a> <a:gamelink\tS\tCST\tdel\t" @ %mid @ "\t0><color:00dcd4> <delete> </a>"; 
+                  }
+                  
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);    
+               }
+            }
+         }
+
+         //%so = new scriptObject(){
+            //pugID = $dtStats::gameID;
+            //mapName = $MissionDisplayName;
+            //date =  formattimestring("M-d-yy");
+            //teamOne = $TeamScore[1]; 
+            //teamTwo = $TeamScore[2];
+            //gameType = %game.class;
+         //};
+
+      case "CSG":
+         %opt0 = %client.GlArg3;
+         %opt1 = %client.GlArg4;
+         %opt2 = %client.GlArg5;
+         
+         switch$(%opt0){
+            case "gmc":
+               if(!$dtStats::tmCompile){
+                  buildTest(0);
+                  messageAll('MsgStats', '\Map stats build started, server preformance will degrade for a few minutes~wfx/misc/hunters_greed.wav');
+               }
+               %client.GlArg3 = 0;
+            case "rmv":
+               %opt1.select = 0;
+            case "add":
+               %opt1.select = 1;  
+            case "del":
+               if(isObject(%opt1)){
+                  %opt1.delete();
+                  pubList.schedule(1000,"save","serverStats/pubLog.cs", 0);
+               }
+         }
+  
+         messageClient( %client, 'SetScoreHudHeader', "", "<just:center>Map Stats Compile");
+         if($dtStatsImgBuild || $dtStats::tmCompile){
+            %line = '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a><just:right><color:ff0000> Stats Compiling ';
+            messageClient( %client, 'SetScoreHudSubheader', "", %line,0);
+         }
+         else{
+            if(($HostGamePlayerCount - $HostGameBotCount) <  6){
+               %line = '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a><just:right> <a:gamelink\tS\tCSG\tgmc\t0>Compile Selected Stats</a>';
+               messageClient( %client, 'SetScoreHudSubheader', "", %line,0);    
+            }
+            else{
+               %line = '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a><just:right> Compile Stats Locked';
+               messageClient( %client, 'SetScoreHudSubheader', "", %line,0);    
+            }
+         }
+
+
+         %hasCount = 0;  %line = ""; 
+         for(%i = 0; %i < pubList.getCount(); %i++){
+            %grpObj = pubList.getObject(%i);
+            for(%x = 0; %x < %grpObj.getCount(); %x++){
+               %mid = %grpObj.getObject(%x);
+               if(%client.statSlot == %mid.statSlot){
+                  %line =  %mid.mapName SPC %mid.teamOne SPC %mid.teamTwo SPC %mid.gameType SPC %mid.date;
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line); 
+                  if(!%mid.select){  
+                     %line = "<a:gamelink\tS\tCSG\tadd\t" @ %mid @ "\t0><color:00ff00> <Add> </a> <a:gamelink\tS\tCSG\tdel\t" @ %mid @ "\t0><color:00dcd4> <delete> </a>";
+                  }
+                  else{
+                    %line = "<a:gamelink\tS\tCSG\trmv\t" @ %mid @ "\t0><color:ff0000> <Remove> </a> <a:gamelink\tS\tCSG\tdel\t" @ %mid @ "\t0><color:00dcd4> <delete> </a>"; 
+                  }
+                  
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);    
+               }
+            }
+         }   
       case "MAP":
          %opt0 = %client.GlArg3;
          %opt1 = %client.GlArg4;
@@ -8274,14 +8697,14 @@ function statsMenu(%client,%game){
          %client.GlArg3 = 0;
          %client.GlArg4 = 0;
          if( ML.curMapList $= ""){
-            ML.curMapList = 0;
+            ML.curMapList = 0;  
          }
          messageClient( %client, 'SetScoreHudHeader', "", "<just:center>Map Config");
          %line = '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>  <just:right><color:FF5F00><a:gamelink\tS\tMAP\t0\t5\t0>Reset All To Default  </a>';
-
+               
          messageClient( %client, 'SetScoreHudSubheader', "", %line,0);
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, 'Number of maps for given player numbers');
-
+         messageClient( %client, 'SetLineHud', "", %tag, %index++, 'Number of maps for given player numbers'); 
+         
          if(!$dtMapRebuild && ML.curMapList != 3){
             deleteVariables("$dtMapMinMax*");
             for ( %i = 0; %i < ML.getCount(); %i++ ){
@@ -8290,17 +8713,17 @@ function statsMenu(%client,%game){
                if(getField(%ms,0)){
                   for ( %r =  getField(%ms,2); %r <=  getField(%ms,3); %r++ ){
                      if(!getFieldCount($dtMapMinMax[%r, ML.TypeName[%client.gmType],ML.curMapList])){
-                        $dtMapMinMax[%r, ML.TypeName[%client.gmType],ML.curMapList]  = %i;
+                        $dtMapMinMax[%r, ML.TypeName[%client.gmType],ML.curMapList]  = %i;    
                      }
                      else{
-                        $dtMapMinMax[%r, ML.TypeName[%client.gmType],ML.curMapList]  = $dtMapMinMax[%r, ML.TypeName[%client.gmType],ML.curMapList]  TAB %i;
+                        $dtMapMinMax[%r, ML.TypeName[%client.gmType],ML.curMapList]  = $dtMapMinMax[%r, ML.TypeName[%client.gmType],ML.curMapList]  TAB %i;   
                      }
                   }
                }
             }
             $dtMapRebuild = 1;
          }
-
+         
          %vv = 70;
          %line = "<tab:" @ 1*%vv @ "," @ 2*%vv @ "," @ 3*%vv @ "," @ 4*%vv @ "," @ 5*%vv @ "," @ 6*%vv @"," @ 7*%vv @">";
          for(%z = 0; %z < 64; %z++){
@@ -8313,18 +8736,18 @@ function statsMenu(%client,%game){
                %line = %line @ %z+1 @ "-" @ getFieldCount(%maps) @ "\t";
             }
             if((%z % 8) == 7){
-               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
+               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line); 
                %line = "<tab:" @ 1*%vv @ "," @ 2*%vv @ "," @ 3*%vv @ "," @ 4*%vv @ "," @ 5*%vv @ "," @ 6*%vv @"," @ 7*%vv @">";
             }
          }
-
+         
          if((%z-1 % 8) < 7)
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
-
-
+            messageClient( %client, 'SetLineHud', "", %tag, %index++, %line); 
+         
+         
          %vv = 100;
          %line = "<tab:" @ 1*%vv @ "," @ 2*%vv @ "," @ 3*%vv @ "," @ 4*%vv @">";
-         for(%z = 0; %z < ML.TypeCount; %z++){
+         for(%z = 0; %z < ML.TypeCount; %z++){ 
             if(%z  $= %client.gmType){
                %line = %line @ "|<color:00ff00>" @ ML.TypeName[%z]@ "<color:00dcd4>|\t";
             }
@@ -8332,15 +8755,15 @@ function statsMenu(%client,%game){
                %line = %line @ "|<a:gamelink\tS\tMAP\t0\t1\t"@ %z @">" @ ML.TypeName[%z] @ "</a>|\t";
             }
             if((%z % 5) == 4){
-               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
-               %line = "<tab:" @ 1*%vv @ "," @ 2*%vv @ "," @ 3*%vv @ "," @ 4*%vv @">";
+               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line); 
+               %line = "<tab:" @ 1*%vv @ "," @ 2*%vv @ "," @ 3*%vv @ "," @ 4*%vv @">"; 
             }
          }
          if((%z-1 % 5) != 4){
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
+            messageClient( %client, 'SetLineHud', "", %tag, %index++, %line); 
          }
-
-         //messageClient( %client, 'SetLineHud', "", %tag, %index++, '');
+         
+         //messageClient( %client, 'SetLineHud', "", %tag, %index++, ''); 
          if(ML.enable){
             if(!ML.saveMapPlayed){
                %line = '<a:gamelink\tS\tMAP\t%1\t%2\t%3> + <color:ff0000>Disable<color:00dcd4> Map Custom Rotation</a> - <a:gamelink\tS\tMAP\t%1\t%4\t%3><color:00ff00>Enable<color:00dcd4> Non Repeat Map Rotation</a>';
@@ -8356,9 +8779,9 @@ function statsMenu(%client,%game){
             %line = '<a:gamelink\tS\tMAP\t%1\t%2\t%3> + <color:00ff00>Enable<color:00dcd4> Map Custom Rotation</a> -  overrides other map systems for this one';
             messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,%client.gmType,3,0);
          }
-
+         
          messageClient( %client, 'SetLineHud', "", %tag, %index++, '');
-
+         
          %mapList = ML.curMapList;
          switch(%mapList){
             case 0:
@@ -8376,24 +8799,24 @@ function statsMenu(%client,%game){
          }
          %line = '<tab:140,280,420><a:gamelink\tS\tM\t2\t0\t%3> |Edit Rotation|</a>\t<a:gamelink\tS\tM\t2\t1\t%3> |Edit Rotation|</a>\t<a:gamelink\tS\tM\t2\t2\t%3> |Edit Rotation|</a>\t<a:gamelink\tS\tM\t2\t3\t%3> |Edit Rotation|</a>';
          messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
-
+         
       case "MF":
          %opt0 = %client.GlArg3;
          %opt1 = %client.GlArg4;
          %opt2 = %client.GlArg5;
-         switch(%opt0){
+         switch(%opt0){ 
             case 1:// page next
                %client.curPageMF++;
-            case 2:// page back;
-               %client.curPageMF--;
+            case 2:// page back; 
+               %client.curPageMF--;  
                if(%client.curPageMF < 0){
-                 %client.curPageMF = 0;
+                 %client.curPageMF = 0; 
                }
-            case 3:
+            case 3: 
                %client.curPageMF = 0;
             case 4:
                %fields = $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]];
-               $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]] = setField(%fields,2, %opt2);
+               $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]] = setField(%fields,2, %opt2); 
             case 5:// remove fixed
                if($dtFixedMapCount[ML.TypeName[%client.gmType]]){
                   $dtFixedMapCount[ML.TypeName[%client.gmType]]--;
@@ -8403,19 +8826,19 @@ function statsMenu(%client,%game){
                }
             case 6://move up
                if(%opt1-1 > -1){
-                  %A = $dtFixedMapList[%opt1-1, ML.TypeName[%client.gmType]];
-                  %B = $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]];
+                  %A = $dtFixedMapList[%opt1-1, ML.TypeName[%client.gmType]]; 
+                  %B = $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]]; 
                   $dtFixedMapList[%opt1-1, ML.TypeName[%client.gmType]] = %B;
                   $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]] = %A;
                }
             case 7://move down
                if(%opt1+1 < $dtFixedMapCount[ML.TypeName[%client.gmType]]){
-                  %A = $dtFixedMapList[%opt1+1, ML.TypeName[%client.gmType]];
-                  %B = $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]];
+                  %A = $dtFixedMapList[%opt1+1, ML.TypeName[%client.gmType]]; 
+                  %B = $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]]; 
                   $dtFixedMapList[%opt1+1, ML.TypeName[%client.gmType]] = %B;
                   $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]] = %A;
                }
-            case 8://first
+            case 8://first 
                if($dtFixedMapCount[ML.TypeName[%client.gmType]] > 1){
                   %element = $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]];
                    for (%i = %opt1; %i > 0; %i--) {
@@ -8425,7 +8848,7 @@ function statsMenu(%client,%game){
                }
             case 9://last
                if($dtFixedMapCount[ML.TypeName[%client.gmType]] > 1){
-                  %element = $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]];
+                  %element = $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]]; 
                   %size = $dtFixedMapCount[ML.TypeName[%client.gmType]] - 1;
                   for (%i = %opt1; %i < %size; %i++) {
                      $dtFixedMapList[%i, ML.TypeName[%client.gmType]] = $dtFixedMapList[%i + 1, ML.TypeName[%client.gmType]];
@@ -8436,12 +8859,12 @@ function statsMenu(%client,%game){
          if(%opt0 > 3){
             saveMapRot();
             if(ML.enable && %client.curMapList == ML.curMapList ){
-               buildMissionList();
+               buildMissionList();   
             }
          }
-         %client.GlArg3 = 0;
+         %client.GlArg3 = 0;    
           messageClient( %client, 'SetScoreHudHeader', "", "<just:center> Fixed Map Rotation");
-
+         
          if((%client.curPageMF+1) * 16 < $dtFixedMapCount[ML.TypeName[%client.gmType]]){
             if(%client.curPageMF == 0){
                 %line = '<a:gamelink\tS\tM\t0>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tMF\t1\t0\t0> Next Page >';
@@ -8455,7 +8878,7 @@ function statsMenu(%client,%game){
                %line = '<a:gamelink\tS\tM\t0>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tMF\t2\t0\t0> < Back Page</a>';
                 messageClient( %client, 'SetScoreHudSubheader', "", %line ,%Client);
             }
-
+            
          }
          else{
             if(%client.curPageMF > 0){
@@ -8463,29 +8886,29 @@ function statsMenu(%client,%game){
                 messageClient( %client, 'SetScoreHudSubheader', "", %line);
             }
             else{
-               messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tM\t0>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>');
+               messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tM\t0>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>'); 
             }
          }
-
-
-
+         
+         
+         
          %line = '<tab:220>Map List \t Rmv-Remove A-Allow Vote X-Deny F-First L-Last';
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
-
+         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line); 
+         
          %r = 0;
-         for(%i =  %client.curPageMF * 16; %i <  $dtFixedMapCount[ML.TypeName[%client.gmType]] && %r < 16; %i++){
+         for(%i =  %client.curPageMF * 16; %i <  $dtFixedMapCount[ML.TypeName[%client.gmType]] && %r < 16; %i++){  
             %mapFields = $dtFixedMapList[%i, ML.TypeName[%client.gmType]];
             %name2 = getField(%mapFields,1);
             %name2 = (strLen(%name2) >  21) ? getSubStr(%name2, 0,  21) @ ".." : %name2;
-
+            
             %vote = (getField(%mapFields,2) == 0) ?  "<a:gamelink\tS\tMF\t4\t" @ %i @ "\t1>A</a>" : "<a:gamelink\tS\tMF\t4\t" @ %i @ "\t0>X</a>";
             %move = "<a:gamelink\tS\tMF\t6\t" @ %i @ "\t1>U</a>" SPC "<a:gamelink\tS\tMF\t7\t" @ %i @ "\t1>D</a>";
             %first = "<a:gamelink\tS\tMF\t8\t" @ %i @ "\t1>F</a>" SPC "<a:gamelink\tS\tMF\t9\t" @ %i @ "\t1>L</a>";
             %line = "<tab:220,270,365>"@ %i @ ":" @  %name2 @ "\t<a:gamelink\tS\tMF\t5\t" @ %i @ "\t0>Rmv</a>" SPC %vote  SPC %move  SPC %first;
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
-            %r++;
+            messageClient( %client, 'SetLineHud', "", %tag, %index++, %line); 
+            %r++;  
          }
-
+         
       case "M":
          %opt0 = %client.GlArg3;
          %opt1 = %client.GlArg4;
@@ -8499,10 +8922,10 @@ function statsMenu(%client,%game){
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,0, 0);
                   }
                   else{
-                     %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,0, 1);
+                     %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,0, 1);   
                   }
                }
-               $dtMapRebuild = 0;
+               $dtMapRebuild = 0;  
                if(ML.enable && ML.curMapList == %client.curMapList){
                   buildMissionList();
                }
@@ -8512,11 +8935,11 @@ function statsMenu(%client,%game){
                %client.curPage = 0;
                %client.pageZ[%client.curPage] = 0;
             case 3://next page
-               %client.curPage++;
+               %client.curPage++; 
             case 4://back page
                %client.curPage--;
                if(%client.curPage == 0){
-                  %client.pageZ[%client.curPage] = 0;
+                  %client.pageZ[%client.curPage] = 0; 
                }
                if(%client.curPage < 0){
                   %client.curPage = 0;
@@ -8544,11 +8967,11 @@ function statsMenu(%client,%game){
                      %mapObj = ML.getObject(%z);
                      if(%mapObj.typeList[ML.TypeName[%client.gmType]]){
                         %options = %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList];
-                        %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,0, 1);
+                        %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,0, 1);   
                      }
                   }
                }
-               $dtMapRebuild = 0;
+               $dtMapRebuild = 0;  
                if(ML.enable && ML.curMapList == %client.curMapList){
                   buildMissionList();
                }
@@ -8564,7 +8987,7 @@ function statsMenu(%client,%game){
                            $dtFixedMapCount[ML.TypeName[%client.gmType]]--;
                            if($dtFixedMapCount[ML.TypeName[%client.gmType]] < 1){
                               $dtFixedMapCount[ML.TypeName[%client.gmType]]  = 0;
-                             break;
+                             break;  
                            }
                         }
                      }
@@ -8575,11 +8998,11 @@ function statsMenu(%client,%game){
                      %mapObj = ML.getObject(%z);
                      if(%mapObj.typeList[ML.TypeName[%client.gmType]]){
                         %options = %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList];
-                        %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,0, 0);
+                        %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,0, 0);   
                      }
                   }
                }
-               $dtMapRebuild = 0;
+               $dtMapRebuild = 0;  
                if(ML.enable && ML.curMapList == %client.curMapList){
                   buildMissionList();
                }
@@ -8594,7 +9017,7 @@ function statsMenu(%client,%game){
                if(!isEventPending($saveMR)){
                   $saveMR = schedule(5000, 0, "export", "$dtFixedMap*", "serverStats/fixMapRot.cs", false );
                }
-               $dtMapRebuild = 0;
+               $dtMapRebuild = 0;  
                if(ML.enable && ML.curMapList == %client.curMapList){
                   buildMissionList();
                }
@@ -8602,7 +9025,7 @@ function statsMenu(%client,%game){
             case 9:// remove fixed
             case 10://vote
                %fields = $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]];
-               $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]] = setField(%fields,2, %opt2);
+               $dtFixedMapList[%opt1, ML.TypeName[%client.gmType]] = setField(%fields,2, %opt2); 
             case 11: // add all bots maps
                if(%client.curMapList == 3){
                   for(%z = 0; %z < ML.getCount(); %z++){
@@ -8621,11 +9044,11 @@ function statsMenu(%client,%game){
                      %bot  = isFile("terrains/" @ %mapObj.file @".nav");
                      if(%mapObj.typeList[ML.TypeName[%client.gmType]] && %bot){
                         %options = %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList];
-                        %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,0, 1);
+                        %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,0, 1);   
                      }
                   }
                }
-               $dtMapRebuild = 0;
+               $dtMapRebuild = 0;  
                if(ML.enable && ML.curMapList == %client.curMapList){
                   buildMissionList();
                }
@@ -8641,10 +9064,10 @@ function statsMenu(%client,%game){
             %line = "<just:center><a:gamelink\tS\tMF\t3><color:FFC400>Click Here To View Fixed Map List <color:00dcd4>- Current Map Count =</a>" SPC $dtFixedMapCount[ML.TypeName[%client.gmType]];
             messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
          }
-
-         %line = "<tab:220,300,490>";
-         %r = 0;
-         %lineCount = 0;
+         
+         %line = "<tab:220,300,490>";  
+         %r = 0; 
+         %lineCount = 0; 
          %dtmc = (%client.curPage) * 16;
          for(%z = %client.pageZ[%client.curPage]; %z < ML.getCount(); %z++){
             %mapObj = ML.getObject(%z);
@@ -8657,11 +9080,11 @@ function statsMenu(%client,%game){
                      %name = (strLen(%name) >  %clip) ? getSubStr(%name, 0,%clip) @ ".." : %name;
                      %line = %line @  %line = "<tab:220,270,480>" @ %name @ "\t|<a:gamelink\tS\tM\t8\t" @ %z @ "\t0><color:00FF00>Add<color:00dcd4></a>|\t";
                      if((%r % 2) == 1){
-                        messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
-                        %line = "<tab:220,270,480>";
+                        messageClient( %client, 'SetLineHud', "", %tag, %index++, %line); 
+                        %line = "<tab:220,270,480>";  
                         if( %lineCount++ > 15){
-                           %client.pageZ[%client.curPage+1] = %z;// the next page stoping point
-                           break;
+                           %client.pageZ[%client.curPage+1] = %z;// the next page stoping point 
+                           break;  
                         }
                      }
                      %r++;
@@ -8675,11 +9098,11 @@ function statsMenu(%client,%game){
                      %A =  (getField(%options,0) == 0) ? "|<a:gamelink\tS\tM\t1\t" @ %z @ "\t0><color:00FF00>Add<color:00dcd4></a>" : "|<a:gamelink\tS\tM\t1\t" @ %z @ "\t0><color:FF0000>Rmv<color:00dcd4></a>";
                      %line = %line @ %name @ "\t" @ %A @ "|<a:gamelink\tS\tMO\t"@ %z @">Opt</a>|\t";
                      if((%r % 2) == 1){
-                        messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
-                        %line = "<tab:220,300,490>";
+                        messageClient( %client, 'SetLineHud', "", %tag, %index++, %line); 
+                        %line = "<tab:220,300,490>";  
                         if( %lineCount++ > 16){
-                           %client.pageZ[%client.curPage+1] = %z;// the next page stoping point
-                           break;
+                           %client.pageZ[%client.curPage+1] = %z;// the next page stoping point 
+                           break;  
                         }
                      }
                      %r++;
@@ -8687,7 +9110,7 @@ function statsMenu(%client,%game){
                }
             }
          }
-
+         
          if(%z < ML.getCount()){
             if(%client.curPage == 0){
                 %line = '<a:gamelink\tS\tMAP\t0>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tM\t3\t0\t0> Next Page ></a>  * = Bot Support';
@@ -8701,7 +9124,7 @@ function statsMenu(%client,%game){
                %line = '<a:gamelink\tS\tMAP\t0>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tM\t4\t0\t0> < Back Page</a> * = Bot Support';
                 messageClient( %client, 'SetScoreHudSubheader', "", %line ,%Client);
             }
-
+            
          }
          else{
             if(%client.curPage > 0){
@@ -8709,10 +9132,10 @@ function statsMenu(%client,%game){
                 messageClient( %client, 'SetScoreHudSubheader', "", %line);
             }
             else{
-               messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tMAP\t%1>>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> * = Bot Support');
+               messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tMAP\t%1>>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> * = Bot Support'); 
             }
          }
-      case "MO":// map options
+      case "MO":// map options 
          %opt0 = %client.GlArg3;
          %opt1 = %client.GlArg4;
          %opt2 = %client.GlArg5;
@@ -8726,26 +9149,26 @@ function statsMenu(%client,%game){
                   %max = getField(%options,3);
                   %p = getField(%options,2) + 4;
                   if(%p > %max){
-                     %p = %max-1;
+                     %p = %max-1;   
                   }
                   %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 2, %p);
                case 3://-
                   %p = getField(%options,2) - 4;
                   if(%p < 0){
-                     %p = 0;
+                     %p = 0;   
                   }
                   %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 2, %p);
                case 4://+
                   %p = getField(%options,3) + 4;
                   if(%p > 63){
-                     %p = 64;
+                     %p = 64;   
                   }
                   %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 3, %p);
                case 5://-
                   %min = getField(%options,2);
                   %p = getField(%options, 3) - 4;
-                  if(%p < %min){// cant be smaller then min
-                     %p = %min + 1;
+                  if(%p < %min){// cant be smaller then min 
+                     %p = %min + 1;   
                   }
                   %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 3, %p);
                case 6:// prio
@@ -8755,8 +9178,8 @@ function statsMenu(%client,%game){
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,5, 0);
                   }
                   else{
-                     %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = %options = setField(%options,5,1);
-                     %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,7,0);
+                     %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = %options = setField(%options,5,1); 
+                     %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,7,0);  
                   }
                case 8:// week select
                   %week = getField(%options,6);
@@ -8774,8 +9197,8 @@ function statsMenu(%client,%game){
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,7,0);
                   }
                   else{
-                     %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = %options = setField(%options,7,1);
-                     %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,5, 0);
+                     %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = %options = setField(%options,7,1);  
+                     %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,5, 0); 
                   }
                case 10:// Month select
                   %month = getField(%options,8);
@@ -8794,14 +9217,14 @@ function statsMenu(%client,%game){
                   if(%opt2){
                      %p = getField(%options,10) + 1;
                      if(%p > 24){
-                           %p = 0;
+                           %p = 0;   
                      }
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 10, %p);
                   }
                   else{
                      %p = getField(%options,10) - 1;
                      if(%p < 0){
-                           %p = 24;
+                           %p = 24;   
                      }
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 10, %p);
                   }
@@ -8809,14 +9232,14 @@ function statsMenu(%client,%game){
                   if(%opt2){
                      %p = getField(%options,11) + 1;
                      if(%p > 60){
-                           %p = 0;
+                           %p = 0;   
                      }
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 11, %p);
                   }
                   else{
                      %p = getField(%options,11) - 1;
                      if(%p < 0){
-                           %p = 60;
+                           %p = 60;   
                      }
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 11, %p);
                   }
@@ -8824,14 +9247,14 @@ function statsMenu(%client,%game){
                   if(%opt2){
                      %p = getField(%options,12) + 1;
                      if(%p > 31){
-                           %p = 0;
+                           %p = 0;   
                      }
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 12, %p);
                   }
                   else{
                      %p = getField(%options,12) - 1;
                      if(%p < 0){
-                           %p = 31;
+                           %p = 31;   
                      }
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 12, %p);
                   }
@@ -8839,14 +9262,14 @@ function statsMenu(%client,%game){
                   if(%opt2){
                      %p = getField(%options,13) + 1;
                      if(%p > 12){
-                           %p = 1;
+                           %p = 1;   
                      }
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 13, %p);
                   }
                   else{
                      %p = getField(%options,13) - 1;
                      if(%p < 0){
-                           %p = 12;
+                           %p = 12;   
                      }
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 13, %p);
                   }
@@ -8863,20 +9286,20 @@ function statsMenu(%client,%game){
                   %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options,15, %opt2);
                case 18://  year
                   if(%opt2){
-                     %p = getField(%options,16) + 5;
+                     %p = getField(%options,16) + 5; 
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 16, %p);
                   }
                   else{
                      %p = getField(%options,16) - 5;
                      if(%p < 0){
-                           %p = 0;
+                           %p = 0;   
                      }
                      %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList] = setField(%options, 16, %p);
                   }
 
             }
             if(%opt1 > 0){
-               $dtMapRebuild = 0;
+               $dtMapRebuild = 0;  
                saveMapRot();
                if(ML.enable && ML.curMapList == %client.curMapList){
                   buildMissionList();
@@ -8886,10 +9309,10 @@ function statsMenu(%client,%game){
             %client.GlArg5 = 0;
             %options = %mapObj.typeOptions[ML.TypeName[%client.gmType], %client.curMapList];
             messageClient( %client, 'SetScoreHudHeader', "", "<just:center>" @ %mapObj.name);
-            messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tM\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>',0);
-
+            messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tM\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>',0);     
+      
             %vote = getField(%options,1);  // (getField(%options,1) == 0) ? "<a:gamelink\tS\tMO\t" @ %opt0 @ "\t1\t0><color:00FF00>Enable<color:00dcd4></a>" : "<a:gamelink\tS\tMO\t" @ %opt0 @ "\t1\t0><color:FF0000>Disable<color:00dcd4></a>";
-            //messageClient( %client, 'SetLineHud', "", %tag, %index++, "Vote Only " @ %vote @ " - Removes map from rotation but can be voted on");
+            //messageClient( %client, 'SetLineHud', "", %tag, %index++, "Vote Only " @ %vote @ " - Removes map from rotation but can be voted on"); 
             switch(%vote){
                case 0:
                   messageClient( %client, 'SetLineHud', "", %tag, %index++, "Vote Option <color:00FF00>|Normal|<color:00dcd4> <a:gamelink\tS\tMO\t" @ %opt0 @ "\t1\t1>Vote Only</a> <a:gamelink\tS\tMO\t" @ %opt0 @ "\t1\t2>Rotation Only</a>");
@@ -8898,13 +9321,13 @@ function statsMenu(%client,%game){
                case 2:
                   messageClient( %client, 'SetLineHud', "", %tag, %index++, "Vote Option <a:gamelink\tS\tMO\t" @ %opt0 @ "\t1\t0>Normal</a> <a:gamelink\tS\tMO\t" @ %opt0 @ "\t1\t1>Vote Only</a> <color:00FF00>|Rotation Only|<color:00dcd4>");
             }
-
+            
             messageClient( %client, 'SetLineHud', "", %tag, %index++, "Min Players <a:gamelink\tS\tMO\t" @ %opt0 @ "\t3\t0><</a> "@ getField(%options,2) @" <a:gamelink\tS\tMO\t" @ %opt0 @ "\t2\t0>></a>  - Minium number of players");
             messageClient( %client, 'SetLineHud', "", %tag, %index++, "Max Players <a:gamelink\tS\tMO\t" @ %opt0 @ "\t5\t0><</a> "@ getField(%options,3) @" <a:gamelink\tS\tMO\t" @ %opt0 @ "\t4\t0>></a>  - Maxium number of players");
-
+            
             messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>--------------------------------------------Advance Settings--------------------------------------------");
-
-            %prio = getField(%options,4);
+            
+            %prio = getField(%options,4); 
             switch(%prio){
                case 1:
                   messageClient( %client, 'SetLineHud', "", %tag, %index++, "Priority Level |1| <a:gamelink\tS\tMO\t" @ %opt0 @ "\t6\t2>2</a> <a:gamelink\tS\tMO\t" @ %opt0 @ "\t6\t3>3</a> <a:gamelink\tS\tMO\t" @ %opt0 @ "\t6\t4>4</a> <a:gamelink\tS\tMO\t" @ %opt0 @ "\t6\t5>5</a> - how often a map shows up, 3 being normal");
@@ -8917,13 +9340,13 @@ function statsMenu(%client,%game){
                case 5:
                   messageClient( %client, 'SetLineHud', "", %tag, %index++, "Priority Level <a:gamelink\tS\tMO\t" @ %opt0 @ "\t6\t1>1</a> <a:gamelink\tS\tMO\t" @ %opt0 @ "\t6\t2>2</a> <a:gamelink\tS\tMO\t" @ %opt0 @ "\t6\t3>3</a> <a:gamelink\tS\tMO\t" @ %opt0 @ "\t6\t4>4</a> |5| - how often a map shows up, 3 being normal");
             }
-
+            
             %week =  (getField(%options,5) == 0) ? "<a:gamelink\tS\tMO\t" @ %opt0 @ "\t7\t0><color:00FF00>Enable<color:00dcd4></a>" : "<a:gamelink\tS\tMO\t" @ %opt0 @ "\t7\t0><color:FF0000>Disable<color:00dcd4></a>";
             messageClient( %client, 'SetLineHud', "", %tag, %index++, "Weekly Restrictions " @ %week @ " - Contorl which day of the week a map will show up");
-
+            
             %weekDay = getField(%options,6);
             %wd[0] = "Sun";%wd[1] = "Mon";%wd[2] = "Tue";%wd[3] = "Wed";%wd[4] = "Thu";%wd[5] = "Fri";%wd[6] = "Sat";
-            %line = "";
+            %line = "";         
             for(%i =0; %i < 7; %i++){
               %w = getSubStr(%weekDay,%i,1);
               if(%w){
@@ -8933,13 +9356,13 @@ function statsMenu(%client,%game){
                  %line = %line @ " <a:gamelink\tS\tMO\t" @ %opt0 @ "\t8\t" @ %i @ ">" @ %wd[%i] @ "</a> ";
               }
             }
-
+            
             %month =  (getField(%options,7) == 0) ? "<a:gamelink\tS\tMO\t" @ %opt0 @ "\t9\t0><color:00FF00>Enable<color:00dcd4></a>" : "<a:gamelink\tS\tMO\t" @ %opt0 @ "\t9\t0><color:FF0000>Disable<color:00dcd4></a>";
             messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
-
+            
             messageClient( %client, 'SetLineHud', "", %tag, %index++, "Monthly Restrictions "@ %month @" - Control how often a map can show up during a month");
-            %mw = getField(%options,8);
-            %line = "";
+            %mw = getField(%options,8);            
+            %line = "";         
             for(%i =0; %i < 31; %i++){
                %w = getSubStr(%mw,%i,1);
                if(%w){
@@ -8949,24 +9372,24 @@ function statsMenu(%client,%game){
                   %line = %line @ " <a:gamelink\tS\tMO\t" @ %opt0 @ "\t10\t" @ %i @ ">" @ %i+1 @ "</a>";
                }
                if((%i % 7) == 6){
-                 messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
+                 messageClient( %client, 'SetLineHud', "", %tag, %index++, %line); 
                  %line = "";
                }
             }
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, %line @ "- Note maps will only show up on these if month allows");
-
+            messageClient( %client, 'SetLineHud', "", %tag, %index++, %line @ "- Note maps will only show up on these if month allows"); 
+            
             %event =  (getField(%options,9) == 0) ? "<a:gamelink\tS\tMO\t" @ %opt0 @ "\t11\t1><color:00FF00>Enable<color:00dcd4></a>" : "<a:gamelink\tS\tMO\t" @ %opt0 @ "\t11\t0><color:FF0000>Disable<color:00dcd4></a>";
             if(getField(%options,15)){
-               %etype ="<color:00FF00>Set next<color:00dcd4> - <a:gamelink\tS\tMO\t" @ %opt0 @ "\t17\t0>Force switch</a> - ";
+               %etype ="<color:00FF00>Set next<color:00dcd4> - <a:gamelink\tS\tMO\t" @ %opt0 @ "\t17\t0>Force switch</a> - "; 
             }
             else{
-               %etype ="<a:gamelink\tS\tMO\t" @ %opt0 @ "\t17\t1>Set Next</a> - <color:00FF00>Force switch<color:00dcd4> - ";
+               %etype ="<a:gamelink\tS\tMO\t" @ %opt0 @ "\t17\t1>Set Next</a> - <color:00FF00>Force switch<color:00dcd4> - "; 
             }
-
+           
             messageClient( %client, 'SetLineHud', "", %tag, %index++, "Event Map - " @ %event @ " - " @ %etype @ " maps at set time and day ");
-
+            
             messageClient( %client, 'SetLineHud', "", %tag, %index++, "Current Server Time and Date" SPC formattimestring("HH:nn d-m-yy"));
-
+            
             %hour = "<a:gamelink\tS\tMO\t" @ %opt0 @ "\t12\t0><</a>" @ getField(%options,10) @ "H<a:gamelink\tS\tMO\t" @ %opt0 @ "\t12\t1>></a>";
             %min = "<a:gamelink\tS\tMO\t" @ %opt0 @ "\t13\t0><</a>" @ getField(%options,11) @ "m<a:gamelink\tS\tMO\t" @ %opt0 @ "\t13\t1>></a>";
             %eventTime = "Event Length <a:gamelink\tS\tMO\t" @ %opt0 @ "\t18\t0><</a>" @ getField(%options,16) @ "m<a:gamelink\tS\tMO\t" @ %opt0 @ "\t18\t1>></a>";
@@ -8980,10 +9403,10 @@ function statsMenu(%client,%game){
       case "EV":
          %opt1 = %client.GlArg4;
          %opt2 = %client.GlArg5;
-
+         
          messageClient( %client, 'SetScoreHudHeader', "", "<just:center>Event Panel");
          messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>',0);
-
+         
          for(%i = $dtStats::eventMax; %i > 0; %i--){
             %v  = (%i+$dtServer::eventLogCount)  % $dtStats::eventMax;
             %log = $dtServer::eventLog[%v];
@@ -9022,7 +9445,7 @@ function statsMenu(%client,%game){
                $dtServer::teamOneLoss[%map, %client.lgame] = 0;
                $dtServer::teamTwoWin[%map, %client.lgame] = 0;
                $dtServer::teamTwoLoss[%map, %client.lgame] = 0;
-
+               
                $dtServerVars::serverCrash[%map, %client.lgame] = 0;
             }
             $dtServer::serverHangTotal = 0;
@@ -9214,7 +9637,7 @@ function statsMenu(%client,%game){
          "<a:gamelink\tS\tSV\t" @ 0 @ "\t1\t" @ %client.lgame @ "-" @ "5" @ ">Max-Plr</a>",
          "<a:gamelink\tS\tSV\t" @ 0 @ "\t1\t" @ %client.lgame @ "-" @ "6" @ ">Lag</a>",
          "<a:gamelink\tS\tSV\t" @ 0 @ "\t1\t" @ %client.lgame @ "-" @ "7" @ ">Hitch</a>" TAB
-         "T1<a:gamelink\tS\tSV\t" @ 0 @ "\t1\t" @ %client.lgame @ "-" @ "8" @ "> W</a>/<a:gamelink\tS\tSV\t" @ 0 @ "\t1\t" @ %client.lgame @ "-" @ "8.5" @ ">L</a>" TAB
+         "T1<a:gamelink\tS\tSV\t" @ 0 @ "\t1\t" @ %client.lgame @ "-" @ "8" @ "> W</a>/<a:gamelink\tS\tSV\t" @ 0 @ "\t1\t" @ %client.lgame @ "-" @ "8.5" @ ">L</a>" TAB 
          "T2<a:gamelink\tS\tSV\t" @ 0 @ "\t1\t" @ %client.lgame @ "-" @ "9" @ "> W</a>/<a:gamelink\tS\tSV\t" @ 0 @ "\t1\t" @ %client.lgame @ "-" @ "9.5" @ ">L</a>");
          for(%z = (%vLPage - 1) * %perPage; %z < %vLPage * %perPage && %z < $mapID::countGame[%client.lgame]; %z++){
             %map = $mapID::IDNameGame[%z+1,%client.lgame];
@@ -9226,12 +9649,12 @@ function statsMenu(%client,%game){
             %mp = $dtServer::maxPlayers[%map,%client.lgame];
             %cr = $dtServer::hostHangMap[%map,%client.lgame];
             %sh = $dtServer::serverHangMap[%map,%client.lgame];
-
+            
             %t1w= $dtServer::teamOneWin[%map,%client.lgame];
             %t1l= $dtServer::teamOneLoss[%map,%client.lgame];
             %t2w= $dtServer::teamTwoWin[%map,%client.lgame];
             %t2l= $dtServer::teamTwoLoss[%map,%client.lgame];
-
+            
             %v1 = %pc ? %pc : 0;
             %v2 = %sc ? %sc : 0;
             %v3 = %vc ? %vc : 0;
@@ -9239,12 +9662,12 @@ function statsMenu(%client,%game){
             %v5 = %mp ? %mp : 0;
             %v6 = %cr ? %cr : 0;
             %v7 = %sh ? %sh : 0;
-
+            
             %v8 = %t1w ? %t1w : 0;
             %v9 = %t1l ? %t1l : 0;
             %v10 = %t2w ? %t2w : 0;
             %v11 = %t2l ? %t2l : 0;
-
+            
             %line = '<tab:114,164,214,264,324,364,405,444,514><color:0befe7><font:univers condensed:18><clip:110>%1 %2</clip>\t<color:03d597>%3\t%4\t%5\t%6\t%7\t%8\t%9';
             messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,%z+1,%map,%v1,%v2,%v3,%v4 @ "<color:FFAC00> / <color:03d597>" @ %v44,%v5,%v6,%v7 TAB %v8 @ "<color:FFAC00> / <color:03d597>" @ %v9 TAB %v10 @ "<color:FFAC00> / <color:03d597>" @ %v11);
          }
@@ -9273,10 +9696,10 @@ function statsMenu(%client,%game){
          }
          if(%hasCount > 0)
             messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" SPC %line);
-
-
-
-
+            
+            
+            
+            
         case "SZ"://////////////////////////////////////////////////////////////////////////////////////////////////
          %vLPage = %client.GlArg4;
          %field5 = strreplace(%client.GlArg5,"-","\t");
@@ -9299,8 +9722,8 @@ function statsMenu(%client,%game){
                switch$(%cat){
                   case 1://kills
                      for (%j = %i+1; %j < statsGroup.getCount(); %j++){
-                        %dtStatsJ = statsGroup.getObject(%j);
-                        %dtStatsM = statsGroup.getObject(%maxCount);
+                        %dtStatsJ = statsGroup.getObject(%j);   
+                        %dtStatsM = statsGroup.getObject(%maxCount);  
                         %pc1 = getGameDataAvg(%client.lgame,%dtStatsJ,"killsTG");
                         %pc2 = getGameDataAvg(%client.lgame,%dtStatsM,"killsTG");
                         if (%pc1 > %pc2)
@@ -9313,7 +9736,7 @@ function statsMenu(%client,%game){
             }
             %client.GlArg5 = %client.roll @ "-C";
          }
-
+         
          messageClient( %client, 'SetScoreHudHeader', "", "<just:center>8 Game Averages");
          %line = '<a:gamelink\tS\tReset\t%1>Return To Score Screen</a> <a:gamelink\tS\tSZ\t%1\t1\t1-1>[Capper]</a> <a:gamelink\tS\tSZ\t%1\t1\t2-1>[Offensive]</a> <a:gamelink\tS\tSZ\t%1\t1\t3-1>[Defensive]</a> <a:gamelink\tS\tSZ\t%1\t1\t4-1>[Base Ops]</a>';
          messageClient( %client, 'SetScoreHudSubheader', "",%line,0);
@@ -9342,12 +9765,12 @@ function statsMenu(%client,%game){
                   %v6 = getGameDataAvg(%client.lgame,%dtStats,"killsTG");
                   %v7 = getGameDataAvg(%client.lgame,%dtStats,"killsTG");
                   %v8 = getGameDataAvg(%client.lgame,%dtStats,"killsTG");
-
+                  
                   if(isObject(%dtStats.client.player) && %dtStats.client.player.team == 1){
-                     %line = '<tab:114,154,204,254,324,374,424,494><color:00EBFD><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
+                     %line = '<tab:114,154,204,254,324,374,424,494><color:00EBFD><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';   
                   }
                   else if(isObject(%dtStats.client.player) && %dtStats.client.player.team == 2){
-                     %line = '<tab:114,154,204,254,324,374,424,494><color:FD8200><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
+                     %line = '<tab:114,154,204,254,324,374,424,494><color:FD8200><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';   
                   }
                   else{
                      %line = '<tab:114,154,204,254,324,374,424,494><color:0befe7><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
@@ -9376,12 +9799,12 @@ function statsMenu(%client,%game){
                   %v6 = getGameDataAvg(%client.lgame,%dtStats,"killsTG");
                   %v7 = getGameDataAvg(%client.lgame,%dtStats,"killsTG");
                   %v8 = getGameDataAvg(%client.lgame,%dtStats,"killsTG");
-
+                  
                   if(isObject(%dtStats.client.player) && %dtStats.client.player.team == 1){
-                     %line = '<tab:114,154,204,254,324,374,424,494><color:00EBFD><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
+                     %line = '<tab:114,154,204,254,324,374,424,494><color:00EBFD><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';   
                   }
                   else if(isObject(%dtStats.client.player) && %dtStats.client.player.team == 2){
-                     %line = '<tab:114,154,204,254,324,374,424,494><color:FD8200><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
+                     %line = '<tab:114,154,204,254,324,374,424,494><color:FD8200><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';   
                   }
                   else{
                      %line = '<tab:114,154,204,254,324,374,424,494><color:0befe7><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
@@ -9410,12 +9833,12 @@ function statsMenu(%client,%game){
                   %v6 = getGameDataAvg(%client.lgame,%dtStats,"killsTG");
                   %v7 = getGameDataAvg(%client.lgame,%dtStats,"killsTG");
                   %v8 = getGameDataAvg(%client.lgame,%dtStats,"killsTG");
-
+                  
                   if(isObject(%dtStats.client.player) && %dtStats.client.player.team == 1){
-                     %line = '<tab:114,154,204,254,324,374,424,494><color:00EBFD><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
+                     %line = '<tab:114,154,204,254,324,374,424,494><color:00EBFD><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';   
                   }
                   else if(isObject(%dtStats.client.player) && %dtStats.client.player.team == 2){
-                     %line = '<tab:114,154,204,254,324,374,424,494><color:FD8200><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
+                     %line = '<tab:114,154,204,254,324,374,424,494><color:FD8200><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';   
                   }
                   else{
                      %line = '<tab:114,154,204,254,324,374,424,494><color:0befe7><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
@@ -9444,12 +9867,12 @@ function statsMenu(%client,%game){
                   %v6 = getGameDataAvg(%client.lgame,%dtStats,"killsTG");
                   %v7 = getGameDataAvg(%client.lgame,%dtStats,"killsTG");
                   %v8 = getGameDataAvg(%client.lgame,%dtStats,"killsTG");
-
+                  
                   if(isObject(%dtStats.client.player) && %dtStats.client.player.team == 1){
-                     %line = '<tab:114,154,204,254,324,374,424,494><color:00EBFD><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
+                     %line = '<tab:114,154,204,254,324,374,424,494><color:00EBFD><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';   
                   }
                   else if(isObject(%dtStats.client.player) && %dtStats.client.player.team == 2){
-                     %line = '<tab:114,154,204,254,324,374,424,494><color:FD8200><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
+                     %line = '<tab:114,154,204,254,324,374,424,494><color:FD8200><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';   
                   }
                   else{
                      %line = '<tab:114,154,204,254,324,374,424,494><color:0befe7><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
@@ -9488,9 +9911,9 @@ function statsMenu(%client,%game){
 
             %mon = $lData::mon[%lType, %client.lgame, %page];
             if(%build $= "Build" && !$dtStatsImgBuild){
-               genBigStats(%client.lgame, getField(%mon,0),getField(%mon,1));
+               genBigStats(%client.lgame, %lType, getField(%mon,0),getField(%mon,1));
                messageAll('MsgStats', '\c3Stats build started, server preformance may degrade for a few minutes~wfx/misc/hunters_greed.wav');
-               $dtStatsImgBuild = 1;
+               $dtStatsImgBuild = 1;            
             }
          }
          else if(!%page){
@@ -9506,27 +9929,32 @@ function statsMenu(%client,%game){
             switch$(%lType){
                case "day":
                   %lTypeName = "Daily";
+                   %lTypeNameShort = "Day";
                   messageClient( %client, 'SetScoreHudHeader', "", '<just:center>%1 Leaderboards For %2',%lTypeName,"Day:" @ %mon);
                case "week":
                   %lTypeName = "Weekly";
+                  %lTypeNameShort = "Week";
                   messageClient( %client, 'SetScoreHudHeader', "", '<just:center>%1 Leaderboards For %2',%lTypeName,"Week:" @ %mon);
                case "month":
                   %lTypeName = "Monthly";
+                  %lTypeNameShort = "Month";
                   messageClient( %client, 'SetScoreHudHeader', "", '<just:center>%1 Leaderboards For %2',%lTypeName,monthString(%mon));
                case "quarter":
                   %lTypeName = "Quarterly";
+                  %lTypeNameShort = "Quarter";
                   messageClient( %client, 'SetScoreHudHeader', "", '<just:center>%1 Leaderboards For %2',%lTypeName,"Q:" @ %mon);
                case "year":
                   %lTypeName = "Yearly";
+                  %lTypeNameShort = "Year";
                   messageClient( %client, 'SetScoreHudHeader', "", '<just:center>%1 Leaderboards For %2',%lTypeName,%year);
             }
             if(%client.isSuperAdmin){
-               if($dtStatsImgBuild)
-                  messageClient( %client, 'SetScoreHudSubheader', "", '<tab:210,455><a:gamelink\tS\tReset\t%1> Return To Score Screen</a> \t <color:ff0000><a:gamelink\tS\tLBOARDS\t%1\tmonth-%2\tBuild-%5> Generate Img For %4</a> \t <color:0befe7><a:gamelink\tS\tSP\t%1\t1\t%2-%3>Server Admin Panel</a> ',0,%client.lgame,1,monthString(%mon),%page);
+               if($dtStatsImgBuild || $dtStats::tmCompile)
+                  messageClient( %client, 'SetScoreHudSubheader', "", '<tab:210,455><a:gamelink\tS\tReset\t%1> Return To Score Screen</a> \t <color:ff0000><a:gamelink\tS\tLBOARDS\t%1\t%6-%2\tBuild-%5> Generate Img For %4</a> \t <color:0befe7><a:gamelink\tS\tSP\t%1\t1\t%2-%3>Server Admin Panel</a> ',0,%client.lgame,1,%lType $= "month" ? monthString(%mon) : ("Week" SPC %mon),%page,%lType);
                else
-                  messageClient( %client, 'SetScoreHudSubheader', "", '<tab:210,455><a:gamelink\tS\tReset\t%1> Return To Score Screen</a> \t <a:gamelink\tS\tLBOARDS\t%1\tmonth-%2\tBuild-%5> Generate Img For %4</a> \t <a:gamelink\tS\tSP\t%1\t1\t%2-%3>Server Admin Panel</a> ',0,%client.lgame,1,monthString(%mon),%page);
+                  messageClient( %client, 'SetScoreHudSubheader', "", '<tab:210,455><a:gamelink\tS\tReset\t%1> Return To Score Screen</a> \t <a:gamelink\tS\tLBOARDS\t%1\t%6-%2\tBuild-%5> Generate Img For %4</a> \t <a:gamelink\tS\tSP\t%1\t1\t%2-%3>Server Admin Panel</a> ',0,%client.lgame,1,%lType $= "month" ? monthString(%mon) : ("Week" SPC %mon) , %page, %lType);
             }
-            else
+            else  
                messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tReset\t%1> Return To Score Screen</a>',0,%game,1);
 
 
@@ -9568,29 +9996,38 @@ function statsMenu(%client,%game){
             }
 
             if($lData::monCount[%client.lgame,%lType] > 1){
+                %vw = (%lType $= "week") ? "month" : "week";
                if(%page == 1){
-                   %line = '<just:right><a:gamelink\tS\tLBOARDS\t%1\t%2-%4\t%3>Previous Month</a>';
-                   messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%lType,%page+1,%client.lgame);
+                   %line = '<just:center><a:gamelink\tS\tLBOARDS\t0\t%6-%4\t0> [View %5 Stats]</a> <just:right><a:gamelink\tS\tLBOARDS\t%1\t%2-%4\t%3>Previous %5</a>';
+                   messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%lType,%page+1,%client.lgame,%lTypeNameShort,%vw);
                }
                else if(%page >= $lData::monCount[%client.lgame,%lType]){
-                  %line = '<just:right><a:gamelink\tS\tLBOARDS\t%1\t%2-%4\t%3>Next Month</a>';
-                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%lType,%page-1,%client.lgame);
+                  %line = '<just:center><a:gamelink\tS\tLBOARDS\t0\t%6-%4\t0> [View %5 Stats]</a> <just:right><a:gamelink\tS\tLBOARDS\t%1\t%2-%4\t%3>Next %5</a>';
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%lType,%page-1,%client.lgame,%lTypeNameShort,%vw);
                }
                else{
-                  %line = '<just:right><a:gamelink\tS\tLBOARDS\t%1\t%2-%5\t%4>Previous Month</a> | <a:gamelink\tS\tLBOARDS\t%1\t%2-%5\t%3>Next Month</a>';
-                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%lType,%page-1,%page+1,%client.lgame);
+                  %line = '<just:center><a:gamelink\tS\tLBOARDS\t0\t%7-%5\t0> [View %6 Stats]</a> <just:right><a:gamelink\tS\tLBOARDS\t%1\t%2-%5\t%4>Previous %6</a> | <a:gamelink\tS\tLBOARDS\t%1\t%2-%5\t%3>Next %6</a>';
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%lType,%page-1,%page+1,%client.lgame,%lTypeNameShort,%vw); 
+               }
+            }
+            else{
+               if(%lType !$= "week"){
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" @ "<a:gamelink\tS\tLBOARDS\t0\tweek-" @ %client.lgame @ "\t0> [View Weekly Stats]</a>");
+               }
+               else{
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" @ "<a:gamelink\tS\tLBOARDS\t0\tmonth-" @ %client.lgame @ "\t0> [View Monthly Stats]</a>");  
                }
             }
          }
          else{//no data for selected game type
-
+            
             if(%client.isSuperAdmin){
-               if($dtStatsImgBuild)
+               if($dtStatsImgBuild || $dtStats::tmCompile)
                   messageClient( %client, 'SetScoreHudSubheader', "", '<tab:210,455><a:gamelink\tS\tReset\t%1> Return To Score Screen</a> \t <color:ff0000><a:gamelink\tS\tLBOARDS\t%1\tmonth-%2\tBuild-%5> Generate Img For %4</a> \t <color:0befe7><a:gamelink\tS\tSP\t%1\t1\t%2-%3>Server Admin Panel</a> ',0,%client.lgame,1,monthString(%mon),%page);
                else
                   messageClient( %client, 'SetScoreHudSubheader', "", '<tab:210,455><a:gamelink\tS\tReset\t%1> Return To Score Screen</a> \t <a:gamelink\tS\tLBOARDS\t%1\tmonth-%2\tBuild-%5> Generate Img For %4</a> \t <a:gamelink\tS\tSP\t%1\t1\t%2-%3>Server Admin Panel</a> ',0,%client.lgame,1,monthString(%mon),%page);
             }
-            else
+            else  
                messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tReset\t%1> Return To Score Screen</a>',0,%game,1);
             %header = '<color:0befe7><just:center>No data at this time, check in 24 hours';
             messageClient( %client, 'SetLineHud', "", %tag, %index++, %header,%i1,%i2,%i3,%i4++,%i5,%i6,%i7);
@@ -9605,6 +10042,12 @@ function statsMenu(%client,%game){
                messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
                messageClient( %client, 'SetLineHud', "", %tag, %index++, '<just:center>View other gametypes');
                messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" @ %line);
+            }
+            if(%lType !$= "week"){
+               messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" @ "<a:gamelink\tS\tLBOARDS\t0\tweek-" @ %client.lgame @ "\t0> [View Weekly Stats]</a>");
+            }
+            else{
+               messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" @ "<a:gamelink\tS\tLBOARDS\t0\tmonth-" @ %client.lgame @ "\t0> [View Monthly Stats]</a>");  
             }
          }
       case "GLBOARDS":
@@ -9874,7 +10317,7 @@ function statsMenu(%client,%game){
                %nameTitle2 = "<color:0befe7>" @ %var2Title SPC "<color:03d597>" @ %i2;
                %nameTitle3 = "<color:0befe7>" @ %var3Title SPC "<color:03d597>" @ %i3;
                messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,0,%nameTitle1,%nameTitle2,%nameTitle3,%vsc1,%vsc2,%vsc3);
-
+   
             case "LCTFGame" or "SCtFGame":
                //1
                %var1 = "scoreTG";  %var1Title = "Score Total:";   %var1Name = "Score Total";    %var1TypeName = "Total";
@@ -11198,9 +11641,20 @@ function  getTimeDelta(%d, %year){
    return %days;
 }
 
+function autoCompileStats(){
+   if(!$Host::TournamentMode){
+      if(!$dtStats::building){
+         lStatsCycle(1, 1);     
+      }
+      else{
+         error("Stats Already Compiling");
+      }
+   }
+}
+
 function compileStats(){
     if(!$dtStats::building){
-         lStatsCycle(1, 1);
+         lStatsCycle(1, 1);     
     }
     else{
       error("Stats Already Compiling");
@@ -11299,7 +11753,6 @@ function lStatsCycle(%build,%runReset){ // starts and manages the build/sort cyc
          messageAll( 'MsgStats', '\c3Stats build complete, reverting time back to normal');
          $dtStats::timeChange = 0;
       }
-      preLoadTurStats(0);
    }
 }
 // only load one gameType/leaderboard at at time to reduce memory allocation
@@ -11479,8 +11932,8 @@ function  sortLStats(%c,%game,%lType){
       LFData.writeLine(%n);
       LFData.writeLine(%s);
       LFData.writeLine(%g);
-   }
-
+   } 
+      
    if(%c++ < $statsVars::count[%game]){
       schedule($dtStats::sortSpeed,0,"sortLStats",%c,%game,%lType);
    }
@@ -11499,7 +11952,7 @@ function loadLeaderboards(%reset){ // loads up leaderboards
    markNewDay();//called when server starts and when build completes
    dtCleanUp(0);
    if(!isEventPending($dtStats::buildEvent))
-      $dtStats::buildEvent = schedule(getTimeDif($dtStats::buildSetTime),0,"compileStats");
+      $dtStats::buildEvent = schedule(getTimeDif($dtStats::buildSetTime),0,"autoCompileStats");
    $dtStats::building = 0;
    if(isFile("serverStats/saveVars.cs"))
       exec("serverStats/saveVars.cs");
@@ -11835,16 +12288,41 @@ function clearStatFile(%file,%filepath,%i,%count, %stats,%type){
       %file.close();
    }
 }
+
+function buildTest(%mode){
+   if(!$dtStats::tmCompile){
+      %list = !%mode ? pubList : pugList;
+      for(%i = 0; %i < %list.getCount(); %i++){
+         %gameType = %list.getObject(%i);
+         $dtStats::pugCount[%gameType.game] = 0;
+         for(%x = 0; %x < %gameType.getCount(); %x++){
+            %game = %gameType.getObject(%x);
+            if(%game.select){
+               %count = $dtStats::pugCount[%gameType.game];
+               $dtStats::pugIDS[%gameType.game,%count] = %game.pugID;
+               $dtStats::pugMap[%gameType.game,%count] = %game.mapName;
+               $dtStats::pugDate[%gameType.game,%count]  = %game.date;
+               $dtStats::pugFS[%gameType.game,%count] = %game.teamOne SPC %game.teamTwo;
+               $dtStats::pugCount[%gameType.game]++;
+               error( $dtStats::pugCount[%gameType.game]);
+            }
+         }
+      }
+      $dtStats::path  = (!%mode) ? "stats" : "statsTM";
+      preLoadTurStats(0);
+   }
+}
+
 function preLoadTurStats(%gameIndex){ //queue up files for processing
    if(!%gameIndex){
       $dtGameIndex = 0;
-      $dtStats::tmCompile = 1;
+      $dtStats::tmCompile = 1;   
    }
    if(%gameIndex < $dtStats::gameTypeCount){
       %game = $dtStats::gameType[$dtGameIndex];
-      if($dtStats::debugEchos){error("preLoadTurStats queuing up files for" SPC %game SPC getFieldCount($dtServerVars::pugIDS[%game]));}
-      if(getFieldCount($dtServerVars::pugIDS[%game]) > 0){
-         %folderPath = "serverStats/stats/" @ %game @ "/*g.cs";
+      if($dtStats::debugEchos){error("preLoadTurStats queuing up files for" SPC %game SPC $dtStats::pugCount[%game]);}
+      if($dtStats::pugCount[%game] > 0){
+         %folderPath = "serverStats/" @ $dtStats::path  @ "/" @ %game @ "/*g.cs";
          %total = getFileCount(%folderPath);
          if(!%total){
             return;
@@ -11860,10 +12338,9 @@ function preLoadTurStats(%gameIndex){ //queue up files for processing
          preLoadTurStats($dtGameIndex++);
       }
    }
-   else{
-      $dtStats::tmCompile = 0;
+   else{ 
       dtSaveServerVars();
-      compileGameImage(0);
+      compileGameImage(-1);
    }
 }
 
@@ -11874,7 +12351,7 @@ function loadTurStatsData(%file,%game,%fileNum,%total){
    RootGroup.add(%fObj);
    %fObj.OpenForRead(%file);
    %guid = getField(strreplace(getField(strreplace(%file,"/","\t"),3),"g","\t"),0);
-
+   
    %playerName = getField(strreplace(%fObj.readline(),"%t","\t"),1);//1
    %statsOverWrite = getField(strreplace(%fObj.readline(),"%t","\t"),1);//2
    %totalGames = getField(strreplace(%fObj.readline(),"%t","\t"),1);//3
@@ -11895,20 +12372,20 @@ function loadTurStatsData(%file,%game,%fileNum,%total){
    //%dtTeamGame = strreplace(%fObj.readline(),"%t","\t");//18
 
    %found = 0;
-   for(%x = 0; %x < getFieldCount($dtServerVars::pugIDS[%game]); %x++){
+   for(%x = 0; %x < $dtStats::pugCount[%game]; %x++){
       for(%i = 0; %i < getFieldCount(%gameIDLine); %i++){
          %gid = getField(%gameIDLine,%i);
-         if(%gid $= getField($dtServerVars::pugIDS[%game],%x)){
+         if(%gid $= $dtStats::pugIDS[%game,%x]){
             %gameList[%x] = %i;
             %found = 1;
             break;
          }
          else{
-            %gameList[%x] = -1;
+            %gameList[%x] = -1;    
          }
       }
    }
-
+   
    %gListCount = 0;
    if(%found){// only if we found a matching ID
       %obj = new scriptObject();
@@ -11920,7 +12397,7 @@ function loadTurStatsData(%file,%game,%fileNum,%total){
          %var  = getField(%line,0);
          %cat = $statsVars::varType[%var,%game];
          %gListCount = 0;
-         for(%x = 0; %x < getFieldCount($dtServerVars::pugIDS[%game]); %x++){
+         for(%x = 0; %x < $dtStats::pugCount[%game]; %x++){
             %gameIndex = %gameList[%x];
             if(%gameIndex != -1){
                %gListCount++;
@@ -11929,10 +12406,10 @@ function loadTurStatsData(%file,%game,%fileNum,%total){
                   case "TG"://ttl is not used in game stats
                      %obj.LStatsT[%var] += getField(%line,%gameList[%x]);
                   case "Max":
-                     if(getField(%line,%gameList[%x]) > %obj.LStatsT[%var] || %gListCount == 0)
+                     if(getField(%line,%gameList[%x]) > %obj.LStatsT[%var] || %gListCount == 0) 
                         %obj.LStatsT[%var] = getField(%line,%gameList[%x]);
                   case "Min":
-                     if(getField(%line,%gameList[%x]) < %obj.LStatsT[%var] || %gListCount == 0)
+                     if(getField(%line,%gameList[%x]) < %obj.LStatsT[%var] || %gListCount == 0) 
                         %obj.LStatsT[%var] = getField(%line,%gameList[%x]);
                   case "Avg" or "AvgI":
                         %temp[%var] += getField(%line,%gameList[%x]);
@@ -11940,12 +12417,12 @@ function loadTurStatsData(%file,%game,%fileNum,%total){
                }
             }
             else{
-               %obj.LStats[%var] = setField(%obj.LStats[%var],%x, 0);
+               %obj.LStats[%var] = setField(%obj.LStats[%var],%x, 0);   
             }
          }
       }
    }
-
+   
    %fObj.close();
    %fObj.delete();
    if(%fileNum >= %total-1){
@@ -11966,11 +12443,11 @@ function sortTurStats(%c, %gameIndex, %game){
    if(!isObject(LFData)){
       new FileObject(LFData);
       RootGroup.add(LFData);
-      LFData.openForWrite("serverStats/pugData/" @ cleanMapName(getField($dtServerVars::pugMap[%game],%gameIndex)) @ "-" @ %game @ "-" @ getField($dtServerVars::pugIDS[%game],%gameIndex) @ "-G.cs");
-      LFData.writeLine(getField($dtServerVars::pugMap[%game],%gameIndex) @ "%t" @ %game @ "%t" @ getField($dtServerVars::pugIDS[%game],%gameIndex) @ "%t" @ getField($dtServerVars::pugDate[%game],%gameIndex) @ "%t" @ getField($dtServerVars::pugFS[%game],%gameIndex));
-
-      // build out header
-      %var = "scoreTG";
+      LFData.openForWrite("serverStats/gmData/" @ cleanMapName($dtStats::pugMap[%game, %gameIndex]) @ "-" @ %game @ "-" @ $dtStats::pugIDS[%game, %gameIndex] @ "-G.cs");
+      LFData.writeLine($dtStats::pugMap[%game,%gameIndex] @ "%t" @ %game @ "%t" @ $dtStats::pugIDS[%game,%gameIndex] @ "%t" @ $dtStats::pugDate[%game, %gameIndex] @ "%t" @ $dtStats::pugFS[%game,%gameIndex]);
+   
+      // build out header 
+      %var = "scoreTG";   
       %len = serverStats.getCount();
       for (%i = 0; %i < %len - 1; %i++) {
          for (%j = 0; %j < %len - %i - 1; %j++) {
@@ -11983,27 +12460,27 @@ function sortTurStats(%c, %gameIndex, %game){
                serverStats.bringToFront(%bObj);
             }
          }
-      }
+      } 
 
-      %teamOneNameLine[0] = 1 TAB "name";
+      %teamOneNameLine[0] = 1 TAB "name"; 
       %teamOneDataLine[1] = 1 TAB "score";
       %teamOneDataLine[2] = 1 TAB "off";
       %teamOneDataLine[3] = 1 TAB "def";
       %teamOneDataLine[4] = 1 TAB "kills";
       %teamOneDataLine[5] = 1 TAB "caps";
-
-      %teamTwoNameLine[0] = 2 TAB "name";
+      
+      %teamTwoNameLine[0] = 2 TAB "name"; 
       %teamTwoDataLine[1] = 2 TAB "score";
       %teamTwoDataLine[2] = 2 TAB "off";
       %teamTwoDataLine[3] = 2 TAB "def";
       %teamTwoDataLine[4] = 2 TAB "kills";
       %teamTwoDataLine[5] = 2 TAB "caps";
-
+      
       for (%i = 0; %i < %len; %i++) {
          %sObj = serverStats.getObject(%i);
          %team = getField(%sObj.LStats["dtTeamGame"], %gameIndex);
          if(%team == 1){
-            %teamOneNameLine[0] =  %teamOneNameLine[0] TAB %sObj.name;
+            %teamOneNameLine[0] =  %teamOneNameLine[0]  TAB %sObj.name;
             %teamOneDataLine[1] =  %teamOneDataLine[1]  TAB  getField(%sObj.LStats[%var], %gameIndex);
             %teamOneDataLine[2] =  %teamOneDataLine[2]  TAB  getField(%sObj.LStats["offenseScoreTG"], %gameIndex);
             %teamOneDataLine[3] =  %teamOneDataLine[3]  TAB  getField(%sObj.LStats["defenseScoreTG"], %gameIndex);
@@ -12011,7 +12488,7 @@ function sortTurStats(%c, %gameIndex, %game){
             %teamOneDataLine[5] =  %teamOneDataLine[5]  TAB  getField(%sObj.LStats["flagCapsTG"], %gameIndex);
          }
          else if(%team == 2){
-            %teamTwoNameLine[0] =  %teamTwoNameLine[0] TAB %sObj.name;
+            %teamTwoNameLine[0] =  %teamTwoNameLine[0]  TAB %sObj.name;
             %teamTwoDataLine[1] =  %teamTwoDataLine[1]  TAB  getField(%sObj.LStats[%var], %gameIndex);
             %teamTwoDataLine[2] =  %teamTwoDataLine[2]  TAB  getField(%sObj.LStats["offenseScoreTG"], %gameIndex);
             %teamTwoDataLine[3] =  %teamTwoDataLine[3]  TAB  getField(%sObj.LStats["defenseScoreTG"], %gameIndex);
@@ -12025,15 +12502,15 @@ function sortTurStats(%c, %gameIndex, %game){
       LFData.writeLine(strreplace(%teamOneDataLine[3],"\t","%t"));
       LFData.writeLine(strreplace(%teamOneDataLine[4],"\t","%t"));
       //LFData.writeLine(strreplace(%teamOneDataLine[5],"\t","%t"));
-
+         
       LFData.writeLine(strreplace(%teamTwoNameLine[0],"\t","%t"));
       LFData.writeLine(strreplace(%teamTwoDataLine[1],"\t","%t"));
       LFData.writeLine(strreplace(%teamTwoDataLine[2],"\t","%t"));
       LFData.writeLine(strreplace(%teamTwoDataLine[3],"\t","%t"));
       LFData.writeLine(strreplace(%teamTwoDataLine[4],"\t","%t"));
       //LFData.writeLine(strreplace(%teamTwoDataLine[5],"\t","%t"));
-   }
-
+   }   
+   
    %var = $statsVars::varNameType[%c,%game];
    %cat = $statsVars::varType[%var,%game];
    if(%cat !$= "Game"){
@@ -12050,7 +12527,7 @@ function sortTurStats(%c, %gameIndex, %game){
                   serverStats.bringToFront(%bObj);
                }
             }
-         }
+         } 
       }
       else{
          %len = serverStats.getCount();
@@ -12065,20 +12542,20 @@ function sortTurStats(%c, %gameIndex, %game){
                   serverStats.bringToFront(%bObj);
                }
             }
-         }
+         } 
       }
+      
 
-
-      %teamOneNameLine = 1 TAB "name" TAB %var;
+      %teamOneNameLine = 1 TAB "name" TAB %var; 
       %teamOneDataLine = 1 TAB "data" TAB %var;
-
-      %teamTwoNameLine = 2 TAB "name" TAB %var;
-      %teamTwoDataLine = 2 TAB "data" TAB %var;
-
-      %teamAllNameLine = 0 TAB "name" TAB %var;
-      %teamAllDataLine = 0 TAB "data" TAB %var;
-      %teamAllTeamLine = 0 TAB "team" TAB %var;
-
+      
+      %teamTwoNameLine = 2 TAB "name" TAB %var; 
+      %teamTwoDataLine = 2 TAB "data" TAB %var; 
+      
+      %teamAllNameLine = 0 TAB "name" TAB %var; 
+      %teamAllDataLine = 0 TAB "data" TAB %var; 
+      %teamAllTeamLine = 0 TAB "team" TAB %var; 
+      
       %write0 = 0;
       %write1 = 0;
       %write2 = 0;
@@ -12125,7 +12602,7 @@ function sortTurStats(%c, %gameIndex, %game){
    }
    if(%c++ < $statsVars::count[%game])
       schedule($dtStats::sortSpeed,0,"sortTurStats",%c,%gameIndex,%game);
-   else if(%gameIndex++ < getFieldCount($dtServerVars::pugIDS[%game])){
+   else if(%gameIndex++ < $dtStats::pugCount[%game]){
       LFData.close();
       LFData.delete();
       schedule($dtStats::sortSpeed,0,"sortTurStats",0,%gameIndex,%game);
@@ -12142,13 +12619,15 @@ function  sortTurStatsT(%c, %game){
    if(!isObject(LFData)){
       new FileObject(LFData);
       RootGroup.add(LFData);
-      LFData.openForWrite("serverStats/pugData/" @ "-" @ %game @ "-" @ formattimestring("dd-mm-yy") @"-T.cs");
-      LFData.writeLine(strreplace($dtServerVars::pugIDS[%game],"\t","%t"));
-      LFData.writeLine(strreplace($dtServerVars::pugMap[%game],"\t","%t"));
-      LFData.writeLine(strreplace($dtServerVars::pugDate[%game],"\t","%t"));
-      LFData.writeLine(strreplace($dtServerVars::pugFS[%game],"\t","%t"));
-   }
-
+      %file = "serverStats/gmData/" @ "-" @ %game @ "-" @ dtMarkDate() @"-T.cs";
+      $dtStats::totalPath = %file;
+      LFData.openForWrite(%file);
+      //LFData.writeLine(strreplace($dtStats::pugIDS[%game],"\t","%t"));
+      //LFData.writeLine(strreplace($dtStats::pugMap[%game],"\t","%t"));
+      //LFData.writeLine(strreplace($dtStats::pugDate[%game],"\t","%t"));     
+      //LFData.writeLine(strreplace($dtStats::pugFS[%game],"\t","%t"));
+   }   
+   
    %var = $statsVars::varNameType[%c,%game];
    %cat = $statsVars::varType[%var,%game];
    if(%cat !$= "Game"){
@@ -12159,33 +12638,34 @@ function  sortTurStatsT(%c, %game){
                // If the current element is less than the next element, bring the next element to the front
                %aObj = serverStats.getObject(%j);
                %bObj = serverStats.getObject(%j + 1);
-               %A = getField(%aObj.LStats[%var],%gameIndex);
-               %B = getField(%bObj.LStats[%var],%gameIndex);
+               %A = %aObj.LStatsT[%var];
+               %B = %bObj.LStatsT[%var];
                if (%A > %B) {
                   serverStats.bringToFront(%bObj);
                }
             }
-         }
+         } 
       }
       else{
+            
          %len = serverStats.getCount();
          for (%i = 0; %i < %len - 1; %i++) {
             for (%j = 0; %j < %len - %i - 1; %j++) {
                // If the current element is less than the next element, bring the next element to the front
                %aObj = serverStats.getObject(%j);
                %bObj = serverStats.getObject(%j + 1);
-               %A = getField(%aObj.LStats[%var],%gameIndex);
-               %B = getField(%bObj.LStats[%var],%gameIndex);
+               %A = %aObj.LStatsT[%var];
+               %B = %bObj.LStatsT[%var];
                if (%A < %B) {
                   serverStats.bringToFront(%bObj);
                }
             }
-         }
-      }
-
-      %teamAllNameLine = 0 TAB "name" TAB %var;
-      %teamAllDataLine = 0 TAB "data" TAB %var;
-
+         } 
+      } 
+      
+      %teamAllNameLine = "name" TAB %var; 
+      %teamAllDataLine = "data" TAB %var; 
+      
       %write = 0;
       for (%i = 0; %i < %len; %i++) {
          %sObj = serverStats.getObject(%i);
@@ -12199,6 +12679,8 @@ function  sortTurStatsT(%c, %game){
       if(%write){
          LFData.writeLine(strreplace(%teamAllNameLine,"\t","%t"));
          LFData.writeLine(strreplace(%teamAllDataLine,"\t","%t"));
+         $gData::data[%var,%game] = getFields(%teamAllDataLine, 2, getFieldCount(%teamAllDataLine)-1);
+         $gData::name[%var,%game] = getFields(%teamAllNameLine, 2, getFieldCount(%teamAllNameLine)-1);
       }
    }
    if(%c++ < $statsVars::count[%game])
@@ -12210,9 +12692,6 @@ function  sortTurStatsT(%c, %game){
       preLoadTurStats($dtGameIndex++);
    }
 }
-
-
-
 ////////////////////////////////////////////////////////////////////////////////
 //Server Stats
 ////////////////////////////////////////////////////////////////////////////////
@@ -12222,7 +12701,7 @@ $dtStats::prefTestIdleTime = 60*1000;// if no one is playing just run slow
 $dtStats::prefTolerance = 128;//this number is to account for base line preformance and differences between engine simTime and realtime
 $dtStats::prefLog = 0; // enable logging of server hangs
 $dtStats::eventLockout = 15*1000;//every 10 sec
-$dtStats::tsLimit = 0.22; //note this value is heavly effected by packet rate so if you change this be sure to test low and high client rates
+$dtStats::tsLimit = 0.22; //note this value is heavly effected by packet rate so if you change this be sure to test low and high client rates 
 $dtStats::tsCountLimit = 8;
 $dtStats::tsStat = 0;
 function prefTest(%time,%skip){
@@ -12259,7 +12738,7 @@ function getRealFlagPos(%team){
       %pos = $TeamFlag[%team].carrier.getPosition();
    }
    else{
-      %pos = $TeamFlag[%team].getPosition();
+      %pos = $TeamFlag[%team].getPosition();  
    }
    return %pos;
 }
@@ -12284,20 +12763,20 @@ function dtPingStats(){
                   %cl.dtStats.stat["timeNearTeamFS"] += ($dtStats::prefTestTime/1000)/60;
                }
                else{
-                  %cl.dtStats.stat["timeFarTeamFS"] += ($dtStats::prefTestTime/1000)/60;
+                  %cl.dtStats.stat["timeFarTeamFS"] += ($dtStats::prefTestTime/1000)/60; 
                }
-
+               
                %feDist = vectorDist(%fePos,getWords(%tform,0,2));
                if(%fDist < 50){
                   %cl.dtStats.stat["timeNearEnemyFS"] += ($dtStats::prefTestTime/1000)/60;
                }
                else{
-                  %cl.dtStats.stat["timeFarEnemyFS"] += ($dtStats::prefTestTime/1000)/60;
+                  %cl.dtStats.stat["timeFarEnemyFS"] += ($dtStats::prefTestTime/1000)/60; 
                }
                %rfpos = getRealFlagPos(%cl.team);
                %oTeam = (%cl.team == 1) ?  2 : 1;
                %rfEPos = getRealFlagPos(%oTeam);
-
+               
                if(vectorDist(%rfpos, getWords(%tform,0,2)) < 50){
                   %cl.dtStats.stat["timeNearFlag"] += ($dtStats::prefTestTime/1000)/60;
                }
@@ -12359,7 +12838,7 @@ function dtPingStats(){
 				%speed = vectorLen(%vel);
 				%iVel = VectorLen(%player.dtLV) / %factor;
 				%fVel = %speed / %factor;
-
+				
 				%player.vdot[%player.vdotCount++ % 3] = VectorDot(VectorNormalize(%vel), VectorNormalize(%player.lastVelocity));
 				%dotTotal = (%player.vdotCount > 3) ? ((%player.vdot[0] + %player.vdot[1] + %player.vdot[2])/3) : 0;
 				if (%speed > 6 && %iVel > 0.01 && %fVel > 0.01 && %deltaP > 0.01  && %dotTotal > 0.9){
@@ -12367,32 +12846,32 @@ function dtPingStats(){
                %least2 = mAbs(%fVel - %deltaP);
                %least =  (%least2 < %least) ? %least2 : %least;
                %distortion = (%least / %deltaP);
-
+               
                %client.tsDistortion = %distortion;
-
+               
                if(%distortion < 1){// clamp  it so random large values dont mess things up
                   %client.dstTotal += %distortion; %client.dstCount++;
                   %client.dstAvg = %client.dstTotal / %client.dstCount;
-
+                  
                   if(%client.dstCount > 30){// limit sample size
-                    %client.dstTotal *= (1 - 0.3);
-                    %client.dstCount *= (1 - 0.3);
+                    %client.dstTotal *= (1 - 0.3);  
+                    %client.dstCount *= (1 - 0.3); 
                   }
-
-                  if( %client.dstAvg > $tsLimit && %client.dstCount > 15){
+                  
+                  if( %client.dstAvg > $tsLimit && %client.dstCount > 15){ 
                      %client.dstHighAvg++;
                   }
-
+                  
                   if(%distortion > $dtStats::tsLimit){
                      if(%client.distortionCount < $dtStats::tsCountLimit){
-                        %client.distortionCount++;
+                        %client.distortionCount++;  
                      }
-                     if(%client.distortionCount >= $tsCountLimit){
+                     if(%client.distortionCount >= $tsCountLimit){ 
                         %client.tsc++;
                      }
                   }
                   else if(%distortion < $tsLimit && %client.distortionCount > 0)
-                    %client.distortionCount--;
+                    %client.distortionCount--; 
                }
             }
 			}
@@ -12462,7 +12941,7 @@ function dtPingStats(){
 }
 $dtStats::eventMax = 32;
 function dtEventLog(%log,%save){
-
+  
    if(%count >= $dtStats::eventMax){
       $dtServer::eventLogCount = 0;
    }
@@ -12501,6 +12980,8 @@ function dtSaveServerVars(){
    schedule(1000 * %i++,0,"export", "$dtServer::team*", "serverStats/teamWL.cs", false );
    schedule(1000 * %i++,0,"export", "$mapID::*", "serverStats/mapIDList.cs", false );
    schedule(1000 * %i++,0,"export", "$dtServer::event*", "serverStats/eventLog.cs", false );
+   pugList.schedule(1000 * %i++,"save","serverStats/pugLog.cs", 0);
+   pubList.schedule(1000 * %i++,"save","serverStats/pubLog.cs", 0);
    if($dtStats::ctfTimes)
       schedule(1000 * %i++,0,"export", "$dtServer::capTimes*", "serverStats/capTimes.cs", false );
 }
@@ -12528,6 +13009,7 @@ function dtLoadServerVars(){// keep function at the bottom
             $dtServerVars::crashLog[$dtServerVars::crashLogCount++] = %date @ "-" @ %upTime @ "-" @ %mis @ "-" @  $dtServerVars::lastGameType @ "-" @ $dtServerVars::lastPlayerCount;
             schedule(30000,0,"dtEventLog","Server Crash" SPC %date SPC "Pl Count =" SPC $dtServerVars::lastPlayerCount SPC "Map =" SPC %mis, 0);
          }
+         schedule(30001,0,"dtEventLog","Last Server Uptime =" SPC %date SPC "Up Time =" SPC %upTime, 0);
       }
       if($dtServerVars::upTimeCount >= 30)
          $dtServerVars::upTimeCount = 0;
@@ -12559,15 +13041,18 @@ function dtLoadServerVars(){// keep function at the bottom
       if(isFile("serverStats/teamWL.cs"))
          exec("serverStats/teamWL.cs");
       if(isFile("serverStats/capTimes.cs") && $dtStats::ctfTimes)
-         exec("serverStats/capTimes.cs");
+         exec("serverStats/capTimes.cs");  
       if(isFile("serverStats/mapPlayRot.cs"))
-         exec("serverStats/mapPlayRot.cs");
-
+         exec("serverStats/mapPlayRot.cs"); 
+      if(isFile("serverStats/pugLog.cs"))
+         exec("serverStats/pugLog.cs");
+      if(isFile("serverStats/pubLog.cs"))
+         exec("serverStats/pubLog.cs");  
       $dtServer::eventLogCount = 0;
       if(isFile("serverStats/eventLog.cs"))
          exec("serverStats/eventLog.cs");
-
-
+         
+      
 
       dtEventLog("Server Start" SPC formattimestring("hh:nn:a mm-dd-yy"), 0);
 
@@ -12597,7 +13082,7 @@ function savePrx(){
    $DemoFile = %file;
    pathMapData.OpenForWrite(%file);
    writePrx(0);
-
+   
 }
 function writePrx(%x){
    $pathMaps::saving = 1;
@@ -12653,7 +13138,7 @@ function pathDataPoint(%client){
       }
    }
    else{
-      stopPlayerPlot();
+      stopPlayerPlot();  
    }
 }
 
@@ -12665,12 +13150,12 @@ function scanHeightMap(){
       for(%x = -512; %x < 512; %x++){
          %xO = %x * 2;
          %rayStart = %xO SPC %yO SPC 5000; // +5000
-         %rayEnd = %xO  SPC %yO SPC -5000; //- 5000 for 45
+         %rayEnd = %xO  SPC %yO SPC -5000; //- 5000 for 45 
          %ground = ContainerRayCast(%rayStart, %rayEnd, %mask, 0);
          if(%ground){
             %pos = getWords(%ground, 1, 3);
             %depth  = 5000 - vectorDist(%rayStart,%pos);// getTerrainHeight(%x SPC %y SPC 0);
-            $depth::min = $depthMin = ($depthMin < %depth) ? $depthMin : %depth; // find are min and max elevation
+            $depth::min = $depthMin = ($depthMin < %depth) ? $depthMin : %depth; // find are min and max elevation 
             $depth::max = $depthMax = ($depthMax > %depth) ? $depthMax : %depth;
             $depth::array[%x,%y] = %depth;
          }
@@ -12705,7 +13190,7 @@ function pathMapSave(%x){ // save
    for (%y = -512; %y < 512; %y++){
       %depth =$depth::array[%x,%y];
       %col = mFloor((%depth - $depth::min) * %colRange);
-      %color = %col SPC %col SPC %col;
+      %color = %col SPC %col SPC %col; 
       pathFileObj.writeLine(%color @ "\n");
    }
    if($pathMaps::debugEcho){error("pathMapSave" SPC %x SPC "out of" SPC 128);}
@@ -12714,7 +13199,7 @@ function pathMapSave(%x){ // save
    }
    else{
       pathFileObj.close();
-      pathFileObj.delete();
+      pathFileObj.delete();  
       $pathMaps::SaveStart = 0;
       error("Finished Path Map");
       if($pm::buildCount++ <= $pm::count){
@@ -12746,9 +13231,9 @@ function loadDTBanlist(){
          exec($dtStats::BanListFile);
          if(isObject(dtBanList)){
             RootGroup.add(dtBanList);
-            for (%i = 0; %i <  dtBanList.getCount(); %i++){//keeps less junk in the ban file
+            for (%i = 0; %i <  dtBanList.getCount(); %i++){//keeps less junk in the ban file 
                %obj = dtBanList.getObject(%i);
-               %delta =  getBanCount(%obj.banDateTime);
+               %delta =  getTimeDelta(%obj.banDateTime);
                if (%delta > %obj.banLengthMin){
                   unbanUserObj(%obj);
                   %i = 0;// reset
@@ -12757,12 +13242,12 @@ function loadDTBanlist(){
                   if(%obj.guid !$= "")
                      $dtBanTemp::GUID[%obj.guid ] = %obj;
                   if(%obj.ip !$= "")
-                     $dtBanTemp::IP[%obj.ip] = %obj;
+                     $dtBanTemp::IP[%obj.ip] = %obj; 
                }
             }
          }
       }
-
+      
       if(isFile($dtStats::WhtListFile)){
           $dtWhtList:WLCount = 0;
          exec($dtStats::WhtListFile);
@@ -12771,10 +13256,10 @@ function loadDTBanlist(){
             for (%i = 0; %i <  serverSafeList.getCount(); %i++){
                %obj = serverSafeList.getObject(%index);
                $dtWhtList::WhiteList[%obj.guid] = %obj;
-            }
+            }  
          }
       }
-
+      
        loadIPListM();
    }
 }
@@ -12788,7 +13273,7 @@ function loadIPListM(){
       RootGroup.add(%file);
       %file.OpenForRead($dtStats::IPBanListFile);
       schedule(10000, 0,"loadIPBanList",%file);
-   }
+   }  
 }
 function loadIPBanList(%file){
    %i = 0;
@@ -12797,8 +13282,8 @@ function loadIPBanList(%file){
    while( !%file.isEOF() && %i++ < 1000 && !$ipcountLimit){
       %line = %file.readline();
       if(strLen(%line) > 7){
-         if(strstr(%line, "/") != -1){
-            %real  = getRealTime();
+         if(strstr(%line, "/") != -1){   
+            %real  = getRealTime();       
             %amount = getCIDRRange(trim(%line));
          }
          else{
@@ -12806,7 +13291,7 @@ function loadIPBanList(%file){
             $dtIPList[%ip] = 1;
             $ipcount++;
             if($ipcount > 2000000){
-               $ipcountLimit =1;
+               $ipcountLimit =1;  
             }
          }
       }
@@ -12816,7 +13301,7 @@ function loadIPBanList(%file){
    }
    else{
       %file.close();
-      %file.delete();
+      %file.delete();  
    }
 }
 function getCIDRRange(%ip) {
@@ -12829,9 +13314,9 @@ function getCIDRRange(%ip) {
    }
    // Convert IP address to integer
    %ipArray = strreplace(%ip, ".", "\t");
-
-   %binIP = decToBin2(getField(%ipArray,0)) @ decToBin2(getField(%ipArray,1)) @ decToBin2(getField(%ipArray,2)) @ decToBin2(getField(%ipArray,3));
-   %h =  getSubStr(%binIP, 0, %ipMask) @ %host;
+   
+   %binIP = decToBin2(getField(%ipArray,0)) @ decToBin2(getField(%ipArray,1)) @ decToBin2(getField(%ipArray,2)) @ decToBin2(getField(%ipArray,3)); 
+   %h =  getSubStr(%binIP, 0, %ipMask) @ %host;    
    %b =  getSubStr(%binIP, 0, %ipMask) @ %broad;
    %start = binToDec2(getSubStr(%h,0,8)) TAB binToDec2(getSubStr(%h,8,8))  TAB binToDec2(getSubStr(%h,16,8)) TAB binToDec2(getSubStr(%h,24,8));
    %end =  binToDec2(getSubStr(%b,0,8)) TAB binToDec2(getSubStr(%b,8,8))  TAB binToDec2(getSubStr(%b,16,8)) TAB binToDec2(getSubStr(%b,24,8));
@@ -12855,16 +13340,16 @@ function getCIDRRange(%ip) {
             for (%l = getField(%start,3); %l <= getField(%end,3); %l++) {
                %currentIP = %i @ "_" @ %j @ "_" @ %k @ "_" @ %l;
                $dtIPList[%currentIP] = 1;
-               $ipcount++;
+               $ipcount++; 
                %ipcount++;
                if($ipcount > 2000000){
-                  $ipcountLimit = 1;
+                  $ipcountLimit = 1;  
                }
             }
          }
       }
    }
-   return %ipcount;
+   return %ipcount;  
 }
 
 function decToBin2(%dec){
@@ -12899,7 +13384,7 @@ package dtBanSys{
    //Reapply the gag
    function GameConnection::onConnect( %client, %name, %raceGender, %skin, %voice, %voicePitch ){
       parent::onConnect( %client, %name, %raceGender, %skin, %voice, %voicePitch );
-
+      
       %client.isGagged = ($chatGagged[getClientCleanIP(%client)]  || $chatGagged[%client.guid]); //restore status
    }
 
@@ -12921,7 +13406,7 @@ package dtBanSys{
             banDateTime = dtMarkDate();
             banLengthMin = %time;
          };
-         dtBanList.add(%banObj);
+         dtBanList.add(%banObj); 
          if(!%bareIP)
             $dtBanTemp::IP[%bareIP] = %banObj;
          if(%guid){
@@ -12937,7 +13422,7 @@ package dtBanSys{
          %obj = $dtBanTemp::GUID[%bareIP];
          %obj.guid = %guid;
       }
-
+      
       saveBanList();
    }
 
@@ -12945,9 +13430,9 @@ package dtBanSys{
       %ip = getClientCleanIP(%client);
       %obj = $dtBanTemp::IP[%ip];
       if(isObject(%obj) && %obj.banDateTime > 0){
-         %delta =  getBanCount(%obj.banDateTime);
+         %delta =  getTimeDelta(%obj.banDateTime);
          if (%delta < %obj.banLengthMin){
-            pushFailJoin(%obj.name, %obj.gui, 0, "Kick/Ban" SPC %obj.banDateTime - %delta SPC "Minutes Left", 1);
+            pushFailJoin(%obj.name, %obj.gui, 0, "Kick/Ban" SPC %obj.banDateTime - %delta SPC "Minutes Left", 1);   
             return 1;
          }
          else{
@@ -12980,14 +13465,14 @@ package dtBanSys{
 
 function dtIsAdmin(%client,%guid){
 
-   %totalRecords = getFieldCount( $Host::AdminList );
+   %totalRecords = getFieldCount( $Host::AdminList ); 
    for(%i = 0; %i < %totalRecords; %i++)
    {
       %record = getField( getRecord( $Host::AdminList, 0 ), %i);
       if(%record == %guid)
          return true;
    }
-
+   
    %totalRecords = getFieldCount( $Host::superAdminList );
    for(%i = 0; %i < %totalRecords; %i++)
    {
@@ -12995,35 +13480,35 @@ function dtIsAdmin(%client,%guid){
       if(%record == %guid)
          return true;
    }
-
+   
    return false;
 }
 
 
 
-function banList_checkClientGUID(%client, %guid){// only one we care about in whitelist mode
+function banList_checkClientGUID(%client, %guid){// only one we care about in whitelist mode 
    %obj = $dtBanTemp::GUID[%guid];
    if (isObject(%obj) && %obj.banDateTime > 0){
-      %delta =  getBanCount(%obj.banDateTime);
+      %delta =  getTimeDelta(%obj.banDateTime);
       if (%delta < %obj.banLengthMin){
          pushFailJoin(%obj.name, %guid, 0, "Kick/Ban" SPC %obj.banLengthMin - %delta SPC "Minutes Left",1);
-
+         
          %client.setDisconnectReason("You are not allowed to play on this server.");
          %client.delete();
          return 1;
       }
       else{
-         unbanUserObj(%obj);
+         unbanUserObj(%obj); 
       }
    }
-
+   
    %realName = getField(%client.t2csri_authInfo, 0 );
    if(%realName !$= "")
       %name = trim(%realName);
    else
       %name = trim(stripChars( detag( getTaggedString( %fc.name ) ), "\cp\co\c6\c7\c8\c9\c0" ));
 
-   %safe = ( dtIsAdmin(%client,%guid) || isObject($dtWhtList::WhiteList[%guid]));
+   %safe = ( dtIsAdmin(%client,%guid) || isObject($dtWhtList::WhiteList[%guid])); 
    if(!%safe){
       pushFailJoin(%name, %guid, 0, "Not Whitelisted", 0);
       if($dtServerVars::WhiteListMode){
@@ -13032,32 +13517,32 @@ function banList_checkClientGUID(%client, %guid){// only one we care about in wh
          return 1;
       }
    }
-
-   %ip = getClientCleanIP(%client);// this is here in case of banned ip is a whitelisted account
+   
+   %ip = getClientCleanIP(%client);// this is here in case of banned ip is a whitelisted account 
    if($dtServerVars::IPBanListMode && $dtIPList[%ip] && !isObject($dtWhtList::WhiteList[%guid])){
       pushFailJoin(%name, %client.guid, %ip, "IP Ban List", 2);
       %client.setDisconnectReason("You are not allowed to play on this server.");
       %client.delete();
-      return 1;
+      return 1;  
    }
    return 0;
 }
 
-function pushFailJoin(%name, %guid, %ip, %reason, %type){// rolling buffer
+function pushFailJoin(%name, %guid, %ip, %reason, %type){// rolling buffer 
    if(%guid && ! $dtJoinListGuid[%guid]){
-      if($dtJoinListCount < $dtStats::joinHist){// limit the list size
+      if($dtJoinListCount < $dtStats::joinHist){// limit the list size 
          if($dtJoinListCount > 0){
              for (%i = $dtJoinListCount - 1; %i >= 0; %i--) {
-                 $dtJoinList[%i + 1] = $dtJoinList[%i];
+                 $dtJoinList[%i + 1] = $dtJoinList[%i]; 
              }
          }
          $dtJoinListGuid[%guid] = 1;
          $dtJoinList[0] = %name TAB %guid TAB %ip TAB %reason TAB %type;
-         $dtJoinListCount++;
+         $dtJoinListCount++;   
       }
       else{
          for (%i = $dtJoinListCount - 1; %i >= 0; %i--) {
-            $dtJoinList[%i + 1] = $dtJoinList[%i];
+            $dtJoinList[%i + 1] = $dtJoinList[%i];  
          }
          $dtJoinListGuid[getField($dtJoinList[$dtJoinListCount],1)] = "";// clear out the last one
          $dtJoinList[0] = %name TAB %guid TAB %ip TAB %reason TAB %type;
@@ -13073,8 +13558,8 @@ function pushWhiteList(%guid,%name){
   }
   if(!$dtWhtList::WhiteList[%guid]){
    if(%name $= "")
-      %name = "NONAME" @ %guid;
-
+      %name = "NONAME" @ %guid;  
+      
    %id = new scriptObject(){
       name = %name;
       guid = %guid;
@@ -13089,7 +13574,7 @@ function rmvWhiteListGuid(%guid){
    %obj = $dtWhtList::WhiteList[%guid];
    if(isObject(%obj)){
       error("Player" SPC %obj.name SPC %obj.guid SPC "Removed");
-      $dtWhtList::WhiteList[%guid] = "";
+      $dtWhtList::WhiteList[%guid] = "";  
       %obj.delete();
       saveWhtList();
    }
@@ -13107,7 +13592,7 @@ function rmvWhiteListIndex(%index){
 function unbanUserObj(%obj){
    if(isObject(%obj)){
       $dtBanTemp::IP[%obj.ip] = "";
-      $dtBanTemp::GUID[%obj.guid] = "";
+      $dtBanTemp::GUID[%obj.guid] = "";      
       error(%obj.name SPC %obj.guid SPC "UNBANNED");
       %obj.delete();
       saveBanList();
@@ -13116,7 +13601,7 @@ function unbanUserObj(%obj){
 
 function unbanIndex(%index){
    if(!%index){
-       for (%i = 0; %i <  dtBanList.getCount(); %i++){//keeps less junk in the ban file
+       for (%i = 0; %i <  dtBanList.getCount(); %i++){//keeps less junk in the ban file 
          %obj = dtBanList.getObject(%i);
          error(%i SPC %obj.name SPC %obj.guid SPC strReplace(%obj.ip, "_", "."));
        }
@@ -13126,7 +13611,7 @@ function unbanIndex(%index){
       %obj = dtBanList.getObject(%index);
       if(isObject(%obj)){
          $dtBanTemp::IP[%obj.ip] = "";
-         $dtBanTemp::GUID[%obj.guid] = "";
+         $dtBanTemp::GUID[%obj.guid] = "";      
          error(%obj.name SPC %obj.guid SPC "UNBANNED");
          %obj.delete();
          saveBanList();
@@ -13155,49 +13640,49 @@ function getClientBanName(%guid, %ip){
   }
   return "NONAME";
 }
-
+ 
 function getClientCleanIP(%client){// variable access bug workaround
    %ip = %client.getAddress();
    %ip = getSubStr(%ip, 3, strLen(%ip));
    %ip = getSubStr(%ip, 0, strstr(%ip, ":"));
-   %ip = strReplace(%ip, ".", "_");
-   return %ip;
+   %ip = strReplace(%ip, ".", "_"); 
+   return %ip; 
 }
 
 function getCleanIP(%ip){ // variable access bug workaround
     if (getSubStr(%ip, 0, 3) $= "IP:"){
       %ip = getSubStr(%ip, 3, strLen(%ip));
       %ip = getSubStr(%ip, 0, strstr(%ip, ":"));
-      %ip = strReplace(%ip, ".", "_");
-      return %ip;
+      %ip = strReplace(%ip, ".", "_"); 
+      return %ip; 
     }
     return 0;
 }
 
-function  getBanCount(%dateTime){
+function  getTimeDelta(%dateTime){
   //banDateTime = "05\t01\t2024\t13\t00";
    %d = getWord(%dateTime,0); %m = getWord(%dateTime,1); %y = getWord(%dateTime,2);
    %h = getWord(%dateTime,3); %n = getWord(%dateTime,4);
-
-   %curDD = formattimestring("dd");%curMM = formattimestring("mm");%curYY = formattimestring("yy");
+   
+   %curDD = formattimestring("dd");%curMM = formattimestring("mm");%curYY = formattimestring("yy");  
    %dcA = %dcB = 0;
-
+   
    %days[2] = (%y % 4 == 0) ? "29" : "28";
-   %days[1] = "31";%days[3] = "31"; %days[4] = "30";
-   %days[5] = "31"; %days[6] = "30"; %days[7] = "31";
-   %days[8] = "31"; %days[9] = "30"; %days[10] = "31";
+   %days[1] = "31";%days[3] = "31"; %days[4] = "30"; 
+   %days[5] = "31"; %days[6] = "30"; %days[7] = "31"; 
+   %days[8] = "31"; %days[9] = "30"; %days[10] = "31"; 
    %days[11] = "30"; %days[12] = "31";
-
+   
    for(%i = 1; %i <= %m-1; %i++){
       %dcA += %days[%i];
-   }
-
+   }   
+   
    %dcA += %d;
-
+   
    %days[2] = (%curYY % 4 == 0) ? "29" : "28";
    for(%i = 1; %i <= %curMM-1; %i++){
       %dcB += %days[%i];
-   }
+   }   
    %dcB += %curDD;
 
    %dif = formattimestring("yy") - %y;
@@ -13244,7 +13729,7 @@ function banSaveExport(%file){
    }
    %fobj.writeLine("};");
    %fobj.close();
-   %fobj.delete();
+   %fobj.delete(); 
 }
 
 function saveWhtList(){
@@ -13270,11 +13755,11 @@ function buildServerGuidList(){
             %guid = getField(strreplace(getField(strreplace(%file,"/","\t"),3),"t","\t"),0);
             if(getFieldCount($dtBanTemp::GUID[%guid]) > 0)// skip banned clients
                continue;
-
+               
             %fobj.openForRead(%file);
             %fobj.readline(); //skip
             %gameCount = strreplace(%fobj.readline(),"%t","\t");
-
+            
             %d0 = getField(%gameCount,1);%d1 = getField(%gameCount,2);
             %d = (%d0 > %d1) ? %d0 : %d1;
             %w0 = getField(%gameCount,3);%w1 = getField(%gameCount,4);
@@ -13283,12 +13768,12 @@ function buildServerGuidList(){
             %m = (%m0 > %m1) ? %m0 : %m1;
             %q0 = getField(%gameCount,7);%q1 = getField(%gameCount,8);
             %q = (%q0 > %q1) ? %q0 : %q1;
-            %y0 = getField(%gameCount,9);%y1 = getField(%gameCount,10);
-            %y = (%y0 > %y1) ? %y0 : %y1;
-
+            %y0 = getField(%gameCount,9);%y1 = getField(%gameCount,10); 
+            %y = (%y0 > %y1) ? %y0 : %y1;           
+            
             if(getFieldCount($guidInfo[%guid]) == 6){
                if(getField($guidInfo[%guid],5) < %y){// update if this info is better
-                  $guidInfo[%guid] = %name TAB %d TAB %w TAB %m TAB %q TAB %y;
+                  $guidInfo[%guid] = %name TAB %d TAB %w TAB %m TAB %q TAB %y;   
                }
             }
             else{
@@ -13296,24 +13781,25 @@ function buildServerGuidList(){
                   %td += %d; %tw += %w; %tm += %m; %tq += %q; %ty += %y;
                   %name = getField(strreplace(%fobj.readline(),"%t","\t"),1);
                   $guidInfo[%guid] = %name TAB %d TAB %w TAB %m TAB %q TAB %y;
-                  $guidList[$guidListCount]= %guid; $guidListCount++;
+                  $guidList[$guidListCount]= %guid; $guidListCount++;  
                   $guidAvgs = mFloor(%td/$guidListCount) TAB mFloor(%tw/$guidListCount) TAB mFloor(%tm/$guidListCount) TAB mFloor(%tq/$guidListCount) TAB mFloor(%ty/$guidListCount);
-               }
+               }              
             }
             %fobj.close();
-         }
+         }  
       }
    }
    %fobj.delete();
-}
+} 
 
 
 if (!isActivePackage(dtBanSys)){
    if(!isFile("scripts/autoexec/dtBanSystem.cs")){
 	   activatePackage(dtBanSys);
    }
-   else
+   else{
       error("Error old ban system in place, delete scripts/autoexec/dtBanSystem.cs and its .dso");
+   }
 	loadDTBanlist();
 	buildServerGuidList();
 }
@@ -13322,14 +13808,14 @@ if (!isActivePackage(dtBanSys)){
 function genFakeWhiteList(%amount){
    deleteVariables("$dtWhtList::WhiteList*");
    serverSafeList.delete();
-   for (%i = 0; %i <  %amount; %i++){
+   for (%i = 0; %i <  %amount; %i++){ 
       pushWhiteList(20056 + %i, "ThisIsALongName" @ %i);
    }
-}
+}         
 
 function genFakeBanList(%amount){
    dtBanList.delete();
-   for (%i = 0; %i <  %amount; %i++){
+   for (%i = 0; %i <  %amount; %i++){ 
       BanList::add(20056 + %i, "IP:192.168.0." @ %i @":28000", getRandom(10,500));
    }
 }
@@ -13337,7 +13823,7 @@ function genFakeBanList(%amount){
 //function genFakeJoinList(%amount){
    //deleteVariables("$dtJoinList*");
    //$dtJoinListCount = 0;
-   //for (%i = 0; %i <  %amount; %i++){
+   //for (%i = 0; %i <  %amount; %i++){ 
      //pushFailJoin("ThisIsALongName" @ %i, 2005+%i, 0, "Test Message",getRandom(0,2));
    //}
 //}
@@ -13347,13 +13833,13 @@ function banList_bareIP(%ip){
    %ip = strReplace(%ip, ".", "_");
    if($dtIPList[%ip]){
       pushFailJoin(%name, %client.guid, %ip, "IP Ban List", 2);
-      return 2;
+      return 2;  
    }
    %obj = $dtBanTemp::IP[%ip];
    if(isObject(%obj) && %obj.banDateTime > 0){
-      %delta =  getBanCount(%obj.banDateTime);
+      %delta =  getTimeDelta(%obj.banDateTime);
       if (%delta < %obj.banLengthMin){
-         pushFailJoin(%obj.name, %obj.gui, 0, "Kick/Ban" SPC %obj.banDateTime - %delta SPC "Minutes Left", 1);
+         pushFailJoin(%obj.name, %obj.gui, 0, "Kick/Ban" SPC %obj.banDateTime - %delta SPC "Minutes Left", 1);   
          return 1;
       }
       else{
@@ -15268,12 +15754,12 @@ $fontInfo["remapTable","T2",32] = "-1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
 
 
 
-// 0       1        2     3      4        5        6
+// 0       1        2     3      4        5        6 
 //xOffset yOffset width height xOrigin yOrigin xIncrement
-//glyph font type rendering
+//glyph font type rendering 
 function addGLText(%text, %sX, %sY, %color, %type, %size, %clipLimit) {
    if ($fontInfo["fontHeight",%type,%size] > 0){
-      %line = %sY;// are line postion
+      %line = %sY;// are line postion 
       %cc = strCmp(".","");
       %rm = getWord($fontInfo["remapTable",%type,%size],strCmp(".",""));
       %pinfo =$fontInfo["charInfoList",%type,%size,%rm];
@@ -15286,7 +15772,7 @@ function addGLText(%text, %sX, %sY, %color, %type, %size, %clipLimit) {
             %charInfo = $fontInfo["charInfoList",%type,%size,%charIndex];
             %sY = ($fontInfo["baseLine",%type,%size] - getWord(%charInfo,5)) + %line;
             %sX += getWord(%charInfo,4);
-            //if (sX > this.width) // we have hit the end of are image
+            //if (sX > this.width) // we have hit the end of are image 
             //    return 0;
             %ln += getWord(%charInfo,6) - getWord(%charInfo,4);
             if (%ln < %clipLimit) {
@@ -15295,7 +15781,7 @@ function addGLText(%text, %sX, %sY, %color, %type, %size, %clipLimit) {
                      %pixel = getWord($fontInfo["bitmap",%type,%size,%y + getWord(%charInfo,1)],%x + getWord(%charInfo,0));
                      if (%pixel > 0) {
                         $textColor[(%sX + %x),(%sY + %y)] = %pixel SPC %color;
-                     }
+                     } 
                      else {
                         $textColor[(%sX + %x),(%sY + %y)] = "0 0 0 0";
                      }
@@ -15303,7 +15789,7 @@ function addGLText(%text, %sX, %sY, %color, %type, %size, %clipLimit) {
                }
                %sX += getWord(%charInfo,6) - getWord(%charInfo,4);
             }
-            else {// adds .. becuase of clip limit
+            else {// adds .. becuase of clip limit 
                for (%z = 0; %z < 2; %z++) {
                   %sY = ($fontInfo["baseLine",%type,%size] - getWord(%pinfo,5)) + %line;
                   %sX += getWord(%pinfo,4);
@@ -15312,7 +15798,7 @@ function addGLText(%text, %sX, %sY, %color, %type, %size, %clipLimit) {
                         %pixel = getWord($fontInfo["bitmap",%type,%size,%y + getWord(%pinfo,1)],%x + getWord(%pinfo,0));
                         if (%pixel > 0) {
                            $textColor[(%sX + %x),(%sY + %y)] = %pixel SPC %color;
-                        }
+                        } 
                         else {
                            $textColor[(%sX + %x),(%sY + %y)] = "0 0 0 0";
                         }
@@ -15339,14 +15825,14 @@ function getTextPosPixels(%text, %sX, %sY, %type, %size)  {
             %charInfo = $fontInfo["charInfoList",%type,%size,%charIndex];
             %sY = ($fontInfo["baseLine",%type,%size] - getWord(%charInfo,5)) + %line;
             %sX += getWord(%charInfo,4);
-            //if (sX > this.width) // we have hit the end of are image
+            //if (sX > this.width) // we have hit the end of are image 
             //    return 0;
             %ln += getWord(%charInfo,6) - getWord(%charInfo,4);
             %sX += getWord(%charInfo,6) - getWord(%charInfo,4);
             %length +=  getWord(%charInfo,6) -  getWord(%charInfo,4);
          }
       }
-      return %sX TAB %length;
+      return %sX TAB %length; 
    }
 }
 
@@ -15367,7 +15853,7 @@ function getTextLengthInPixels(%text, %type, %size) {
    return 0;
 }
 
-function genBigStats(%game, %mon, %year){
+function genBigStats(%game, %lType, %mon, %year){
    if(%game $= "" || %mon $= "" || %year $= ""){
       %game = "CTFGame";
       %mon = 1;
@@ -15376,15 +15862,19 @@ function genBigStats(%game, %mon, %year){
    %callCount = 0;
    %callTime = 16;
    deleteVariables("$textColor*");
-   %lType = "month";
    %mainXSize =1860;
    %mainySize = 1115;
    %leftmargin = 4;
-   %header = "Monthly Stats For" SPC monthString(%mon) SPC %year SPC "-" SPC $dtStats::gtNameLong[%game];
+   if(%lType $= "month"){
+      %header = "Monthly Stats For" SPC monthString(%mon) SPC %year SPC "-" SPC $dtStats::gtNameLong[%game];   
+   }
+   else if(%lType $= "week"){
+       %header = "Weekly Stats For week" SPC %mon SPC %year SPC "-" SPC $dtStats::gtNameLong[%game];   
+   }
    %hsize = getTextLengthInPixels(%header, "RC", 30);//30
    schedule(%callTime * %callCount++,0,"addGLText",%header, mFloor(%mainXSize / 2) - mFloor(%hsize / 2), 50, "11 239 231", "RC", 30, 500);//30
-   %gameOutput = %game;// in case its renamed  we stil want the output file to have the gametype
-   if($smallPanel[0,%game] $= ""){// if we have no data for this gametype switch to are default list
+   %gameOutput = %game;// in case its renamed  we stil want the output file to have the gametype   
+   if($smallPanel[0,%game] $= ""){// if we have no data for this gametype switch to are default list 
       %game = "DefaultGame";
    }
    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15429,7 +15919,7 @@ function genBigStats(%game, %mon, %year){
       %panelYSize = 330;
       %y = 1;
       %r = -1;
-      %uwpCount = (%game $= "CTFGame" || %game $= "DefaultGame") ? 4 : 8;
+      %uwpCount = mFloor($upperWepPanelCount[%game] / 3);
       for (%x = 0; %x < %xPanels; %x++) {
          for (%i = 0; %i < %uwpCount; %i++) {
             %varname = $upperWepPanel[%r++,%game];
@@ -15461,18 +15951,26 @@ function genBigStats(%game, %mon, %year){
          schedule(%callTime * %callCount++,0,"addGLText","Damage", (%tabspace * 4) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
          %weapons = "Blaster\tPlasma Rifle\tChaingun\tSpinfusor\tGrenade Launcher\tShocklance\tMine\tHand Grenade";
       }
+      else if(%game $= "ArenaGame"){
+         schedule(%callTime * %callCount++,0,"addGLText","Weapon", %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Kills", (%tabspace * 1) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","MidAirs", (%tabspace * 2) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Distance", (%tabspace * 3) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Damage", (%tabspace * 4) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         %weapons = "Blaster\tPlasma Rifle\tChaingun\tSpinfusor\tGrenade Launcher\tLaser Rifle\tShocklance\tHand Grenade";
+      }
       else{
          schedule(%callTime * %callCount++,0,"addGLText","Weapon", %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
          schedule(%callTime * %callCount++,0,"addGLText","Accuracy", (%tabspace * 1) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
          schedule(%callTime * %callCount++,0,"addGLText","Wep Combo", (%tabspace * 2) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
          schedule(%callTime * %callCount++,0,"addGLText","Speed", (%tabspace * 3) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
-         schedule(%callTime * %callCount++,0,"addGLText","Damage", (%tabspace * 4) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Damage", (%tabspace * 4) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500); 
          %weapons = "Blaster\tPlasma Rifle\tSpinfusor\tGrenade Launcher\tMortar\tShocklance\tMine\tHand Grenade";
-      }
+      }    
 
 
 
-      %wepLn = (%game $= "CTFGame" || %game $= "DefaultGame") ? 13 : 9;
+      %wepLn = mFloor($wepGridCount[%game] / 4) + 1;      
       %wepCount = %i + %wepLn;
       %w = -1;
       %r = -1;
@@ -15480,16 +15978,16 @@ function genBigStats(%game, %mon, %year){
       for (%i = %i + 1; %i < %wepCount; %i++) {
          %varname = $wepGrid[%r++,%game];
          %nameData1 = $lData::name[%varname,%gameOutput,%lType,%mon,%year];
-
+         
          %varname = $wepGrid[%r++,%game];
          %nameData2 = $lData::name[%varname,%gameOutput,%lType,%mon,%year];
-
+         
          %varname = $wepGrid[%r++,%game];
          %nameData3 = $lData::name[%varname,%gameOutput,%lType,%mon,%year];
-
+         
          %varname = $wepGrid[%r++,%game];
          %nameData4 = $lData::name[%varname,%gameOutput,%lType,%mon,%year];
-
+         
          schedule(%callTime * %callCount++,0,"addGLText",getField(%weapons, %w++), %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, %maxNameSize);
          schedule(%callTime * %callCount++,0,"addGLText",getField(%nameData1, 0), (%tabspace * 1) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "3 213 151", "RC", 15, %maxNameSize);
          schedule(%callTime * %callCount++,0,"addGLText",getField(%nameData2, 0), (%tabspace * 2) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "3 213 151", "RC", 15, %maxNameSize);
@@ -15507,7 +16005,7 @@ function genBigStats(%game, %mon, %year){
       %gridYOffset = 330;
       %y = 2;
       %r = -1;
-      for (%i = 0; %i < 16; %i++) {
+      for (%i = 0; %i < mFloor($panelThreeCount[%game]/3); %i++) {
           for (%x = 0; %x < 3; %x++) {
             %varname = $panelThree[%r++,%game];
             //%data = $lData::data[%varname,%gameOutput,%lType,%mon,%year];
@@ -15551,29 +16049,13 @@ function genBigStats(%game, %mon, %year){
               }
 
           }
-      }
-      schedule(%callTime * %callCount++, 0, "dumpImg",%gameOutput @ "-" @ %mon @ "-" @  %year);
+      } 
+      schedule(%callTime * %callCount++, 0, "dumpImg",%gameOutput @ "-" @ %lType @ "-" @ %mon @ "-" @  %year); 
 }
-
-
-function dumpTest(){
-      deleteVariables("$textColor*");
-   addGLText("abcdefghijklmnop", 0, 30, "3 213 151", 15, 500);
-   new fileObject(img);
-   img.openForWrite("serverStats/statsImg/test.ppm");
-   img.x = 256;
-   img.y = 256;
-   img.writeLine("P3");
-   img.writeLine(img.x SPC img.y);
-   img.writeLine("255");
-   img.yc = 0;
-   img.py = 0;
-   imgCycle(img);
-}
-
 
 function dumpImg(%name){
    new fileObject(img);
+   RootGroup.add(img);
    img.openForWrite("serverStats/statsImg/" @ %name @ ".ppm");
    img.x = 1860;
    img.y = 1115;
@@ -15586,53 +16068,234 @@ function dumpImg(%name){
    imgCycle(img);
 }
 
-function isInsideBorder(%img,%x, %y) {
-   %borderSize = 20;
-   %imgx = %img.x;
-   %imgy = %img.y;
 
-   %right = %x >= (%imgx - %borderSize);
-   %left = %x <= %borderSize;
-   %top = %y <= %borderSize;
-   %bottom = %y >= (%imgy -  %borderSize);
-   //error(%right SPC %left SPC %top SPC %bottom);
-   return %right || %left || %top || %bottom;
+function genBigMapStats(%count){
+   error("genBigMapStats" SPC %count);
+   if(%count < $dtStats::gameTypeCount){
+      %game = $dtStats::gameType[%count];
+      if(getFieldCount($gData::data["scoreTG",%game])){
+         genMapStatsImg(%game, %count);
+      }
+      else{
+         genBigMapStats(%count++);   
+      }
+   }
+   else{
+      $dtStats::tmCompile = 0;
+      error("map stats compile done");
+   }
 }
 
-function isInsideBorderO(%img, %x, %y, %offsetX, %offsetY, %borderSize) {
-  // %borderSize = 4;
-   %imgx = %img.x;
-   %imgy = %img.y;
+function genMapStatsImg(%game,%count){
+   if(%game $= ""){
+      return;
+   }
+   %callCount = 0;
+   %callTime = 16;
+   deleteVariables("$textColor*");
+   %mainXSize =1860;
+   %mainySize = 1115;
+   %leftmargin = 4;
+   %header = "Map Stats For" SPC $dtStats::pugDate[%game, 0] SPC "-" SPC $dtStats::gtNameLong[%game];   
+   %hsize = getTextLengthInPixels(%header, "RC", 30);//30
+   schedule(%callTime * %callCount++,0,"addGLText",%header, mFloor(%mainXSize / 2) - mFloor(%hsize / 2), 50, "11 239 231", "RC", 30, 500);//30
+   %gameOutput = %game;// in case its renamed  we stil want the output file to have the gametype   
+   if($smallPanel[0,%game] $= ""){// if we have no data for this gametype switch to are default list 
+      %game = "DefaultGame";
+   }
+   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   //Large panels Game Type
+   %xOffset = 48 + %leftmargin;
+   %yOffset = 76;
+   %xPanels = 2;
+   %yPanels = 1;
+   %gridXOffset = 240;
+   %gridYOffset = 330;
+   %y = 0;
+   schedule(%callTime * %callCount++,0,"addGLText","#. Score", %xOffset, 20 + %yOffset, "11 239 231", "RC", 15, 500);
+   schedule(%callTime * %callCount++,0,"addGLText","Total", 160 + %xOffset, 20 + %yOffset, "11 239 231", "RC", 15, 500);
+   schedule(%callTime * %callCount++,0,"addGLText","Kills", 240 + %xOffset, 20 + %yOffset, "11 239 231", "RC", 15, 500);
+   schedule(%callTime * %callCount++,0,"addGLText","Total", 400 + %xOffset, 20 + %yOffset, "11 239 231", "RC", 15, 500);
+   for (%x = 0; %x < %xPanels; %x++) {
+      if (%x == 0) {
+         %data = $gData::data["scoreTG",%gameOutput];
+         %nameData = $gData::name["scoreTG",%gameOutput];
+      }
+      else {
+         %data = $gData::data["killsTG",%gameOutput];
+         %nameData = $gData::name["killsTG",%gameOutput];
+      }
+      %r = 0;
+      for (%i = 0; %i < 15; %i++) {
+         if (%r < getFieldCount(%nameData)) {
+            schedule(%callTime * %callCount++,0,"addGLText",(%i + 1) @ "." SPC getField(%nameData, %i), (%xOffset) + (%x * %gridXOffset), ((20 * (%i + 2)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+            schedule(%callTime * %callCount++,0,"addGLText",getField(%data, %i), (160 + %xOffset) + (%x * %gridXOffset), ((20 * (%i + 2)) + %yOffset) + (%y * %gridYOffset), "3 213 151", "RC", 15, 500);
+         }
+      }
+   }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Large panels Weapon
+      %xOffset = 48 + %leftmargin;
+      %yOffset = 76;
+      %xPanels = 3;
+      %yPanels = 2;
+      %gridXOffset = 160;
+      %gridYOffset = 330;
+      %panelXSize = 161;
+      %panelYSize = 330;
+      %y = 1;
+      %r = -1;
+      %uwpCount = mFloor($upperWepPanelCount[%game] / 3);
+      for (%x = 0; %x < %xPanels; %x++) {
+         for (%i = 0; %i < %uwpCount; %i++) {
+            %varname = $upperWepPanel[%r++,%game];
+            %data = $gData::data[%varname,%gameOutput];
+            %nameData = $gData::name[%varname,%gameOutput] !$= "" ? $gData::name[%varname,%gameOutput] :  "NA";
+            %valueName = getField($statsName[%varname],0)  @ ": ";
 
-   %left = %x >= %offsetX && %x <= %borderSize + %offsetX && %y >= %offsetY && %y <= %imgy - %offsetY;
-   %right = %x >= %imgx - %offsetX - %borderSize && %x <= %imgx - %offsetX  && %y >= %offsetY && %y <= %imgy - %offsetY;
-   %top = %y >= %offsetY && %y <= %borderSize + %offsetY && %x >= %offsetX && %x <= %imgx - %offsetX;
-   %bottom = %y >= %imgy - %offsetY - %borderSize && %y <= %imgy - %offsetY && %x >= %offsetX && %x <= %imgx - %offsetX;
+            schedule(%callTime * %callCount++,0,"addGLText",%valueName, ((%xOffset) + (%x * %gridXOffset)), ((19 * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+            //%pxSize = getTextLengthInPixels(%valueName, "RC", 15);
+            %pxSize = getTextPosPixels(%valueName, ((%xOffset) + (%x * %gridXOffset)), ((19 * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "RC",  15);
+            schedule(%callTime * %callCount++,0,"addGLText",getField(%nameData, 0), getField(%pxSize,0), ((19 * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "3 213 151", "RC", 15, 155 - getField(%pxSize,1));
+          }
+      }
+      %tabspace = 95;
+      %vertSpace = 19;
+      if(%game $= "CTFGame" || %game $= "DefaultGame"){
+         schedule(%callTime * %callCount++,0,"addGLText","Weapon", %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Kills", (%tabspace * 1) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","MidAirs", (%tabspace * 2) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Distance", (%tabspace * 3) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Damage", (%tabspace * 4) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         %weapons = "Blaster\tPlasma Rifle\tChaingun\tSpinfusor\tGrenade Launcher\tLaser Rifle\tFusion Mortar\tMissile Launcher\tShocklance\tMine\tHand Grenade\tSatchel Charge";
+      }
+      else if(%game $= "LCTFGame" || %game $= "SCtFGame" ){
+         schedule(%callTime * %callCount++,0,"addGLText","Weapon", %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Kills", (%tabspace * 1) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","MidAirs", (%tabspace * 2) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Distance", (%tabspace * 3) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Damage", (%tabspace * 4) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         %weapons = "Blaster\tPlasma Rifle\tChaingun\tSpinfusor\tGrenade Launcher\tShocklance\tMine\tHand Grenade";
+      }
+      else if(%game $= "ArenaGame"){
+         schedule(%callTime * %callCount++,0,"addGLText","Weapon", %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Kills", (%tabspace * 1) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","MidAirs", (%tabspace * 2) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Distance", (%tabspace * 3) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Damage", (%tabspace * 4) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         %weapons = "Blaster\tPlasma Rifle\tChaingun\tSpinfusor\tGrenade Launcher\tLaser Rifle\tShocklance\tHand Grenade";
+      }
+      else{
+         schedule(%callTime * %callCount++,0,"addGLText","Weapon", %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Accuracy", (%tabspace * 1) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Wep Combo", (%tabspace * 2) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Speed", (%tabspace * 3) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+         schedule(%callTime * %callCount++,0,"addGLText","Damage", (%tabspace * 4) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500); 
+         %weapons = "Blaster\tPlasma Rifle\tSpinfusor\tGrenade Launcher\tMortar\tShocklance\tMine\tHand Grenade";
+      }    
 
-   return %left || %right || %top || %bottom;
+
+
+      %wepLn = mFloor($wepGridCount[%game] / 4) + 1;      
+      %wepCount = %i + %wepLn;
+      %w = -1;
+      %r = -1;
+      %maxNameSize = 90;
+      for (%i = %i + 1; %i < %wepCount; %i++) {
+         %varname = $wepGrid[%r++,%game];
+         %nameData1 = $gData::name[%varname,%gameOutput] !$= "" ? $gData::name[%varname,%gameOutput] :  "NA";
+         
+         %varname = $wepGrid[%r++,%game];
+         %nameData2 = $gData::name[%varname,%gameOutput] !$= "" ? $gData::name[%varname,%gameOutput] :  "NA";
+         
+         %varname = $wepGrid[%r++,%game];
+         %nameData3 = $gData::name[%varname,%gameOutput] !$= "" ? $gData::name[%varname,%gameOutput] :  "NA";
+         
+         %varname = $wepGrid[%r++,%game];
+         %nameData4 = $gData::name[%varname,%gameOutput] !$= "" ? $gData::name[%varname,%gameOutput] :  "NA";
+         
+         schedule(%callTime * %callCount++,0,"addGLText",getField(%weapons, %w++), %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, %maxNameSize);
+         schedule(%callTime * %callCount++,0,"addGLText",getField(%nameData1, 0), (%tabspace * 1) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "3 213 151", "RC", 15, %maxNameSize);
+         schedule(%callTime * %callCount++,0,"addGLText",getField(%nameData2, 0), (%tabspace * 2) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "3 213 151", "RC", 15, %maxNameSize);
+         schedule(%callTime * %callCount++,0,"addGLText",getField(%nameData3, 0), (%tabspace * 3) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "3 213 151", "RC", 15, %maxNameSize);
+         schedule(%callTime * %callCount++,0,"addGLText",getField(%nameData4, 0), (%tabspace * 4) + %xOffset, ((%vertSpace * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "3 213 151", "RC", 15, %maxNameSize);
+      }
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      //Large Game Type Panel
+      %xOffset = 48 + %leftmargin;
+      %yOffset = 76;
+      %xPanels = 3;
+      %yPanels = 4;
+      %gridXOffset = 160;
+      %gridYOffset = 330;
+      %y = 2;
+      %r = -1;
+      for (%i = 0; %i < mFloor($panelThreeCount[%game]/3); %i++) {
+          for (%x = 0; %x < 3; %x++) {
+            %varname = $panelThree[%r++,%game];
+            //%data = $lData::data[%varname,%gameOutput];
+            %nameData = $gData::name[%varname,%gameOutput] !$= "" ? $gData::name[%varname,%gameOutput] :  "NA";
+            %valueName = $statsName[%varname];
+            %valueName = getField(%valueName,0) @ ": ";
+            schedule(%callTime * %callCount++,0,"addGLText",%valueName, (%xOffset) + (%x * %gridXOffset), ((20 * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 500);
+            %pxSize = getTextPosPixels(%valueName, (%xOffset) + (%x * %gridXOffset), ((20 * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "RC", 15);
+            schedule(%callTime * %callCount++,0,"addGLText",getField(%nameData, 0), getField(%pxSize,0), ((20 * (%i + 1)) + %yOffset) + (%y * %gridYOffset), "3 213 151", "RC", 15, 155 -  getField(%pxSize,1));
+          }
+      }
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      //small panels
+      %xOffset = 531;
+      %yOffset = 76;
+      %xPanels = 8;
+      %yPanels = 3;
+      %gridXOffset = %panelXSize;
+      %gridYOffset = %panelYSize;
+      %r = -1;
+      for (%y = 0; %y < %yPanels; %y++) {
+          for (%x = 0; %x < %xPanels; %x++) {
+            %varname = $smallPanel[%r++,%game];
+            %valueName = $statsName[%varname];
+            %data = $gData::data[%varname,%gameOutput];
+            %nameData = $gData::name[%varname,%gameOutput];
+              schedule(%callTime * %callCount++,0,"addGLText","#." SPC getField(%valueName,0), ((%xOffset) + (%x * %gridXOffset)) + %leftmargin, (20 + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 155);
+              for (%i = 0; %i < getFieldCount(%nameData) && %i < 15; %i++) {
+                  %name = (%i + 1) @ "." SPC getField(%nameData,%i);
+                  schedule(%callTime * %callCount++,0,"addGLText",%name, ((%xOffset) + (%x * %gridXOffset)) + %leftmargin, ((20 * (%i + 2)) + %yOffset) + (%y * %gridYOffset), "11 239 231", "RC", 15, 110);
+                  if (getField(%valueName,1) $= "PCT") {
+                     %svalue = getField(%data,%i);
+                     if (strLen(%svalue) > 5) {
+                        %svalue = getSubStr(%svalue, 0, 5);
+                     }
+                  }
+                  else {
+                     %svalue = mFloor(getField(%data,%i));
+                  }
+                  schedule(%callTime * %callCount++,0,"addGLText",%svalue, (115 + %xOffset) + (%x * %gridXOffset), ((20 * (%i + 2)) + %yOffset) + (%y * %gridYOffset), "3 213 151", "RC", 15, 500);
+              }
+
+          }
+      } 
+      schedule(%callTime * %callCount++, 0, "dumpMapImg",%gameOutput @ "-" @ dtMarkDate(), %count); 
 }
 
-function lerpColor(%color1, %color2, %t) {
-  if(%t > 1) %t = 1;
-  else if (%t < 0) %t  = 0;
-
-  %r1 = getWord(%color1,0);
-  %g1 = getWord(%color1,1);
-  %b1 = getWord(%color1,2);
-
-  %r2 = getWord(%color2,0);
-  %g2 = getWord(%color2,1);
-  %b2 = getWord(%color2,2);
-
-  %lerpedR = mFloor(%r1 + (%r2 - %r1) * %t);
-  %lerpedG = mFloor(%g1 + (%g2 - %g1) * %t);
-  %lerpedB = mFloor(%b1 + (%b2 - %b1) * %t);
-
-  return %lerpedR SPC %lerpedG SPC %lerpedB;
+function dumpMapImg(%name, %count){
+   new fileObject(img);
+   RootGroup.add(img);
+   img.openForWrite("serverStats/statsImg/" @ %name @ ".ppm");
+   img.x = 1860;
+   img.y = 1115;
+   img.writeLine("P3");
+   img.writeLine(img.x SPC img.y);
+   img.writeLine("255");
+   img.yc = 0;
+   img.py = 0;
+   img.pct = 0;
+   imgCycle3(img, %count);
 }
 
-function imgCycle(%img){
-
+function imgCycle3(%img, %count){
+   
    %pct = mFloor((%img.yc / %img.y) * 100);
    if(%pct != %img.pct){
       error("Saving Stats image" SPC %pct @ "%");
@@ -15645,7 +16308,7 @@ function imgCycle(%img){
    %border = 45;
    %headersize = 42;
    %leftmargin = 4;
-
+   
    %px = 0;
    %py = 0;
    %y = %img.yc;
@@ -15653,15 +16316,15 @@ function imgCycle(%img){
       %img.py++;
    }
    for (%x = 0; %x < %img.x; %x++) {
-      %color = "0 0 0";
+      %color = "20 45 45";
       if(isInsideBorderO(%img, %x-1, %y-5, 22, 17, 20)){
-         %color = "0 118 118";
-         %color = lerpColor("0 0 0", %color, (%img.yc / %img.y)*1.5);
+         %color = "0 118 118";      
+         %color = lerpColor("32 60 69", %color, (%img.yc / %img.y)*1.5);
       }
 
       if(isInsideBorderO(%img, %x-1, %y-5, 42, 37, 4)){
-         %color = "0 150 160";
-         %color = lerpColor(%color, "0 0 0", (%img.yc / %img.y) * 0.25);
+         %color = "0 150 160";  
+         %color = lerpColor(%color, "32 60 69", (%img.yc / %img.y) * 0.25);
       }
       if (%x > %border && %y > %border && %px < (%img.x - 88)) {
          %px++;
@@ -15683,7 +16346,7 @@ function imgCycle(%img){
       }
       %fd = $textColor[%x,%y];
       if(getWord(%fd,0) > 0){
-         %opacity = 1 - (getWord(%fd,0) / 255);
+         %opacity = 1 - (getWord(%fd,0) / 255); 
          %r = mFloor((1 - %opacity) * getWord(%fd,1) + %opacity * getWord(%color,0));
          %g = mFloor((1 - %opacity) * getWord(%fd,2) + %opacity * getWord(%color,1));
          %b = mFloor((1 - %opacity) * getWord(%fd,3) + %opacity * getWord(%color,2));
@@ -15694,11 +16357,146 @@ function imgCycle(%img){
       }
    }
    %img.yc++;
-   if(%img.yc < %img.y)
+   if(%img.yc < %img.y) 
+      schedule(32,0,"imgCycle3",%img);
+   else{
+     %img.close();
+     %img.delete();  
+     deleteVariables("$textColor*");
+     error("Stats Image Done");
+     genBigMapStats(%count++); 
+   }
+}
+
+function dumpTest(){
+      deleteVariables("$textColor*");
+   addGLText("abcdefghijklmnop", 0, 30, "3 213 151", 15, 500);
+   new fileObject(img);
+   img.openForWrite("serverStats/statsImg/test.ppm");
+   img.x = 256;
+   img.y = 256;
+   img.writeLine("P3");
+   img.writeLine(img.x SPC img.y);
+   img.writeLine("255");
+   img.yc = 0;
+   img.py = 0;
+   imgCycle(img);
+}
+
+
+function isInsideBorder(%img,%x, %y) {
+   %borderSize = 20;
+   %imgx = %img.x;
+   %imgy = %img.y;
+   
+   %right = %x >= (%imgx - %borderSize);
+   %left = %x <= %borderSize;
+   %top = %y <= %borderSize;
+   %bottom = %y >= (%imgy -  %borderSize);
+   //error(%right SPC %left SPC %top SPC %bottom); 
+   return %right || %left || %top || %bottom;
+}
+
+function isInsideBorderO(%img, %x, %y, %offsetX, %offsetY, %borderSize) {
+  // %borderSize = 4;
+   %imgx = %img.x;
+   %imgy = %img.y;
+   
+   %left = %x >= %offsetX && %x <= %borderSize + %offsetX && %y >= %offsetY && %y <= %imgy - %offsetY;
+   %right = %x >= %imgx - %offsetX - %borderSize && %x <= %imgx - %offsetX  && %y >= %offsetY && %y <= %imgy - %offsetY;
+   %top = %y >= %offsetY && %y <= %borderSize + %offsetY && %x >= %offsetX && %x <= %imgx - %offsetX;
+   %bottom = %y >= %imgy - %offsetY - %borderSize && %y <= %imgy - %offsetY && %x >= %offsetX && %x <= %imgx - %offsetX;
+   
+   return %left || %right || %top || %bottom;
+}
+
+function lerpColor(%color1, %color2, %t) {
+  if(%t > 1) %t = 1;
+  else if (%t < 0) %t  = 0;
+  
+  %r1 = getWord(%color1,0);
+  %g1 = getWord(%color1,1);
+  %b1 = getWord(%color1,2);
+
+  %r2 = getWord(%color2,0);
+  %g2 = getWord(%color2,1);
+  %b2 = getWord(%color2,2);
+
+  %lerpedR = mFloor(%r1 + (%r2 - %r1) * %t);
+  %lerpedG = mFloor(%g1 + (%g2 - %g1) * %t);
+  %lerpedB = mFloor(%b1 + (%b2 - %b1) * %t);
+
+  return %lerpedR SPC %lerpedG SPC %lerpedB;
+} 
+
+function imgCycle(%img){
+   
+   %pct = mFloor((%img.yc / %img.y) * 100);
+   if(%pct != %img.pct){
+      error("Saving Stats image" SPC %pct @ "%");
+      %img.pct = %pct;
+   }
+   %panelXSize = 161;
+   %panelYSize = 330;
+   %bigPanelXSize = 483;
+   %bigPanelYSize = 330;
+   %border = 45;
+   %headersize = 42;
+   %leftmargin = 4;
+   
+   %px = 0;
+   %py = 0;
+   %y = %img.yc;
+   if (%y > (%border + %headersize + 3) && %img.py < (%img.y - 124)) {
+      %img.py++;
+   }
+   for (%x = 0; %x < %img.x; %x++) {
+      %color = "20 45 45";
+      if(isInsideBorderO(%img, %x-1, %y-5, 22, 17, 20)){
+         %color = "0 118 118";      
+         %color = lerpColor("32 60 69", %color, (%img.yc / %img.y)*1.5);
+      }
+
+      if(isInsideBorderO(%img, %x-1, %y-5, 42, 37, 4)){
+         %color = "0 150 160";  
+         %color = lerpColor(%color, "32 60 69", (%img.yc / %img.y) * 0.25);
+      }
+      if (%x > %border && %y > %border && %px < (%img.x - 88)) {
+         %px++;
+         if (%px > 2 && %x < 1816 && (%y - %border) < %headersize) {// render top header disable if bg has it
+            %color  = "33 87 97";
+         }
+         else {
+            if (%px > 484) {
+               if ((%px % %panelXSize) > 2 && (%img.py % %panelYSize) > 2) {
+                  %color  = "33 87 97";
+               }
+            }
+            else {
+               if ((%px % %bigPanelXSize) > 2 && (%img.py % %bigPanelYSize) > 2) {
+                  %color  = "33 87 97";
+               }
+            }
+         }
+      }
+      %fd = $textColor[%x,%y];
+      if(getWord(%fd,0) > 0){
+         %opacity = 1 - (getWord(%fd,0) / 255); 
+         %r = mFloor((1 - %opacity) * getWord(%fd,1) + %opacity * getWord(%color,0));
+         %g = mFloor((1 - %opacity) * getWord(%fd,2) + %opacity * getWord(%color,1));
+         %b = mFloor((1 - %opacity) * getWord(%fd,3) + %opacity * getWord(%color,2));
+         img.writeLine(%r SPC %g SPC %b);
+      }
+      else{
+         img.writeLine(%color);
+      }
+   }
+   %img.yc++;
+   if(%img.yc < %img.y) 
       schedule(32,0,"imgCycle",%img);
    else{
      %img.close();
-     %img.delete();
+     %img.delete();  
      deleteVariables("$textColor*");
      error("Stats Image Done");
      $dtStatsImgBuild = 0;
@@ -15706,70 +16504,73 @@ function imgCycle(%img){
 }
 
 function compileGameImage(%gameIndex){
-   if(!%gameIndex){
+   if(%gameIndex== -1){
       $dtGameIndex = 0;
       $idPugIndex = 0;
    }
     if($dtStats::debugEchos){error("compileGameImage" SPC $idPugIndex  SPC $dtGameIndex);}
-   if(%gameIndex < $dtStats::gameTypeCount){
+   if($dtGameIndex < $dtStats::gameTypeCount){
       %game = $dtStats::gameType[$dtGameIndex];
-      if(getFieldCount($dtServerVars::pugIDS[%game]) > 0 && $idPugIndex < getFieldCount($dtServerVars::pugIDS[%game])){
-         %id = getField($dtServerVars::pugIDS[%game],$idPugIndex);
+      if($dtStats::pugCount[%game] > 0 && $idPugIndex < $dtStats::pugCount[%game]){
+         %id = $dtStats::pugIDS[%game, $idPugIndex];
          deleteVariables("$pugMap*");
-         %folderPath = "serverStats/pugData/*"@ %id @ "-G.cs";
+         %folderPath = "serverStats/gmData/*"@ %id @ "-G.cs";
          %total = getFileCount(%folderPath);
          if(%total){
             %file = findNextfile(%folderPath);
             %fobj = new fileObject();
+            RootGroup.add(%fobj);
             %fobj.openForRead(%file);
             $pugMapInfo = strreplace(%fobj.readLine(),"%t","\t");
-
+            
             %line = strreplace(%fobj.readLine(),"%t","\t");
-            $pugMapName[1] = getFields(%line, 2, getFieldCount(%line)-1);
+            $pugMapName[1] = getFields(%line, 2, getFieldCount(%line)-1); 
+            %line = strreplace(%fobj.readLine(),"%t","\t");  
+            $pugMapScore[1] = getFields(%line, 2, getFieldCount(%line)-1); 
             %line = strreplace(%fobj.readLine(),"%t","\t");
-            $pugMapScore[1] = getFields(%line, 2, getFieldCount(%line)-1);
+            $pugMapOff[1] = getFields(%line, 2, getFieldCount(%line)-1); 
             %line = strreplace(%fobj.readLine(),"%t","\t");
-            $pugMapOff[1] = getFields(%line, 2, getFieldCount(%line)-1);
+            $pugMapDef[1] = getFields(%line, 2, getFieldCount(%line)-1); 
             %line = strreplace(%fobj.readLine(),"%t","\t");
-            $pugMapDef[1] = getFields(%line, 2, getFieldCount(%line)-1);
+            $pugMapKills[1] = getFields(%line, 2, getFieldCount(%line)-1); 
+            
+            
             %line = strreplace(%fobj.readLine(),"%t","\t");
-            $pugMapKills[1] = getFields(%line, 2, getFieldCount(%line)-1);
-
-
+            $pugMapName[2] = getFields(%line, 2, getFieldCount(%line)-1); 
+            %line = strreplace(%fobj.readLine(),"%t","\t");  
+            $pugMapScore[2] = getFields(%line, 2, getFieldCount(%line)-1); 
             %line = strreplace(%fobj.readLine(),"%t","\t");
-            $pugMapName[2] = getFields(%line, 2, getFieldCount(%line)-1);
+            $pugMapOff[2] = getFields(%line, 2, getFieldCount(%line)-1); 
             %line = strreplace(%fobj.readLine(),"%t","\t");
-            $pugMapScore[2] = getFields(%line, 2, getFieldCount(%line)-1);
+            $pugMapDef[2] = getFields(%line, 2, getFieldCount(%line)-1); 
             %line = strreplace(%fobj.readLine(),"%t","\t");
-            $pugMapOff[2] = getFields(%line, 2, getFieldCount(%line)-1);
-            %line = strreplace(%fobj.readLine(),"%t","\t");
-            $pugMapDef[2] = getFields(%line, 2, getFieldCount(%line)-1);
-            %line = strreplace(%fobj.readLine(),"%t","\t");
-            $pugMapKills[2] = getFields(%line, 2, getFieldCount(%line)-1);
-
+            $pugMapKills[2] = getFields(%line, 2, getFieldCount(%line)-1); 
+            
             while ( !%fobj.isEOF() ){
                %line = strreplace(%fobj.readLine(),"%t","\t");
                %team = getField(%line,0);
                %type = getField(%line,1);
                %var = getField(%line,2);
-               $pugMapData[%team,%type,%var] = getFields(%line, 3, getFieldCount(%line)-1);
+               $pugMapData[%team,%type,%var] = getFields(%line, 3, getFieldCount(%line)-1);   
             }
             switch$(%game){
                case "CTFGame": renderCTFMapTextTM(%id);
                case "LCTFGame" or "SCtFGame":  renderLCTFMapTextTM(%id);
+               //case "ArenaGame":  renderArenaMapTextTM(%id);
+               default:
+                  $dtGameIndex++;
+                  compileGameImage(0);
             }
-            $idPugIndex++;
          }
-
-      }
+         
+      }// we are out of pugs of this game type so lets reset and advance game type 
       else{
-         compileGameImage($dtGameIndex++);
+         $dtGameIndex++;
+         compileGameImage(0);
       }
    }
    else{
-     // finish out
-     error("done game images");
-      $dtStats::tmCompile = 0;
+      genBigMapStats(0);
    }
 }
 
@@ -15785,44 +16586,43 @@ function hasValueC(%val,%return,%return2,%x){
          if(!%x)
          return %int @ %return2;
          %dec = getSubStr(%val, %dot + 1, %x);
-         return %int @ "." @ %dec @ %return2;
+         return %int @ "." @ %dec @ %return2; 
       }
    }
    return %val @ %return2;
 }
-
-function renderLCTFMapTextTM(%id){
-   if($dtStats::debugEchos){error("renderCTFMapTextTM" SPC %id);}
+function renderArenaMapTextTM(%id){
+   if($dtStats::debugEchos){error("renderArenaMapTextTM" SPC %id);}
    deleteVariables("$textColor*");
    %sizeX = 1280+20;
    %sizeY = 810;
-
+   
    %callTime = 8;
    %spaceing = 20;
    %justLeft = 355;
    %justLeft2 = 55;
-   %header = getField($pugMapInfo,0) SPC "LCTF";
+   %header = getField($pugMapInfo,0) SPC "ARENA";   
    %header = stripChars(%header, "!\"#$%&'()*+,./:;<=>?@[\\]^'{|}~\t\n\r1234567890");
    %header = strreplace(%header,"-", " ");
    %header = strreplace(%header,"_", " ");
-
+   
    %hsize = getTextLengthInPixels(%header, "T2", 32);//30
-   schedule(%callTime * %callCount++,0,"addGLText",%header, mFloor(%sizeX / 2) - mFloor(%hsize / 2), 55, "11 239 231", "T2", 32, 1000);//30
-
+   schedule(%callTime * %callCount++,0,"addGLText",%header, mFloor(%sizeX / 2) - mFloor(%hsize / 2), 55, "11 239 231", "T2", 32, 1000);//30 
+   
    %date = getField($pugMapInfo,3);
    %hsize = getTextLengthInPixels(%date, "RC", 12);
    schedule(%callTime * %callCount++,0,"addGLText",%date, mFloor(%sizeX / 2) - mFloor(%hsize / 2), 85, "11 239 231", "RC", 12, 500);
 
-
-      %line = "Storm";
+   
+      %line = "Team 1";  
       schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft, 100, "11 239 231", "RC", 30, 500);
-      %line = getWord(getField($pugMapInfo,4),0);
-      schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+100, 100, "11 239 231", "RC", 30, 500);
-      %line = "Inferno";
+      %line = getWord(getField($pugMapInfo,4),0); 
+      schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+100, 100, "11 239 231", "RC", 30, 500);      
+      %line = "Team 2"; 
       schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+300, 100, "11 239 231", "RC", 30, 500);
-      %line = getWord(getField($pugMapInfo,4),1);
-      schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+400, 100, "11 239 231", "RC", 30, 500);
-
+      %line = getWord(getField($pugMapInfo,4),1); 
+      schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+400, 100, "11 239 231", "RC", 30, 500);   
+            
       schedule(%callTime * %callCount++,0,"addGLText","Player", %justLeft, 130, "11 239 231", "RC", 15, 500);
       schedule(%callTime * %callCount++,0,"addGLText","Score", %justLeft+130, 130, "11 239 231", "RC", 15, 500);
       schedule(%callTime * %callCount++,0,"addGLText","Off", %justLeft+170, 130, "11 239 231", "RC", 15, 500);
@@ -15833,574 +16633,574 @@ function renderLCTFMapTextTM(%id){
       schedule(%callTime * %callCount++,0,"addGLText","Off", %justLeft+470, 130, "11 239 231", "RC", 15, 500);
       schedule(%callTime * %callCount++,0,"addGLText","Def", %justLeft+510, 130, "11 239 231", "RC", 15, 500);
       schedule(%callTime * %callCount++,0,"addGLText","Kills", %justLeft+550, 130, "11 239 231", "RC", 15, 500);
-
+      
       %team1Size = getFieldCount($pugMapName[1]);
       %team2Size = getFieldCount($pugMapName[2]);
-      %teamsize = (%team1Size >%team2Size) ? %team1Size :%team2Size;
+      %teamsize = (%team1Size >%team2Size) ? %team1Size :%team2Size; 
       %teamsize =  %teamsize <= 32 ? %teamsize : 32;
       for(%i=0; %i < %teamsize; %i++){
          if(%i < %team1Size  && %i < %team2Size){
-            %line = %i+1 @ "." @ getField($pugMapName[1],%i);
+            %line = %i+1 @ "." @ getField($pugMapName[1],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft, 150 + (%i*20), "11 239 231", "RC", 15, 130);
             %line = getField($pugMapScore[1],%i);
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+130, 150 + (%i*20), "11 239 231", "RC", 15, 500);
             %line = getField($pugMapOff[1],%i);
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+170, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapDef[1],%i);
+            %line = getField($pugMapDef[1],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+210, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapKills[1],%i);
+            %line = getField($pugMapKills[1],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+250, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = %i+1 @ "." @ getField($pugMapName[2],%i);
+            %line = %i+1 @ "." @ getField($pugMapName[2],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+300, 150 + (%i*20), "11 239 231", "RC", 15, 130);
-            %line = getField($pugMapScore[2],%i);
+            %line = getField($pugMapScore[2],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+430, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapOff[2],%i);
+            %line = getField($pugMapOff[2],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+470, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapDef[2],%i);
+            %line = getField($pugMapDef[2],%i);  
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+510, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapKills[2],%i);
+            %line = getField($pugMapKills[2],%i);  
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+550, 150 + (%i*20), "11 239 231", "RC", 15, 500);
          }
          else if(%i < %team1Size && %i >= %team2Size){
-            %line = %i+1 @ "." @  getField($pugMapName[1],%i);
+            %line = %i+1 @ "." @  getField($pugMapName[1],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft, 150 + (%i*20), "11 239 231", "RC", 15, 130);
             %line = getField($pugMapScore[1],%i);
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+130, 150 + (%i*20), "11 239 231", "RC", 15, 500);
             %line = getField($pugMapOff[1],%i);
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+170, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapDef[1],%i);
+            %line = getField($pugMapDef[1],%i);  
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+210, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapKills[1],%i);
+            %line = getField($pugMapKills[1],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+250, 150 + (%i*20), "11 239 231", "RC", 15, 500);
          }
          else if(%i >= %team1Size && %i < %team2Size){
-            %line = %i+1 @ "." @ getField($pugMapName[2],%i);
+            %line = %i+1 @ "." @ getField($pugMapName[2],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+300, 150 + (%i*20), "11 239 231", "RC", 15, 130);
             %line = getField($pugMapScore[2],%i);
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+430, 150 + (%i*20), "11 239 231", "RC", 15, 500);
             %line = getField($pugMapOff[2],%i);
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+470, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapDef[2],%i);
+            %line = getField($pugMapDef[2],%i);  
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+510, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapKills[2],%i);
+            %line = getField($pugMapKills[2],%i);  
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+550, 150 + (%i*20), "11 239 231", "RC", 15, 500);
          }
-      }
-
-
-   //%line = getTaggedString($teamName[1]) SPC "Team";
-   //schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft2, 100, "11 239 231", "RC", 30, 500);
-
+      }  
+      
+      
+   //%line = getTaggedString($teamName[1]) SPC "Team"; 
+   //schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft2, 100, "11 239 231", "RC", 30, 500); 
+     
    %noValue = "NA";
    %nameOffset = 120;
    %dataOffset = 130;
    %lineCount = 0;
-   %lineCountTeam2 = 0;
+   %lineCountTeam2 = 0;   
    %justLeftTeam2 = 955;
    //%textln = getTextPosPixels(%line, 0, 0, "RC", 15);
-   %line = "Flag Grabs:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagGrabsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagGrabsTG"],0),%noValue,"",-1);
+   %line = "Flag Grabs:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagGrabsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagGrabsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Caps:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagCapsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagCapsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Grab Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","grabSpeedMax"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","grabSpeedMax"],0),%noValue," Kmh",1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Catch:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagCatchTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagCatchTG"],0),%noValue," Sec",2);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Carrier Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","carrierKillsTG"],0),%noValue,"",-1); 
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","carrierKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Defends:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagDefendsTG"],0),%noValue,"",-1); 
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagDefendsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Escort Assists:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","escortAssistsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","escortAssistsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flags Thrown:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagTossTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagTossTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Returns:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagReturnsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagReturnsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Concuss:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","concussFlagTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","concussFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Catch Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagCatchSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagCatchSpeedMax"],0),%noValue," Kmh",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag MA Catches:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","maFlagCatchTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","maFlagCatchTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Intercepted Flags:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","interceptedFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","interceptedFlagTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Intercept Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","interceptSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","interceptSpeedMax"],0),%noValue," Kmh",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Intercepted Flags MA:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","maInterceptedFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","maInterceptedFlagTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Offensive Kills:"; 
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","OffKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","OffKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Defensive Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","DefKillsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","DefKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Kill Assist:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","assistTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","assistTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Distance Moved:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","distMovTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","distMovTG"],0),%noValue," Km",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Highest Avg Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","avgSpeedAvg"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","avgSpeedAvg"],0),%noValue," Kmh",0);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Highest Top Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","maxSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","maxSpeedMax"],0),%noValue," Kmh",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Concuss Hits:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","concussHitTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","concussHitTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Weapon Combos:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","comboCountTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","comboCountTG"],0),%noValue,"",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "First Kill:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","firstKillTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","firstKillTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Last Kill:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","lastKillTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","lastKillTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Best KDR:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","kdrAvg"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","kdrAvg"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Shots Fired:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","shotsFiredTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","shotsFiredTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Total Damage:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","totalWepDmgTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","totalWepDmgTG"],0),%noValue,"",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Kill Streak:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","killStreakMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","killStreakMax"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Mine + Disc Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","minePlusDiscKillTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","minePlusDiscKillTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+    %line = "Rear Shocklance:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","shockRearShotTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","shockRearShotTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
 
-   %line = "Flag Caps:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagCapsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagCapsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Flag Grab Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","grabSpeedMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","grabSpeedMax"],0),%noValue," Kmh",1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Flag Catch:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagCatchTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagCatchTG"],0),%noValue," Sec",2);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Carrier Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","carrierKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","carrierKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Flag Defends:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagDefendsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagDefendsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Escort Assists:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","escortAssistsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","escortAssistsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Flags Thrown:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagTossTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagTossTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Flag Returns:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagReturnsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagReturnsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Flag Concuss:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","concussFlagTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","concussFlagTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Flag Catch Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagCatchSpeedMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagCatchSpeedMax"],0),%noValue," Kmh",0);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Flag MA Catches:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","maFlagCatchTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","maFlagCatchTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Intercepted Flags:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","interceptedFlagTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","interceptedFlagTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Intercept Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","interceptSpeedMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","interceptSpeedMax"],0),%noValue," Kmh",0);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Intercepted Flags MA:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","maInterceptedFlagTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","maInterceptedFlagTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Offensive Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","OffKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","OffKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Defensive Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","DefKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","DefKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Kill Assist:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","assistTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","assistTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Distance Moved:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","distMovTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","distMovTG"],0),%noValue," Km",0);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Highest Avg Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","avgSpeedAvg"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","avgSpeedAvg"],0),%noValue," Kmh",0);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Highest Top Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","maxSpeedMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","maxSpeedMax"],0),%noValue," Kmh",0);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Concuss Hits:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","concussHitTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","concussHitTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Weapon Combos:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","comboCountTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","comboCountTG"],0),%noValue,"",0);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "First Kill:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","firstKillTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","firstKillTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Last Kill:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","lastKillTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","lastKillTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Best KDR:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","kdrAvg"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","kdrAvg"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Shots Fired:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","shotsFiredTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","shotsFiredTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Total Damage:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","totalWepDmgTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","totalWepDmgTG"],0),%noValue,"",0);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Kill Streak:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","killStreakMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","killStreakMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Mine + Disc Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","minePlusDiscKillTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","minePlusDiscKillTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-    %line = "Rear Shocklance:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","shockRearShotTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","shockRearShotTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-
-
-   %line = "Flag Grabs:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagGrabsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagGrabsTG"],0),%noValue,"",-1);
+   
+   
+   %line = "Flag Grabs:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagGrabsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagGrabsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Caps:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagCapsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagCapsTG"],0),%noValue,"",-1);
+   
+   %line = "Flag Caps:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagCapsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagCapsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Grab Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","grabSpeedMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","grabSpeedMax"],0),%noValue," Kmh",1);
+   
+   %line = "Flag Grab Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","grabSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","grabSpeedMax"],0),%noValue," Kmh",1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Catch:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagCatchTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagCatchTG"],0),%noValue," Sec",1);
+   
+   %line = "Flag Catch:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagCatchTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagCatchTG"],0),%noValue," Sec",1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Carrier Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","carrierKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","carrierKillsTG"],0),%noValue,"",-1);
+   
+   %line = "Carrier Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","carrierKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","carrierKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Defends:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagDefendsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagDefendsTG"],0),%noValue,"",-1);
+   
+   %line = "Flag Defends:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagDefendsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagDefendsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Escort Assists:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","escortAssists"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","escortAssists"],0),%noValue,"",-1);
+   
+   %line = "Escort Assists:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","escortAssists"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","escortAssists"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flags Thrown:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagTossTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagTossTG"],0),%noValue,"",-1);
+   
+   %line = "Flags Thrown:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagTossTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagTossTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Returns:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagReturnsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagReturnsTG"],0),%noValue,"",-1);
+   
+   %line = "Flag Returns:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagReturnsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagReturnsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Concuss:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","concussFlagTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","concussFlagTG"],0),%noValue,"",-1);
+   
+   %line = "Flag Concuss:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","concussFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","concussFlagTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Catch Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagCatchSpeedMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagCatchSpeedMax"],0),%noValue," Kmh",0);
+   
+   %line = "Flag Catch Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagCatchSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagCatchSpeedMax"],0),%noValue," Kmh",0);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag MA Catches:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","maFlagCatchTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","maFlagCatchTG"],0),%noValue,"",-1);
+   
+   %line = "Flag MA Catches:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","maFlagCatchTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","maFlagCatchTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Intercepted Flags:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","interceptedFlagTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","interceptedFlagTG"],0),%noValue,"",-1);
+   
+   %line = "Intercepted Flags:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","interceptedFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","interceptedFlagTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Intercept Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","interceptSpeedMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","interceptSpeedMax"],0),%noValue," Kmh",0);
+   
+   %line = "Intercept Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","interceptSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","interceptSpeedMax"],0),%noValue," Kmh",0);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Intercepted Flags MA:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","maInterceptedFlagTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","maInterceptedFlagTG"],0),%noValue,"",-1);
+   
+   %line = "Intercepted Flags MA:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","maInterceptedFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","maInterceptedFlagTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-    %line = "Offensive Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","OffKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","OffKillsTG"],0),%noValue,"",-1);
+   
+    %line = "Offensive Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","OffKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","OffKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-    %line = "Defensive Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","DefKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","DefKillsTG"],0),%noValue,"",-1);
+   
+    %line = "Defensive Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","DefKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","DefKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Kill Assist:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","assistTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","assistTG"],0),%noValue,"",-1);
+   
+   %line = "Kill Assist:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","assistTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","assistTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Distance Moved:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","distMovTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","distMovTG"],0),%noValue," Km",0);
+   
+   %line = "Distance Moved:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","distMovTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","distMovTG"],0),%noValue," Km",0);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Highest Avg Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","avgSpeedAvg"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","avgSpeedAvg"],0),%noValue," Kmh",0);
+   
+   %line = "Highest Avg Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","avgSpeedAvg"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","avgSpeedAvg"],0),%noValue," Kmh",0);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Highest Top Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","maxSpeedMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","maxSpeedMax"],0),%noValue," Kmh",0);
+   
+   %line = "Highest Top Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","maxSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","maxSpeedMax"],0),%noValue," Kmh",0);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Concuss Hits:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","concussHitTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","concussHitTG"],0),%noValue,"",0);
+   
+   %line = "Concuss Hits:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","concussHitTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","concussHitTG"],0),%noValue,"",0);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Weapon Combos:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","comboCountTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","comboCountTG"],0),%noValue,"",-1);
+   
+   %line = "Weapon Combos:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","comboCountTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","comboCountTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "First Kill:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","firstKillTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","firstKillTG"],0),%noValue,"",-1);
+   
+   %line = "First Kill:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","firstKillTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","firstKillTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Last Kill:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","lastKillTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","lastKillTG"],0),%noValue,"",-1);
+   
+   %line = "Last Kill:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","lastKillTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","lastKillTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Best KDR:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","kdrAvg"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","kdrAvg"],0),%noValue,"",-1);
+   
+   %line = "Best KDR:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","kdrAvg"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","kdrAvg"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Shots Fired:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","shotsFiredTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","shotsFiredTG"],0),%noValue,"",-1);
+   
+   %line = "Shots Fired:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","shotsFiredTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","shotsFiredTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;   
+   
+   %line = "Total Damage:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","totalWepDmgTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","totalWepDmgTG"],0),%noValue,"",0);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Total Damage:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","totalWepDmgTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","totalWepDmgTG"],0),%noValue,"",0);
+   
+   %line = "Kill Streak:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","killStreakMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","killStreakMax"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Kill Streak:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","killStreakMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","killStreakMax"],0),%noValue,"",-1);
+   
+   %line = "Mine + Disc Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","minePlusDiscKillTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","minePlusDiscKillTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Mine + Disc Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","minePlusDiscKillTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","minePlusDiscKillTG"],0),%noValue,"",-1);
+   
+    %line = "Rear Shocklance:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","shockRearShotTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","shockRearShotTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-    %line = "Rear Shocklance:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","shockRearShotTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","shockRearShotTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %lineCountTeam2++;
-
+   
    %wepLineCount = %vehLineCount = 24;
 
 
-
-
+      
+      
    %killOffSet = 50;
    %killValue = 150;
    %midAirs =185;
@@ -16409,152 +17209,153 @@ function renderLCTFMapTextTM(%id){
    %damageValue = 420;
    %dist = 455;
    %distValue = 555;
-   %line = "Weapons";
+   %line = "Weapons";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "";
+   %line = "Kills";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "Kills";
+   %line = "";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "";
+   %line = "MidAirs";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "MidAirs";
+   %line = "";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "";
+   %line = "MA Distance";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "MA Distance";
+   %line = "";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-    %line = "";
+    %line = "Damage";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "Damage";
+   %line = "";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
    %wepLineCount++;
-
-
-   %line = "Blaster";
+   
+   
+   %line = "Blaster";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","blasterKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","blasterKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","blasterKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","blasterKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","blasterMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","blasterMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","blasterMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","blasterMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","blasterMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","blasterMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","blasterMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","blasterMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","blasterDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","blasterDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","blasterDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","blasterDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
    %wepLineCount++;
-
-   %line = "Plasma";
+   
+   %line = "Plasma";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","plasmaKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","plasmaKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","plasmaKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","plasmaKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","plasmaMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","plasmaMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","plasmaMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","plasmaMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","plasmaMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","plasmaMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","plasmaMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","plasmaMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","plasmaDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","plasmaDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","plasmaDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","plasmaDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
    %wepLineCount++;
-
-   %line = "Chaingun";
+   
+   %line = "Chaingun";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","cgKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","cgKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","cgKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","cgKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","cgMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","cgMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","cgMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","cgMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","cgMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","cgMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","cgMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","cgMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","cgDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","cgDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","cgDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","cgDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %wepLineCount++;
-
-   %line = "Spinfusor";
+   %wepLineCount++;   
+   
+   %line = "Spinfusor";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","discKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","discKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","discKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","discKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","discMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","discMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","discMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","discMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","discMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","discMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","discMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","discMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","discDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","discDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","discDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","discDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %wepLineCount++;
-
-   %line = "Grenade";
+   %wepLineCount++;    
+   
+   %line = "Grenade";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","grenadeKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","grenadeKillsTG"],0),%noValue,"",-1); 
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","grenadeKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","grenadeKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","grenadeMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","grenadeMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","grenadeMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","grenadeMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","grenadeMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","grenadeMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","grenadeMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","grenadeMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","grenadeDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","grenadeDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","grenadeDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","grenadeDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %wepLineCount++;
+   %wepLineCount++; 
 
-   %line = "Shock";
+   %line = "Shock";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","shockKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","shockKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","shockKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","shockKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","shockMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","shockMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","shockMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","shockMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","shockMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","shockMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","shockMAHitDistMax"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","shockMAHitDistMax"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","shockDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","shockDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","shockDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","shockDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %wepLineCount++;
+   %wepLineCount++;    
    %wepLineCount++;
 
-
+   
    if(%id $= "")
       return;
    %img = new fileObject();
+   RootGroup.add(%img);
    %img.openForWrite("serverStats/statsImg/" @ %id @ ".ppm");
    %img.x = %sizeX;
    %img.y = %sizeY;
@@ -16564,41 +17365,41 @@ function renderLCTFMapTextTM(%id){
    %img.yc = 0;
    %img.py = 0;
    %img.pct = 0;
-   schedule(%callTime * %callCount++, 0, "pugImgCycle2",%img);
+   schedule(%callTime * %callCount++, 0, "pugImgCycle2",%img); 
 }
 
-function renderCTFMapTextTM(%id){
+function renderLCTFMapTextTM(%id){
    if($dtStats::debugEchos){error("renderCTFMapTextTM" SPC %id);}
    deleteVariables("$textColor*");
    %sizeX = 1280+20;
-   %sizeY = 1115;
-
+   %sizeY = 810;
+   
    %callTime = 8;
    %spaceing = 20;
    %justLeft = 355;
    %justLeft2 = 55;
-   %header = getField($pugMapInfo,0) SPC "CTF";
+   %header = getField($pugMapInfo,0) SPC "LCTF";   
    %header = stripChars(%header, "!\"#$%&'()*+,./:;<=>?@[\\]^'{|}~\t\n\r1234567890");
    %header = strreplace(%header,"-", " ");
    %header = strreplace(%header,"_", " ");
-
+   
    %hsize = getTextLengthInPixels(%header, "T2", 32);//30
-   schedule(%callTime * %callCount++,0,"addGLText",%header, mFloor(%sizeX / 2) - mFloor(%hsize / 2), 55, "11 239 231", "T2", 32, 1000);//30
-
+   schedule(%callTime * %callCount++,0,"addGLText",%header, mFloor(%sizeX / 2) - mFloor(%hsize / 2), 55, "11 239 231", "T2", 32, 1000);//30 
+   
    %date = getField($pugMapInfo,3);
    %hsize = getTextLengthInPixels(%date, "RC", 12);
    schedule(%callTime * %callCount++,0,"addGLText",%date, mFloor(%sizeX / 2) - mFloor(%hsize / 2), 85, "11 239 231", "RC", 12, 500);
 
-
-      %line = "Storm";
+   
+      %line = "Storm"; 
       schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft, 100, "11 239 231", "RC", 30, 500);
-      %line = getWord(getField($pugMapInfo,4),0);
-      schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+100, 100, "11 239 231", "RC", 30, 500);
-      %line = "Inferno";
+      %line = getWord(getField($pugMapInfo,4),0); 
+      schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+100, 100, "11 239 231", "RC", 30, 500);      
+      %line = "Inferno"; 
       schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+300, 100, "11 239 231", "RC", 30, 500);
-      %line = getWord(getField($pugMapInfo,4),1);
-      schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+400, 100, "11 239 231", "RC", 30, 500);
-
+      %line = getWord(getField($pugMapInfo,4),1); 
+      schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+400, 100, "11 239 231", "RC", 30, 500);   
+            
       schedule(%callTime * %callCount++,0,"addGLText","Player", %justLeft, 130, "11 239 231", "RC", 15, 500);
       schedule(%callTime * %callCount++,0,"addGLText","Score", %justLeft+130, 130, "11 239 231", "RC", 15, 500);
       schedule(%callTime * %callCount++,0,"addGLText","Off", %justLeft+170, 130, "11 239 231", "RC", 15, 500);
@@ -16609,545 +17410,1322 @@ function renderCTFMapTextTM(%id){
       schedule(%callTime * %callCount++,0,"addGLText","Off", %justLeft+470, 130, "11 239 231", "RC", 15, 500);
       schedule(%callTime * %callCount++,0,"addGLText","Def", %justLeft+510, 130, "11 239 231", "RC", 15, 500);
       schedule(%callTime * %callCount++,0,"addGLText","Kills", %justLeft+550, 130, "11 239 231", "RC", 15, 500);
-
+      
       %team1Size = getFieldCount($pugMapName[1]);
       %team2Size = getFieldCount($pugMapName[2]);
-      %teamsize = (%team1Size >%team2Size) ? %team1Size :%team2Size;
+      %teamsize = (%team1Size >%team2Size) ? %team1Size :%team2Size; 
       %teamsize =  %teamsize <= 32 ? %teamsize : 32;
       for(%i=0; %i < %teamsize; %i++){
          if(%i < %team1Size  && %i < %team2Size){
-            %line = %i+1 @ "." @ getField($pugMapName[1],%i);
+            %line = %i+1 @ "." @ getField($pugMapName[1],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft, 150 + (%i*20), "11 239 231", "RC", 15, 130);
             %line = getField($pugMapScore[1],%i);
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+130, 150 + (%i*20), "11 239 231", "RC", 15, 500);
             %line = getField($pugMapOff[1],%i);
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+170, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapDef[1],%i);
+            %line = getField($pugMapDef[1],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+210, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapKills[1],%i);
+            %line = getField($pugMapKills[1],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+250, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = %i+1 @ "." @ getField($pugMapName[2],%i);
+            %line = %i+1 @ "." @ getField($pugMapName[2],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+300, 150 + (%i*20), "11 239 231", "RC", 15, 130);
-            %line = getField($pugMapScore[2],%i);
+            %line = getField($pugMapScore[2],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+430, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapOff[2],%i);
+            %line = getField($pugMapOff[2],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+470, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapDef[2],%i);
+            %line = getField($pugMapDef[2],%i);  
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+510, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapKills[2],%i);
+            %line = getField($pugMapKills[2],%i);  
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+550, 150 + (%i*20), "11 239 231", "RC", 15, 500);
          }
          else if(%i < %team1Size && %i >= %team2Size){
-            %line = %i+1 @ "." @  getField($pugMapName[1],%i);
+            %line = %i+1 @ "." @  getField($pugMapName[1],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft, 150 + (%i*20), "11 239 231", "RC", 15, 130);
             %line = getField($pugMapScore[1],%i);
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+130, 150 + (%i*20), "11 239 231", "RC", 15, 500);
             %line = getField($pugMapOff[1],%i);
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+170, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapDef[1],%i);
+            %line = getField($pugMapDef[1],%i);  
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+210, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapKills[1],%i);
+            %line = getField($pugMapKills[1],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+250, 150 + (%i*20), "11 239 231", "RC", 15, 500);
          }
          else if(%i >= %team1Size && %i < %team2Size){
-            %line = %i+1 @ "." @ getField($pugMapName[2],%i);
+            %line = %i+1 @ "." @ getField($pugMapName[2],%i); 
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+300, 150 + (%i*20), "11 239 231", "RC", 15, 130);
             %line = getField($pugMapScore[2],%i);
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+430, 150 + (%i*20), "11 239 231", "RC", 15, 500);
             %line = getField($pugMapOff[2],%i);
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+470, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapDef[2],%i);
+            %line = getField($pugMapDef[2],%i);  
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+510, 150 + (%i*20), "11 239 231", "RC", 15, 500);
-            %line = getField($pugMapKills[2],%i);
+            %line = getField($pugMapKills[2],%i);  
             schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+550, 150 + (%i*20), "11 239 231", "RC", 15, 500);
          }
-      }
-
-
-   //%line = getTaggedString($teamName[1]) SPC "Team";
-   //schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft2, 100, "11 239 231", "RC", 30, 500);
-
+      }  
+      
+      
+   //%line = getTaggedString($teamName[1]) SPC "Team"; 
+   //schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft2, 100, "11 239 231", "RC", 30, 500); 
+     
    %noValue = "NA";
    %nameOffset = 120;
    %dataOffset = 130;
    %lineCount = 0;
-   %lineCountTeam2 = 0;
+   %lineCountTeam2 = 0;   
    %justLeftTeam2 = 955;
    //%textln = getTextPosPixels(%line, 0, 0, "RC", 15);
-   %line = "Flag Grabs:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagGrabsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagGrabsTG"],0),%noValue,"",-1);
+   %line = "Flag Grabs:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagGrabsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagGrabsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Caps:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagCapsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagCapsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Grab Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","grabSpeedMax"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","grabSpeedMax"],0),%noValue," Kmh",1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Catch:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagCatchTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagCatchTG"],0),%noValue," Sec",2);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Carrier Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","carrierKillsTG"],0),%noValue,"",-1); 
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","carrierKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Defends:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagDefendsTG"],0),%noValue,"",-1); 
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagDefendsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Escort Assists:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","escortAssistsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","escortAssistsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flags Thrown:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagTossTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagTossTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Returns:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagReturnsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagReturnsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Concuss:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","concussFlagTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","concussFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag Catch Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagCatchSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagCatchSpeedMax"],0),%noValue," Kmh",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Flag MA Catches:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","maFlagCatchTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","maFlagCatchTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Intercepted Flags:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","interceptedFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","interceptedFlagTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Intercept Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","interceptSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","interceptSpeedMax"],0),%noValue," Kmh",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Intercepted Flags MA:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","maInterceptedFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","maInterceptedFlagTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Offensive Kills:"; 
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","OffKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","OffKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Defensive Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","DefKillsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","DefKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Kill Assist:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","assistTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","assistTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Distance Moved:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","distMovTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","distMovTG"],0),%noValue," Km",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Highest Avg Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","avgSpeedAvg"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","avgSpeedAvg"],0),%noValue," Kmh",0);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Highest Top Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","maxSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","maxSpeedMax"],0),%noValue," Kmh",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Concuss Hits:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","concussHitTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","concussHitTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Weapon Combos:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","comboCountTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","comboCountTG"],0),%noValue,"",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "First Kill:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","firstKillTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","firstKillTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Last Kill:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","lastKillTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","lastKillTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Best KDR:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","kdrAvg"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","kdrAvg"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Shots Fired:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","shotsFiredTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","shotsFiredTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Total Damage:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","totalWepDmgTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","totalWepDmgTG"],0),%noValue,"",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Kill Streak:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","killStreakMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","killStreakMax"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Mine + Disc Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","minePlusDiscKillTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","minePlusDiscKillTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+    %line = "Rear Shocklance:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","shockRearShotTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","shockRearShotTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
 
-   %line = "Flag Caps:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagCapsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagCapsTG"],0),%noValue,"",-1);
+   
+   
+   %line = "Flag Grabs:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagGrabsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagGrabsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Flag Caps:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagCapsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagCapsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Flag Grab Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","grabSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","grabSpeedMax"],0),%noValue," Kmh",1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Flag Catch:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagCatchTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagCatchTG"],0),%noValue," Sec",1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Carrier Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","carrierKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","carrierKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Flag Defends:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagDefendsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagDefendsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Escort Assists:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","escortAssists"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","escortAssists"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Flags Thrown:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagTossTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagTossTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Flag Returns:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagReturnsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagReturnsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Flag Concuss:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","concussFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","concussFlagTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Flag Catch Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagCatchSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagCatchSpeedMax"],0),%noValue," Kmh",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Flag MA Catches:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","maFlagCatchTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","maFlagCatchTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Intercepted Flags:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","interceptedFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","interceptedFlagTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Intercept Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","interceptSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","interceptSpeedMax"],0),%noValue," Kmh",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Intercepted Flags MA:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","maInterceptedFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","maInterceptedFlagTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+    %line = "Offensive Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","OffKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","OffKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+    %line = "Defensive Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","DefKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","DefKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Kill Assist:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","assistTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","assistTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Distance Moved:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","distMovTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","distMovTG"],0),%noValue," Km",0);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Highest Avg Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","avgSpeedAvg"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","avgSpeedAvg"],0),%noValue," Kmh",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Highest Top Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","maxSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","maxSpeedMax"],0),%noValue," Kmh",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Concuss Hits:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","concussHitTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","concussHitTG"],0),%noValue,"",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Weapon Combos:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","comboCountTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","comboCountTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "First Kill:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","firstKillTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","firstKillTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Last Kill:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","lastKillTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","lastKillTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Best KDR:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","kdrAvg"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","kdrAvg"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Shots Fired:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","shotsFiredTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","shotsFiredTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;   
+   
+   %line = "Total Damage:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","totalWepDmgTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","totalWepDmgTG"],0),%noValue,"",0);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Kill Streak:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","killStreakMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","killStreakMax"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %line = "Mine + Disc Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","minePlusDiscKillTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","minePlusDiscKillTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+    %line = "Rear Shocklance:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","shockRearShotTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","shockRearShotTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;
+   
+   %wepLineCount = %vehLineCount = 24;
+
+
+      
+      
+   %killOffSet = 50;
+   %killValue = 150;
+   %midAirs =185;
+   %midAirValue = 285;
+   %damage = 320;
+   %damageValue = 420;
+   %dist = 455;
+   %distValue = 555;
+   %line = "Weapons";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = "Kills";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = "";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = "MidAirs";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = "";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = "MA Distance";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = "";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+    %line = "Damage";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = "";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %wepLineCount++;
+   
+   
+   %line = "Blaster";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = hasValueC(getField($pugMapData[0,"name","blasterKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","blasterKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","blasterMATG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","blasterMATG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","blasterMAHitDistMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","blasterMAHitDistMax"],0),0,"",0);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","blasterDmgTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","blasterDmgTG"],0),0,"",1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %wepLineCount++;
+   
+   %line = "Plasma";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = hasValueC(getField($pugMapData[0,"name","plasmaKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","plasmaKillsTG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","plasmaMATG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","plasmaMATG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","plasmaMAHitDistMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","plasmaMAHitDistMax"],0),0,"",0);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","plasmaDmgTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","plasmaDmgTG"],0),0,"",1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %wepLineCount++;
+   
+   %line = "Chaingun";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = hasValueC(getField($pugMapData[0,"name","cgKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","cgKillsTG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","cgMATG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","cgMATG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","cgMAHitDistMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","cgMAHitDistMax"],0),0,"",0);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","cgDmgTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","cgDmgTG"],0),0,"",1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %wepLineCount++;   
+   
+   %line = "Spinfusor";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = hasValueC(getField($pugMapData[0,"name","discKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","discKillsTG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","discMATG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","discMATG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","discMAHitDistMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","discMAHitDistMax"],0),0,"",0);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","discDmgTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","discDmgTG"],0),0,"",1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %wepLineCount++;    
+   
+   %line = "Grenade";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = hasValueC(getField($pugMapData[0,"name","grenadeKillsTG"],0),%noValue,"",-1); 
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","grenadeKillsTG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","grenadeMATG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","grenadeMATG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","grenadeMAHitDistMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","grenadeMAHitDistMax"],0),0,"",0);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","grenadeDmgTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","grenadeDmgTG"],0),0,"",1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %wepLineCount++; 
+
+   %line = "Shock";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %line = hasValueC(getField($pugMapData[0,"name","shockKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","shockKillsTG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","shockMATG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","shockMATG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","shockMAHitDistMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","shockMAHitDistMax"],0),0,"",1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"name","shockDmgTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %line = hasValueC(getField($pugMapData[0,"data","shockDmgTG"],0),0,"",1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %wepLineCount++;    
+   %wepLineCount++;
+
+   
+   if(%id $= "")
+      return;
+   %img = new fileObject();
+   RootGroup.add(%img);
+   %img.openForWrite("serverStats/statsImg/" @ %id @ ".ppm");
+   %img.x = %sizeX;
+   %img.y = %sizeY;
+   %img.writeLine("P3");
+   %img.writeLine(%sizeX SPC %sizeY);
+   %img.writeLine("255");
+   %img.yc = 0;
+   %img.py = 0;
+   %img.pct = 0;
+   schedule(%callTime * %callCount++, 0, "pugImgCycle2",%img); 
+}
+
+function renderCTFMapTextTM(%id){
+   if($dtStats::debugEchos){error("renderCTFMapTextTM" SPC %id);}
+   deleteVariables("$textColor*");
+   %sizeX = 1280+20;
+   %sizeY = 1115;
+   
+   %callTime = 8;
+   %spaceing = 20;
+   %justLeft = 355;
+   %justLeft2 = 55;
+   %header = getField($pugMapInfo,0) SPC "CTF";   
+   %header = stripChars(%header, "!\"#$%&'()*+,./:;<=>?@[\\]^'{|}~\t\n\r1234567890");
+   %header = strreplace(%header,"-", " ");
+   %header = strreplace(%header,"_", " ");
+   
+   %hsize = getTextLengthInPixels(%header, "T2", 32);//30
+   schedule(%callTime * %callCount++,0,"addGLText",%header, mFloor(%sizeX / 2) - mFloor(%hsize / 2), 55, "11 239 231", "T2", 32, 1000);//30 
+   
+   %date = getField($pugMapInfo,3);
+   %hsize = getTextLengthInPixels(%date, "RC", 12);
+   schedule(%callTime * %callCount++,0,"addGLText",%date, mFloor(%sizeX / 2) - mFloor(%hsize / 2), 85, "11 239 231", "RC", 12, 500);
+
+   
+      %line = "Storm"; 
+      schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft, 100, "11 239 231", "RC", 30, 500);
+      %line = getWord(getField($pugMapInfo,4),0); 
+      schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+100, 100, "11 239 231", "RC", 30, 500);      
+      %line = "Inferno"; 
+      schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+300, 100, "11 239 231", "RC", 30, 500);
+      %line = getWord(getField($pugMapInfo,4),1); 
+      schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+400, 100, "11 239 231", "RC", 30, 500);   
+            
+      schedule(%callTime * %callCount++,0,"addGLText","Player", %justLeft, 130, "11 239 231", "RC", 15, 500);
+      schedule(%callTime * %callCount++,0,"addGLText","Score", %justLeft+130, 130, "11 239 231", "RC", 15, 500);
+      schedule(%callTime * %callCount++,0,"addGLText","Off", %justLeft+170, 130, "11 239 231", "RC", 15, 500);
+      schedule(%callTime * %callCount++,0,"addGLText","Def", %justLeft+210, 130, "11 239 231", "RC", 15, 500);
+      schedule(%callTime * %callCount++,0,"addGLText","Kills", %justLeft+250, 130, "11 239 231", "RC", 15, 500);
+      schedule(%callTime * %callCount++,0,"addGLText","Player", %justLeft+300, 130, "11 239 231", "RC", 15, 500);
+      schedule(%callTime * %callCount++,0,"addGLText","Score", %justLeft+430, 130, "11 239 231", "RC", 15, 500);
+      schedule(%callTime * %callCount++,0,"addGLText","Off", %justLeft+470, 130, "11 239 231", "RC", 15, 500);
+      schedule(%callTime * %callCount++,0,"addGLText","Def", %justLeft+510, 130, "11 239 231", "RC", 15, 500);
+      schedule(%callTime * %callCount++,0,"addGLText","Kills", %justLeft+550, 130, "11 239 231", "RC", 15, 500);
+      
+      %team1Size = getFieldCount($pugMapName[1]);
+      %team2Size = getFieldCount($pugMapName[2]);
+      %teamsize = (%team1Size >%team2Size) ? %team1Size :%team2Size; 
+      %teamsize =  %teamsize <= 32 ? %teamsize : 32;
+      for(%i=0; %i < %teamsize; %i++){
+         if(%i < %team1Size  && %i < %team2Size){
+            %line = %i+1 @ "." @ getField($pugMapName[1],%i); 
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft, 150 + (%i*20), "11 239 231", "RC", 15, 130);
+            %line = getField($pugMapScore[1],%i);
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+130, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = getField($pugMapOff[1],%i);
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+170, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = getField($pugMapDef[1],%i); 
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+210, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = getField($pugMapKills[1],%i); 
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+250, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = %i+1 @ "." @ getField($pugMapName[2],%i); 
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+300, 150 + (%i*20), "11 239 231", "RC", 15, 130);
+            %line = getField($pugMapScore[2],%i); 
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+430, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = getField($pugMapOff[2],%i); 
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+470, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = getField($pugMapDef[2],%i);  
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+510, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = getField($pugMapKills[2],%i);  
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+550, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+         }
+         else if(%i < %team1Size && %i >= %team2Size){
+            %line = %i+1 @ "." @  getField($pugMapName[1],%i); 
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft, 150 + (%i*20), "11 239 231", "RC", 15, 130);
+            %line = getField($pugMapScore[1],%i);
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+130, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = getField($pugMapOff[1],%i);
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+170, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = getField($pugMapDef[1],%i);  
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+210, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = getField($pugMapKills[1],%i); 
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+250, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+         }
+         else if(%i >= %team1Size && %i < %team2Size){
+            %line = %i+1 @ "." @ getField($pugMapName[2],%i); 
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+300, 150 + (%i*20), "11 239 231", "RC", 15, 130);
+            %line = getField($pugMapScore[2],%i);
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+430, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = getField($pugMapOff[2],%i);
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+470, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = getField($pugMapDef[2],%i);  
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+510, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+            %line = getField($pugMapKills[2],%i);  
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft+550, 150 + (%i*20), "11 239 231", "RC", 15, 500);
+         }
+      }  
+      
+      
+   //%line = getTaggedString($teamName[1]) SPC "Team"; 
+   //schedule(%callTime * %callCount++,0,"addGLText",%line, %justLeft2, 100, "11 239 231", "RC", 30, 500); 
+     
+   %noValue = "NA";
+   %nameOffset = 120;
+   %dataOffset = 130;
+   %lineCount = 0;
+   %lineCountTeam2 = 0;   
+   %justLeftTeam2 = 955;
+   //%textln = getTextPosPixels(%line, 0, 0, "RC", 15);
+   %line = "Flag Grabs:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagGrabsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagGrabsTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Flag Grab Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","grabSpeedMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","grabSpeedMax"],0),%noValue," Kmh",1);
+   
+   %line = "Flag Caps:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagCapsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagCapsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Flag Catch:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagCatchTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagCatchTG"],0),%noValue," Sec",2);
+   
+   %line = "Flag Grab Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","grabSpeedMax"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","grabSpeedMax"],0),%noValue," Kmh",1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Carrier Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","carrierKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","carrierKillsTG"],0),%noValue,"",-1);
+   
+   %line = "Flag Catch:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagCatchTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagCatchTG"],0),%noValue," Sec",2);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Flag Defends:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagDefendsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagDefendsTG"],0),%noValue,"",-1);
+   
+   %line = "Carrier Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","carrierKillsTG"],0),%noValue,"",-1); 
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","carrierKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Escort Assists:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","escortAssistsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","escortAssistsTG"],0),%noValue,"",-1);
+   
+   %line = "Flag Defends:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagDefendsTG"],0),%noValue,"",-1); 
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagDefendsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Flags Thrown:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagTossTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagTossTG"],0),%noValue,"",-1);
+   
+   %line = "Escort Assists:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","escortAssistsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","escortAssistsTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Flag Returns:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","flagReturnsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","flagReturnsTG"],0),%noValue,"",-1);
+   
+   %line = "Flags Thrown:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagTossTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagTossTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Flag Concuss:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","concussFlagTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","concussFlagTG"],0),%noValue,"",-1);
+   
+   %line = "Flag Returns:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","flagReturnsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","flagReturnsTG"],0),%noValue,"",-1);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Offensive Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","OffKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","OffKillsTG"],0),%noValue,"",-1);
+   
+   %line = "Flag Concuss:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","concussFlagTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","concussFlagTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Defensive Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","DefKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","DefKillsTG"],0),%noValue,"",-1);
+   
+   %line = "Offensive Kills:"; 
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","OffKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","OffKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Repairs:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","repairsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","repairsTG"],0),%noValue,"",-1);
+   
+   %line = "Defensive Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","DefKillsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","DefKillsTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Destruction:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   
+   %line = "Repairs:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","repairsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","repairsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;
+   
+   %line = "Destruction:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
    %line = hasValueC(getField($pugMapData[1,"name","destructionTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","destructionTG"],0),%noValue,"",-1);
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","destructionTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++;   
+   
+   %line = "Gens Destroyed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","genDestroysTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","genDestroysTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++; 
+   
+   %line = "Gens Repairs";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","genSolRepairsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","genSolRepairsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
+   %lineCount++; 
+   
+   %line = "Indoor Turret Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","indoorDepTurretKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","indoorDepTurretKillsTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Gens Destroyed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","genDestroysTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","genDestroysTG"],0),%noValue,"",-1);
+   
+   %line = "Outdoor Turret Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","outdoorDepTurretKillsTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","outdoorDepTurretKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Gens Repairs";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","genSolRepairsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","genSolRepairsTG"],0),%noValue,"",-1);
+   
+   %line = "Deploy Invy Use:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","depInvyUseTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","depInvyUseTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Indoor Turret Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","indoorDepTurretKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","indoorDepTurretKillsTG"],0),%noValue,"",-1);
+   
+   %line = "Inventorys Deployed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","InventoryDepTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","InventoryDepTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Outdoor Turret Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","outdoorDepTurretKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","outdoorDepTurretKillsTG"],0),%noValue,"",-1);
+   
+   %line = "Kill Assist:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","assistTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","assistTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Deploy Invy Use:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","depInvyUseTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","depInvyUseTG"],0),%noValue,"",-1);
+   
+   %line = "Distance Moved:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","distMovTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","distMovTG"],0),%noValue," Km",0);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Inventorys Deployed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","InventoryDepTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","InventoryDepTG"],0),%noValue,"",-1);
+   
+   
+   %line = "Highest Avg Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","avgSpeedAvg"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","avgSpeedAvg"],0),%noValue," Kmh",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Kill Assist:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","assistTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","assistTG"],0),%noValue,"",-1);
+   
+   %line = "Highest Top Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","maxSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","maxSpeedMax"],0),%noValue," Kmh",0);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Distance Moved:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","distMovTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","distMovTG"],0),%noValue," Km",0);
+   
+   %line = "Sensors Deployed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","SensorsDepTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","SensorsDepTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-
-   %line = "Highest Avg Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","avgSpeedAvg"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","avgSpeedAvg"],0),%noValue," Kmh",0);
+   
+   %line = "Shield Block Damage:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","shieldPackDmgTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","shieldPackDmgTG"],0),%noValue,"",2);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Highest Top Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","maxSpeedMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","maxSpeedMax"],0),%noValue," Kmh",0);
+   
+   %line = "Stealth Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","cloakerKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","cloakerKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Sensors Deployed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","SensorsDepTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","SensorsDepTG"],0),%noValue,"",-1);
+   
+   %line = "Cloakers Killed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","cloakersKilledTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","cloakersKilledTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
-
-   %line = "Shield Block Damage:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","shieldPackDmgTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","shieldPackDmgTG"],0),%noValue,"",2);
+   
+   %line = "Sensor Jammer:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[1,"name","jammerTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[1,"data","jammerTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Stealth Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","cloakerKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","cloakerKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Cloakers Killed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","cloakersKilledTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","cloakersKilledTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %lineCount++;
-
-   %line = "Sensor Jammer:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[1,"name","jammerTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[1,"data","jammerTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
-
-
-
-
-
-
-   %line = "Flag Grabs:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagGrabsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagGrabsTG"],0),%noValue,"",-1);
+   
+   
+   
+   
+   
+   
+   %line = "Flag Grabs:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagGrabsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagGrabsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Caps:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagCapsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagCapsTG"],0),%noValue,"",-1);
+   
+   %line = "Flag Caps:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagCapsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagCapsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Grab Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","grabSpeedMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","grabSpeedMax"],0),%noValue," Kmh",1);
+   
+   %line = "Flag Grab Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","grabSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","grabSpeedMax"],0),%noValue," Kmh",1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Catch:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagCatchTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagCatchTG"],0),%noValue," Sec",1);
+   
+   %line = "Flag Catch:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagCatchTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagCatchTG"],0),%noValue," Sec",1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Carrier Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","carrierKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","carrierKillsTG"],0),%noValue,"",-1);
+   
+   %line = "Carrier Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","carrierKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","carrierKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Defends:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagDefendsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagDefendsTG"],0),%noValue,"",-1);
+   
+   %line = "Flag Defends:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagDefendsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagDefendsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Escort Assists:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","escortAssists"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","escortAssists"],0),%noValue,"",-1);
+   
+   %line = "Escort Assists:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","escortAssists"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","escortAssists"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flags Thrown:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagTossTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagTossTG"],0),%noValue,"",-1);
+   
+   %line = "Flags Thrown:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagTossTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagTossTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Returns:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","flagReturnsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","flagReturnsTG"],0),%noValue,"",-1);
+   
+   %line = "Flag Returns:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","flagReturnsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagReturnsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Flag Concuss:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","concussFlagTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","concussFlagTG"],0),%noValue,"",-1);
+   
+   %line = "Flag Concuss:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","concussFlagTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","concussFlagTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Offensive Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","OffKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","OffKillsTG"],0),%noValue,"",-1);
+   
+   %line = "Offensive Kills:"; 
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","OffKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","OffKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Defensive Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","DefKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","DefKillsTG"],0),%noValue,"",-1);
+   
+   %line = "Defensive Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","DefKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","DefKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Repairs:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","repairsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","repairsTG"],0),%noValue,"",-1);
+   
+   %line = "Repairs:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","repairsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","repairsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-
-   %line = "Destruction:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","destructionTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","destructionTG"],0),%noValue,"",-1);
+   
+   
+   %line = "Destruction:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","destructionTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","destructionTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++;   
+   
+   %line = "Gens Destroyed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","genDestroysTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","genDestroysTG"],0),%noValue,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
+   %lineCountTeam2++; 
+   
+   %line = "Gens Repairs:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","genSolRepairsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","genSolRepairsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Gens Destroyed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","genDestroysTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","genDestroysTG"],0),%noValue,"",-1);
+   
+   %line = "Indoor Turret Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","indoorDepTurretKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","indoorDepTurretKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Gens Repairs:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","genSolRepairsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","genSolRepairsTG"],0),%noValue,"",-1);
+   
+   %line = "Outdoor Turret Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","outdoorDepTurretKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","outdoorDepTurretKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Indoor Turret Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","indoorDepTurretKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","indoorDepTurretKillsTG"],0),%noValue,"",-1);
+   
+   %line = "Deploy Invy Use:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","depInvyUseTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","depInvyUseTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Outdoor Turret Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","outdoorDepTurretKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","outdoorDepTurretKillsTG"],0),%noValue,"",-1);
+   
+   %line = "Inventorys Deployed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","InventoryDepTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","InventoryDepTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Deploy Invy Use:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","depInvyUseTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","depInvyUseTG"],0),%noValue,"",-1);
+   
+   %line = "Kill Assist:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","assistTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","assistTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Inventorys Deployed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","InventoryDepTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","InventoryDepTG"],0),%noValue,"",-1);
+   
+   %line = "Distance Moved:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","distMovTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","distMovTG"],0),%noValue," Km",0);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Kill Assist:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","assistTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","assistTG"],0),%noValue,"",-1);
+   
+   
+   %line = "Highest Avg Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","avgSpeedAvg"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","avgSpeedAvg"],0),%noValue," Kmh",0);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Distance Moved:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","distMovTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","distMovTG"],0),%noValue," Km",0);
+   
+   %line = "Highest Top Speed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","maxSpeedMax"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","maxSpeedMax"],0),%noValue," Kmh",0);   
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-
-   %line = "Highest Avg Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","avgSpeedAvg"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","avgSpeedAvg"],0),%noValue," Kmh",0);
+   
+   %line = "Sensors Deployed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","SensorsDepTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","SensorsDepTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Highest Top Speed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","maxSpeedMax"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","maxSpeedMax"],0),%noValue," Kmh",0);
+   
+   %line = "Shield Block Damage:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","shieldPackDmgTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","shieldPackDmgTG"],0),%noValue,"",2);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Sensors Deployed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","SensorsDepTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","SensorsDepTG"],0),%noValue,"",-1);
+   
+   %line = "Stealth Kills:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","cloakerKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","cloakerKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Shield Block Damage:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","shieldPackDmgTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","shieldPackDmgTG"],0),%noValue,"",2);
+   
+   %line = "Cloakers Killed:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","cloakersKilledTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","cloakersKilledTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
-
-   %line = "Stealth Kills:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","cloakerKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","cloakerKillsTG"],0),%noValue,"",-1);
+   
+   %line = "Sensor Jammer:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[2,"name","jammerTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[2,"data","jammerTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %lineCountTeam2++;
-
-   %line = "Cloakers Killed:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","cloakersKilledTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","cloakersKilledTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %lineCountTeam2++;
-
-   %line = "Sensor Jammer:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[2,"name","jammerTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[2,"data","jammerTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
-
-
-
-
-
+   
+   
+   
+   
+   
    %lineCount++;
    %lineCount++;
    %lineCount++;
@@ -17162,313 +18740,314 @@ function renderCTFMapTextTM(%id){
    %damageValue = 420;
    %dist = 455;
    %distValue = 555;
-   %line = "Weapons";
+   %line = "Weapons";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "";
+   %line = "Kills";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "Kills";
+   %line = "";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "";
+   %line = "MidAirs";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "MidAirs";
+   %line = "";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "";
+   %line = "MA Distance";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "MA Distance";
+   %line = "";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-    %line = "";
+    %line = "Damage";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = "Damage";
+   %line = "";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
    %wepLineCount++;
-
-
-   %line = "Blaster";
+   
+   
+   %line = "Blaster";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","blasterKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","blasterKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","blasterKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","blasterKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","blasterMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","blasterMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","blasterMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","blasterMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","blasterMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","blasterMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","blasterMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","blasterMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","blasterDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","blasterDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","blasterDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","blasterDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
    %wepLineCount++;
-
-   %line = "Plasma";
+   
+   %line = "Plasma";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","plasmaKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","plasmaKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","plasmaKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","plasmaKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","plasmaMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","plasmaMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","plasmaMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","plasmaMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","plasmaMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","plasmaMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","plasmaMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","plasmaMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","plasmaDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","plasmaDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","plasmaDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","plasmaDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
    %wepLineCount++;
-
-   %line = "Chaingun";
+   
+   %line = "Chaingun";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","cgKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","cgKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","cgKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","cgKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","cgMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","cgMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","cgMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","cgMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","cgMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","cgMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","cgMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","cgMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","cgDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","cgDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","cgDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","cgDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %wepLineCount++;
-
-   %line = "Spinfusor";
+   %wepLineCount++;   
+   
+   %line = "Spinfusor";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","discKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","discKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","discKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","discKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","discMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","discMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","discMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","discMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","discMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","discMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","discMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","discMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","discDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","discDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","discDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","discDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %wepLineCount++;
-
-   %line = "Grenade";
+   %wepLineCount++;    
+   
+   %line = "Grenade";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","grenadeKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","grenadeKillsTG"],0),%noValue,"",-1); 
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","grenadeKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","grenadeKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","grenadeMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","grenadeMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","grenadeMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","grenadeMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","grenadeMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","grenadeMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","grenadeMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","grenadeMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","grenadeDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","grenadeDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","grenadeDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","grenadeDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %wepLineCount++;
-
-   %line = "Laser";
+   %wepLineCount++; 
+   
+   %line = "Laser";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","laserKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","laserKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","laserKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","laserKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","laserMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","laserMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","laserMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","laserMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","laserMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","laserMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","laserMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","laserMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","laserDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","laserDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","laserDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","laserDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %wepLineCount++;
+   %wepLineCount++;   
 
-   %line = "Mortar";
+   %line = "Mortar";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","mortarKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","mortarKillsTG"],0),%noValue,"",-1); 
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","mortarKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","mortarKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","mortarMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","mortarMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","mortarMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","mortarMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","mortarMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","mortarMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","mortarMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","mortarMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","mortarDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","mortarDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","mortarDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","mortarDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %wepLineCount++;
+   %wepLineCount++;    
 
-   %line = "Missile";
+   %line = "Missile";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","missileKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","missileKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","missileKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","missileKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","missileMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","missileMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","missileMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","missileMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","missileMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","missileMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","missileMAHitDistMax"],0),0,"",0);
+   %line = hasValueC(getField($pugMapData[0,"data","missileMAHitDistMax"],0),0,"",0);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","missileDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","missileDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","missileDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","missileDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %wepLineCount++;
+   %wepLineCount++;   
+   
 
-
-   %line = "Shock";
+   %line = "Shock";  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","shockKillsTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","shockKillsTG"],0),%noValue,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killOffSet , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","shockKillsTG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","shockKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %killValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","shockMATG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","shockMATG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirs , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","shockMATG"],0),0,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"data","shockMATG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %midAirValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","shockMAHitDistMax"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","shockMAHitDistMax"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damage , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","shockMAHitDistMax"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","shockMAHitDistMax"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %damageValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"name","shockDmgTG"],0),%noValue,"",-1);
+   %line = hasValueC(getField($pugMapData[0,"name","shockDmgTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %dist , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
-   %line = hasValueC(getField($pugMapData[0,"data","shockDmgTG"],0),0,"",1);
+   %line = hasValueC(getField($pugMapData[0,"data","shockDmgTG"],0),0,"",1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v + %distValue , 150 + (%wepLineCount*20), "11 239 231", "RC", 15, 100);
+   %wepLineCount++;    
    %wepLineCount++;
-   %wepLineCount++;
-
+   
    %justLeft3 = %justLeft2 + 320;
-   %nameAdjust = -15;
-
-   %line = "Hand Grenade:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","hGrenadeKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[0,"data","hGrenadeKillsTG"],0),0,"",-1);
+   %nameAdjust = -15;   
+   
+   %line = "Hand Grenade:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[0,"name","hGrenadeKillsTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[0,"data","hGrenadeKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-
-   %line = "Concuss Hits:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft3, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","concussHitTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[0,"data","concussHitTG"],0),0,"",-1);
+   
+   %line = "Concuss Hits:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft3, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[0,"name","concussHitTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[0,"data","concussHitTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-
+   
    %wepLineCount++;
-
-   %line = "Mine:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","concussHitTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[0,"data","concussHitTG"],0),0,"",-1);
+   
+   %line = "Mine:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[0,"name","concussHitTG"],0),%noValue,"",-1); 
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[0,"data","concussHitTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-
-   %line = "Mine + Disc:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft3, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","minePlusDiscTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[0,"data","minePlusDiscTG"],0),0,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %wepLineCount++;
-
-   %line = "Satchel Charge:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","satchelKillsTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[0,"data","satchelKillsTG"],0),0,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-
-   %line = "Sniper Head Shots:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft3, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","laserHeadShotTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[0,"data","laserHeadShotTG"],0),0,"",-1);
+   
+   %line = "Mine + Disc:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft3, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[0,"name","minePlusDiscTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[0,"data","minePlusDiscTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
    %wepLineCount++;
-
-   %line = "ELF Usage:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","elfShotsFiredTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[0,"data","elfShotsFiredTG"],0),0,"",-1);
+   
+   %line = "Satchel Charge:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[0,"name","satchelKillsTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[0,"data","satchelKillsTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-
-
-   %line = "Shock Rear Hits:";
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft3, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
-   %line = hasValueC(getField($pugMapData[0,"name","shockRearShotTG"],0),%noValue,"",-1);
-   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);
-   %line = hasValueC(getField($pugMapData[0,"data","shockRearShotTG"],0),0,"",-1);
+   
+   %line = "Sniper Head Shots:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft3, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[0,"name","laserHeadShotTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[0,"data","laserHeadShotTG"],0),0,"",-1);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
    %wepLineCount++;
+   
+   %line = "ELF Usage:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[0,"name","elfShotsFiredTG"],0),%noValue,"",-1);   
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[0,"data","elfShotsFiredTG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   
+   
+   %line = "Shock Rear Hits:";  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft3, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500); 
+   %line = hasValueC(getField($pugMapData[0,"name","shockRearShotTG"],0),%noValue,"",-1);    
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 130);    
+   %line = hasValueC(getField($pugMapData[0,"data","shockRearShotTG"],0),0,"",-1);  
+   schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 140 + (%wepLineCount*20), "11 239 231", "RC", 15, 500);
+   %wepLineCount++;
+   
+   
 
-
-
-
+  
    %justLeft5 = 650;
    %justLeft6 = 650+320;
-   %nameAdjust = 0;
-   %nameAdjust2 = -15;
-
+   %nameAdjust = 0; 
+   %nameAdjust2 = -15; 
+   
    %vc = 0;
    for(%a = 0; %a < $imgStatListCount && %vc < 28; %a++){
       %var =  $imgStatList[%a];
       %name = hasValueC(getField($pugMapData[0,"name",%var],0),0,"",-1);
       %value = hasValueC(getField($pugMapData[0,"data",%var],0),0,"",1);
-
-      if(%value){
+      
+      if(%value){            
          if((%vc % 2) == 0){
-            %line = getField($statsName[%var], 0) @ ":";
-            schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft5, 150 + (%vehLineCount*20), "11 239 231", "RC", 15, 500);
-            %line = %name;
-            schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 150 + (%vehLineCount*20), "11 239 231", "RC", 15, 130);
-            %line = %value;
+            %line = getField($statsName[%var], 0) @ ":";  
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft5, 150 + (%vehLineCount*20), "11 239 231", "RC", 15, 500); 
+            %line = %name;  
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust, 150 + (%vehLineCount*20), "11 239 231", "RC", 15, 130);    
+            %line = %value;  
             schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%vehLineCount*20), "11 239 231", "RC", 15, 500);
          }
          else{
-            %line = getField($statsName[%var], 0) @ ":";
-            schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft6, 150 + (%vehLineCount*20), "11 239 231", "RC", 15, 500);
-            %line = %name;
-            schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust2, 150 + (%vehLineCount*20), "11 239 231", "RC", 15, 130);
-            %line = %value;
-            schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%vehLineCount*20), "11 239 231", "RC", 15, 500);
+            %line = getField($statsName[%var], 0) @ ":";    
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft6, 150 + (%vehLineCount*20), "11 239 231", "RC", 15, 500); 
+            %line = %name;  
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset+%nameAdjust2, 150 + (%vehLineCount*20), "11 239 231", "RC", 15, 130);    
+            %line = %value;  
+            schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%vehLineCount*20), "11 239 231", "RC", 15, 500);   
             %vehLineCount++;
          }
          %vc++;
       }
    }
-
+   
    if(%id $= "")
       return;
    %img = new fileObject();
+   RootGroup.add(%img);
    %img.openForWrite("serverStats/statsImg/" @ %id @ ".ppm");
    %img.x = %sizeX;
    %img.y = %sizeY;
@@ -17478,39 +19057,39 @@ function renderCTFMapTextTM(%id){
    %img.yc = 0;
    %img.py = 0;
    %img.pct = 0;
-   schedule(%callTime * %callCount++, 0, "pugImgCycle",%img);
-}
+   schedule(%callTime * %callCount++, 0, "pugImgCycle",%img); 
+}  
 function pugImgCycle(%img){
    %pct = mFloor((%img.yc / %img.y) * 100);
    if(%pct != %img.pct){
       if($dtStats::debugEchos){error("pugImgCycle Saving Stats image" SPC %pct @ "%");}
       %img.pct = %pct;
    }
-
+   
    %y = %img.yc;
    for (%x = 0; %x < %img.x; %x++) {
-      %color = "0 0 0";
-      if(%x >= 48 && %x <= 1235+20 && %y >= 47 && %y <= %img.y -20){
+      %color = "20 45 45";
+      if(%x >= 48 && %x <= 1235+20 && %y >= 47 && %y <= %img.y -20){ 
          if(%x >=  %img.x/2 && %y < 780)
             %color = "33 86 96";
-         else if(%x <=  %img.x/2 && %y < 780)
+         else if(%x <=  %img.x/2 && %y < 780) 
             %color = "29 74 82";
-         else
+         else 
             %color = "21 55 61";
       }
-
+         
       if(isInsideBorderO(%img, %x-1, %y-5, 26, 21, 15)){
-         %color = "0 118 118";
-         %color = lerpColor("0 0 0", %color, (%img.yc / %img.y)*1.5);
+         %color = "0 118 118";      
+         %color = lerpColor("20 45 45", %color, (%img.yc / %img.y)*1.5);
       }
 
       if(isInsideBorderO(%img, %x-1, %y-5, 42, 37, 4)){
-         %color = "0 150 160";
-         %color = lerpColor(%color, "0 0 0", (%img.yc / %img.y) * 0.25);
+         %color = "0 150 160";  
+         %color = lerpColor(%color, "20 45 45", (%img.yc / %img.y) * 0.25);
       }
       %fd = $textColor[%x,%y];
       if(getWord(%fd,0) > 0){
-         %opacity = 1 - (getWord(%fd,0) / 255);
+         %opacity = 1 - (getWord(%fd,0) / 255); 
          %r = mFloor((1 - %opacity) * getWord(%fd,1) + %opacity * getWord(%color,0));
          %g = mFloor((1 - %opacity) * getWord(%fd,2) + %opacity * getWord(%color,1));
          %b = mFloor((1 - %opacity) * getWord(%fd,3) + %opacity * getWord(%color,2));
@@ -17518,17 +19097,17 @@ function pugImgCycle(%img){
       }
       else{
          %img.writeLine(%color);
-      }
+      }   
    }
    %img.yc++;
-   if(%img.yc < %img.y)
+   if(%img.yc < %img.y) 
       schedule(16,0,"pugImgCycle",%img);
    else{
      %img.close();
-     %img.delete();
+     %img.delete();  
      deleteVariables("$textColor*");
      compileGameImage($idPugIndex++);
-   }
+   } 
 }
 function pugImgCycle2(%img){
    %pct = mFloor((%img.yc / %img.y) * 100);
@@ -17536,34 +19115,34 @@ function pugImgCycle2(%img){
       if($dtStats::debugEchos){error("pugImgCycle Saving Stats image" SPC %pct @ "%");}
       %img.pct = %pct;
    }
-
+   
    %y = %img.yc;
    for (%x = 0; %x < %img.x; %x++) {
-      %color = "0 0 0";
-      if(%x >= 48 && %x <= 1235+20 && %y >= 47 && %y <= %img.y -20){
+      %color = "20 45 45";
+      if(%x >= 48 && %x <= 1235+20 && %y >= 47 && %y <= %img.y -20){ 
          if(%x >=  %img.x/2 && %y < 780)
             %color = "33 86 96";
-         else if(%x <=  %img.x/2 && %y < 780)
+         else if(%x <=  %img.x/2 && %y < 780) 
             %color = "29 74 82";
-         else
+         else 
             %color = "21 55 61";
       }
-
+         
       if(isInsideBorderO(%img, %x-1, %y-5, 26, 21, 15)){
-         %color = "0 118 118";
-         %color = lerpColor("0 0 0", %color, (%img.yc / %img.y)*1.5);
+         %color = "0 118 118";      
+         %color = lerpColor("20 45 45", %color, (%img.yc / %img.y)*1.5);
       }
 
       if(isInsideBorderO(%img, %x-1, %y-5, 42, 37, 4)){
-         %color = "0 150 160";
-         %color = lerpColor(%color, "0 0 0", (%img.yc / %img.y) * 0.25);
+         %color = "0 150 160";  
+         %color = lerpColor(%color, "20 45 45", (%img.yc / %img.y) * 0.25);
       }
       if(%x > 355 && %y > 633 && %x < 950 && %y < 764){
-
+         
       }
       %fd = $textColor[%x,%y];
       if(getWord(%fd,0) > 0){
-         %opacity = 1 - (getWord(%fd,0) / 255);
+         %opacity = 1 - (getWord(%fd,0) / 255); 
          %r = mFloor((1 - %opacity) * getWord(%fd,1) + %opacity * getWord(%color,0));
          %g = mFloor((1 - %opacity) * getWord(%fd,2) + %opacity * getWord(%color,1));
          %b = mFloor((1 - %opacity) * getWord(%fd,3) + %opacity * getWord(%color,2));
@@ -17571,17 +19150,17 @@ function pugImgCycle2(%img){
       }
       else{
          %img.writeLine(%color);
-      }
+      }   
    }
    %img.yc++;
-   if(%img.yc < %img.y)
+   if(%img.yc < %img.y) 
       schedule(16,0,"pugImgCycle",%img);
    else{
      %img.close();
-     %img.delete();
+     %img.delete();  
      deleteVariables("$textColor*");
      compileGameImage($idPugIndex++);
-   }
+   } 
 }
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -17590,26 +19169,27 @@ function dtBuildMissionList(%reset){
       ML.delete();
    }
    if(isFile("serverStats/mapRot.cs") && !%reset){
-      exec("serverStats/mapRot.cs");
+      exec("serverStats/mapRot.cs");  
       RootGroup.add(ML);
    }
    if(!isObject(ML)){
-       new simGroup(ML);
+       new simGroup(ML); 
        RootGroup.add(ML);
        ML.curMapList = 0;
    }
    %search = "missions/*.mis";
    %fobject = new FileObject();
+   RootGroup.add(%fobject);
    for( %file = findFirstFile( %search ); %file !$= ""; %file = findNextFile( %search ) ){
       %fileName = fileBase( %file ); // get the name
-      %name = cleanMapName(%fileName);
-      if(!isObject(%name)){
+      %name = cleanMapName(%fileName); 
+      if(!isObject(%name)){  
          if ( !%fobject.openForRead( %file ) )
-            continue;
+            continue; 
          %mObj = new scriptObject(%name){
            file = %fileName;
-           name = %name;
-         };
+           name = %name; 
+         }; 
 
          %typeList = "None";
          while ( !%fobject.isEOF() ){
@@ -17623,14 +19203,14 @@ function dtBuildMissionList(%reset){
             }
          }
          %fobject.close();
-
+         
          // Don't include single player missions:
          if ( strstr( %typeList, "SinglePlayer" ) != -1 || (strstr( %typeList, "TR2" ) != -1  && !$Host::ClassicLoadTR2Gametype)){
             %mObj.delete();
             continue;
          }
-
-
+         
+      
 
          %mObj.typeList = %typeList;
          for( %word = 0; ( %misType = strlwr(getWord( %typeList, %word )) ) !$= ""; %word++ ){
@@ -17641,36 +19221,36 @@ function dtBuildMissionList(%reset){
                ML.TypeCount++;
                ML.TypeName[%i] = %misType;
                ML.TypeIndex[%misType] = %i;
-            }
+            }         
             %mObj.typeList[%misType] = 1;
             //%mObj.typeList = (%i == 0) ? ML.TypeIndex[%misType] : (%mObj.typeList SPC ML.TypeIndex[%misType]);
-            // enable 0 voteOption 1  min 2   max 3 prio 4 week 5 weekBitAsk 6 monthRes 7 monthBitMask 8 eventMap 9 hour 10 min 11 month 12 day 13 year 14 eventSwitch 15 eventTime 16;
-            %mObj.typeOptions[%misType,0] = 0 TAB 0 TAB 0 TAB 64 TAB 3 TAB 0 TAB "1000000" TAB 0 TAB "1000000000000000000000000000000" TAB 0 TAB 12 TAB 60 TAB 28 TAB 12 TAB 2024 TAB 0 TAB 60;
-            %mObj.typeOptions[%misType,1] = 0 TAB 0 TAB 0 TAB 64 TAB 3 TAB 0 TAB "1000000" TAB 0 TAB "1000000000000000000000000000000" TAB 0 TAB 12 TAB 60 TAB 28 TAB 12 TAB 2024 TAB 0 TAB 60;
-            %mObj.typeOptions[%misType,2] = 0 TAB 0 TAB 0 TAB 64 TAB 3 TAB 0 TAB "1000000" TAB 0 TAB "1000000000000000000000000000000" TAB 0 TAB 12 TAB 60 TAB 28 TAB 12 TAB 2024 TAB 0 TAB 60;
+            // enable 0 voteOption 1  min 2   max 3 prio 4 week 5 weekBitAsk 6 monthRes 7 monthBitMask 8 eventMap 9 hour 10 min 11 month 12 day 13 year 14 eventSwitch 15 eventTime 16 unsued 17
+            %mObj.typeOptions[%misType,0] = 0 TAB 0 TAB 0 TAB 64 TAB 3 TAB 0 TAB "1000000" TAB 0 TAB "1000000000000000000000000000000" TAB 0 TAB 12 TAB 60 TAB 28 TAB 12 TAB 2024 TAB 0 TAB 60 TAB 0;
+            %mObj.typeOptions[%misType,1] = 0 TAB 0 TAB 0 TAB 64 TAB 3 TAB 0 TAB "1000000" TAB 0 TAB "1000000000000000000000000000000" TAB 0 TAB 12 TAB 60 TAB 28 TAB 12 TAB 2024 TAB 0 TAB 60 TAB 0;
+            %mObj.typeOptions[%misType,2] = 0 TAB 0 TAB 0 TAB 64 TAB 3 TAB 0 TAB "1000000" TAB 0 TAB "1000000000000000000000000000000" TAB 0 TAB 12 TAB 60 TAB 28 TAB 12 TAB 2024 TAB 0 TAB 60 TAB 0;
          }
          ML.add(%mObj);
       }
    }
    %fobject.delete();
-
+   
    $dtFixedMapCycle = 0;
    for ( %i = 0; %i <  ML.TypeCount; %i++ ){
        $dtFixedMapCount[ ML.TypeName[%i]] = 0;
    }
 
    if(isFile("serverStats/fixMapRot.cs") && !%reset){
-      exec("serverStats/fixMapRot.cs");
-   }
-
+      exec("serverStats/fixMapRot.cs");  
+   }   
+   
    for ( %i = 0; %i < ML.getCount(); %i++ ){// cleanup
       %mapObj = ML.getObject(%i);
       if(!isFile("missions/"@ %mapObj.file @".mis")){
-         %mapObj.delete();
+         %mapObj.delete(); 
          %i--;
       }
    }
-
+   
    if(!isEventPending($saveML)){
       $saveML = ML.schedule(2000,"save", "serverStats/mapRot.cs" , 0);
       ML.schedule(1000,"save", "serverStats/mapRotBackup.cs" , 0);
@@ -17679,20 +19259,20 @@ function dtBuildMissionList(%reset){
 
 function saveMapRot(){
    if(!isEventPending($saveML))
-      $saveML = ML.schedule(1000,"save", "serverStats/mapRot.cs" , 0);
+      $saveML = ML.schedule(1000,"save", "serverStats/mapRot.cs" , 0); 
    if(!isEventPending($saveMR))
       $saveMR = schedule(2000, 0, "export", "$dtFixedMap*", "serverStats/fixMapRot.cs", false );
 }
 
 function eventGameStart(%time){
    Game.gameOver();
-   CycleMissions();
+   CycleMissions(); 
 }
 
 function mapEventCheck(){
-   //if(%event && getField(%ms,0)){//eventMap 9 hour 10 min 11 month 12 day 13 year 14;
+   //if(%event && getField(%ms,0)){//eventMap 9 hour 10 min 11 month 12 day 13 year 14; 
       //$dtEventMap[$dtEventMapCount] = (%event == 3) TAB %mapObj.file TAB %gameType TAB getFields(%ms,10,14);
-      //$dtEventMapCount++;
+      //$dtEventMapCount++;   
    //}
    %time = formattimestring("H\tn\td\tm\tyy");
    for(%i = 0; %i < $dtEventMapCount; %i++){
@@ -17707,14 +19287,14 @@ function mapEventCheck(){
          deleteVariables("$HostMission*");
          deleteVariables("$HostType*");
          if(getField(%fields,0)){// next map
-            messageAll('MsgEventMap', '\c2 The next map will be %1 do to a scheduled event, map voteing has been diabled~wfx/misc/hunters_horde.wav',%mapObj.name);
+            messageAll('MsgEventMap', '\c2 The next map will be %1 do to a scheduled event, map voteing has been diabled~wfx/misc/hunters_horde.wav',%mapObj.name);                  
             $dtEventMap = %mapObj TAB %mapType TAB getField(%fields,1);
             $dtEventMapOldTime = $Host::TimeLimit;
             $dtEventMapOldType = $CurrentMissionType;
          }
-         else{// force change
+         else{// force change 
             %min = 5;
-            messageAll('MsgEventMap', '\c2 Do to a sheduled event, the sever will force change to %1 in %2 min, map voteing has been diabled~wfx/misc/hunters_horde.wav',%mapObj.name,%min);
+            messageAll('MsgEventMap', '\c2 Do to a sheduled event, the sever will force change to %1 in %2 min, map voteing has been diabled~wfx/misc/hunters_horde.wav',%mapObj.name,%min);                     
             schedule(60000*%min, 0, "eventGameStart",getField(%fields,1));
             %ms = $Host::TimeLimit * 60 * 1000;
             $missionStartTime = getSimTime() - (%ms - (60000*%min));
@@ -17735,7 +19315,7 @@ function pushMissionList(){
    deleteVariables("$HostType*");
    deleteVariables("$dtEventMap*");
    $dtEventMapCount = 0;
-   if(ML.curMapList == 3){// Fixed rotation list
+   if(ML.curMapList == 3){// Fixed rotation list 
       for(%x = 0; %x < ML.TypeCount; %x++){
          %gameType = ML.TypeName[%x];
          for(%i = 0; %i < $dtFixedMapCount[strlwr(%gameType)]; %i++){
@@ -17793,12 +19373,12 @@ function pushMissionList(){
          if(isFile("missions/"@ %mapObj.file @".mis")){
             for( %w = 0; ( %gameType = getWord( %mapObj.typeList, %w ) ) !$= ""; %w++ ){
                %ms = %mapObj.typeOptions[strlwr(%gameType), ML.curMapList];
-
-               if(getField(%ms,9) && getField(%ms,0)){//eventMap 9 hour 10 min 11 month 12 day 13 year 14;
+               
+               if(getField(%ms,9) && getField(%ms,0)){//eventMap 9 hour 10 min 11 month 12 day 13 year 14; 
                   $dtEventMap[$dtEventMapCount] = getField(%ms,15) TAB getField(%ms,16) TAB %mapObj TAB %gameType TAB getFields(%ms,10,14);
-                  $dtEventMapCount++;
+                  $dtEventMapCount++;   
                }
-
+               
                if(getField(%ms,0) && getField(%ms,1) != 2){
                   %found = false;
                   for (%mis = 0; %mis < $HostMissionCount; %mis++){
@@ -17850,33 +19430,33 @@ function pushMissionList(){
 package dtMapRotation{
    function loadMission( %missionName, %missionType, %firstMission ){
       parent::loadMission( %missionName, %missionType, %firstMission );
-
+      
       %cName = cleanMapName(%missionName);
       if(ML.curMapList != 3){
          $dtMapPlayed[$CurrentMissionType,%cName] = 1;
          if(ML.saveMapPlayed && !isEventPending($saveMapRot)){
             $saveMapRot = schedule(15000, 0, "export", "$dtMapPlayed*", "serverStats/mapPlayRot.cs", false );
          }
-      }
+      } 
       else if(ML.curMapList == 3){
          if(!$dtMissionCycle){//map did not cycle lets update are pointer;
             %mapCount = $dtFixedMapCount[strlwr(%missionType)];
             for(%i = 0; %i < %mapCount; %i++){
-               %mn = getField($dtFixedMapList[%i, strlwr(%missionType)],0);
+               %mn = getField($dtFixedMapList[%i, strlwr(%missionType)],0);  
                if(%mn $= %missionName){
                   $dtFixedMapCycle = (%i + 1) % %mapCount;
                   error("TEST" SPC %missionName);
                   if(!isEventPending($saveMR)){
                      $saveMR = schedule(15000, 0, "export", "$dtFixedMap*", "serverStats/fixMapRot.cs", false );
-                  }
+                  }    
                   break;
                }
             }
-         }
+         } 
       }
       $dtMissionCycle = 0;
    }
-
+   
    function CycleMissions(){
       $dtMissionCycle = 1;
       if(!ML.enable){
@@ -17897,7 +19477,7 @@ package dtMapRotation{
                $Host::TimeLimit = $dtEventMapOldTime;
                $CurrentMissionType = $dtEventMapOldType;
                $lastMapEvent = 0;
-               buildMissionList();// rebuild vote list
+               buildMissionList();// rebuild vote list 
             }
             if(Game.scheduleVote !$= "") // a vote is still running, stop it
                stopCurrentVote();
@@ -17918,10 +19498,10 @@ package dtMapRotation{
          pushMissionList();
       }
       else{
-         parent::buildMissionList();
+         parent::buildMissionList();  
       }
    }
-
+   
 };
 
 if (!isActivePackage(dtMapRotation)){
@@ -17943,32 +19523,32 @@ function dtNextMission(%gameType){
       }
       return getField(%missionName,0);
    }
-
+   
    %gindex = ML.TypeIndex[%gameType];
    %plrCount = ClientGroup.getCount();
 
    %mapListA = 0;
    %mapListB = 0;
    %mapListF = 0;
-   %prioA = 0;
-   %prioB = 0;
+   %prioA = 0;    
+   %prioB = 0;    
    %wIndex["Sun"] = 0;%wIndex["Mon"] = 1;%wIndex["Tue"] = 2;%wIndex["Wed"] = 3;%wIndex["Thu"] = 5;%wIndex["Fri"] = 5;%wIndex["Sat"] = 6;
    for ( %i = 0; %i < ML.getCount(); %i++ ){
       %mapObj = ML.getObject(%i);
-      // enable 0 voteonly 1  min 2   max 3 prio 4 week 5 weekBitMask 6 monthRes 7 monthBitMask 8 eventMap 9 hour 10 min 11 month 12 day 13 year 14;
+      // enable 0 voteonly 1  min 2   max 3 prio 4 week 5 weekBitMask 6 monthRes 7 monthBitMask 8 eventMap 9 hour 10 min 11 month 12 day 13 year 14;   
       %options = %mapObj.typeOptions[%gameType,ML.curMapList];
       %cName = cleanMapName(%mapObj.file);
       if(getField(%options,0) && getField(%options,1) != 1){ // enable and voteonly check
          if(!$dtMapPlayed[%gameType,%cName]){
-            if(%plrCount >= getField(%options,2) && %plrCount <= getField(%options,3) || (%plrCount > 64 && getField(%options,2) > 32)){// min max player
+            if(%plrCount >= getField(%options,2) && %plrCount <= getField(%options,3) || (%plrCount > 64 && getField(%options,2) > 32)){// min max player 
                if(getField(%options,5)){// week limits
-                  %dindex = %wIndex[formattimestring("D")];
+                  %dindex = %wIndex[formattimestring("D")];  
                   if(getSubStr(getField(%options,6),%dindex,1) == 1){
                      %prio += getField(%options,4);
                      %mapList[%mapListA] = %mapObj;
                      %mapListA++;
                   }
-               }
+               }          
                else if(getField(%options,7)){ // month limits
                   if(getSubStr(getField(%options,8),formattimestring("m")-1,1) == 1){
                      %prioA += getField(%options,4);
@@ -17982,15 +19562,15 @@ function dtNextMission(%gameType){
                   %mapListA++;
                }
             }
-            else{// does not fit are min max condition
+            else{// does not fit are min max condition 
                if(getField(%options,5)){
-                  %dindex = %wIndex[formattimestring("D")];
+                  %dindex = %wIndex[formattimestring("D")];  
                   if(getSubStr(getField(%options,6),%dindex,1) == 1){
                      %prioB += getField(%options,4);
                      %outlier[%mapListB] = %mapObj;
                      %mapListB++;
                   }
-               }
+               }     
                else if(getField(%options,7)){
                   if(getSubStr(getField(%options,8),formattimestring("m")-1,1) == 1){
                      %prioB += getField(%options,4);
@@ -18012,7 +19592,7 @@ function dtNextMission(%gameType){
          }
       }
    }
-
+   
    if(%mapListA){ // min max list
       %randomNum  = getRandom() * %prioA;
       %weight = 0;
@@ -18023,9 +19603,9 @@ function dtNextMission(%gameType){
             return %mapObj.file;
          }
       }
-       return %mapList[getRandom(0, %mapListA-1)].file;
+       return %mapList[getRandom(0, %mapListA-1)].file; 
    }
-   if(%mapListB){// Fail safe list
+   if(%mapListB){// Fail safe list 
       deleteVariables("$dtMapPlayed*");
       %random  = getRandom() * %prioB;
       %weight = 0;
@@ -18038,7 +19618,7 @@ function dtNextMission(%gameType){
       }
       return %outlier[getRandom(0, %mapListB-1)].file;
    }
-   if(%mapListF){// Fail safe list
+   if(%mapListF){// Fail safe list 
       error("Ran out of valid maps using fail safe list, add more maps for the system to pick from");
       deleteVariables("$dtMapPlayed*");
       return %failSafe[getRandom(0, %mapListF-1)].file;
@@ -18085,9 +19665,9 @@ function mapCyleTest(){
       if(ML.curMapList != 3){
          $dtMapPlayed[$CurrentMissionType,%cName] = 1;
          error(%cName);
-      }
+      } 
       else{
-         error("Mode 0" SPC %cName);
+         error("Mode 0" SPC %cName);  
       }
 }
 
@@ -18371,34 +19951,34 @@ function mapCyleTest(){
 //    Added a check to prevent stats building during tournament mode or games with more than 6 players.
 //    Big stats generation outputs a ppm image file of the monthly stats. CTF/LCTF only
 //    Removed stats that are unused, uninteresting, or confusing.
-//    Server Admin Panel rework.
-//    Added Custom map rotatons
-//    Convert TTL type stats to TG,for tournament stats
+//    Server Admin Panel rework. 
+//    Added Custom map rotatons 
+//    Convert TTL type stats to TG,for tournament stats 
 //    Added custom two team debrief as well as a evo style extended stats
 //    Reworked enable disable, only disables stats saving and stats access, do to systems relying on systems
 //
 //    10.1 - 10.2 - 10.3
-//    Ban system changes
+//    Ban system changes 
 //    Fix bad loop in ban system
 //    Misc arena things
-//    Added LCTF Naming
+//    Added LCTF Naming 
 //    serverPrefs Support
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////Storage/////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-//function testVarsRandomAll(%max){
-   //%game = Game.class;
-   //for(%q = 0; %q < $statsVars::count[%game]; %q++){
-      //%varNameType = $statsVars::varNameType[%q,%game];
-      //%varName = $statsVars::varName[%q,%game];
-      //for(%i = 0; %i < ClientGroup.getCount(); %i++){
-         //%client = ClientGroup.getObject(%i);
-         //%val = getRandom(0,%max);
-         //%client.dtStats.stat[%varName] = %val;
-         //dtMinMax(%varName, "wep", 1, %val, %client);
-         //dtMinMax(%varName, "flag", 1, %val, %client);
-         //dtMinMax(%varName, "misc", 1, %val, %client);
-      //}
-   //}
-//}
+function testVarsRandomAll(%max){
+   %game = Game.class;
+   for(%q = 0; %q < $statsVars::count[%game]; %q++){
+      %varNameType = $statsVars::varNameType[%q,%game];
+      %varName = $statsVars::varName[%q,%game];
+      for(%i = 0; %i < ClientGroup.getCount(); %i++){
+         %client = ClientGroup.getObject(%i);
+         %val = getRandom(0,%max);
+         %client.dtStats.stat[%varName] = %val;
+         dtMinMax(%varName, "wep", 1, %val, %client);
+         dtMinMax(%varName, "flag", 1, %val, %client);
+         dtMinMax(%varName, "misc", 1, %val, %client);
+      }
+   }
+}
