@@ -15,7 +15,7 @@
 // Note See bottom of file for full log
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //-----------Settings-----------
-$dtStats::version = 10.52;
+$dtStats::version = 10.53;
 //disable stats system
 $dtStats::Enable = $Host::dtStatsEnable $= "" ? ($Host::dtStatsEnable = 1) : $Host::dtStatsEnable;
 if(!$dtStats::Enable){ return;}// so it disables with a restart
@@ -3614,6 +3614,7 @@ function DefaultGame::sendCTFDebrif(%game,%client){
 
          //print out the client
          %score = %cl.score $= "" ? 0 : %cl.score;//<bitmap:bullet_2>
+         %kills = %cl.kills $= "" ? 0 : %cl.kills;
          %nameColor = %cl == %client ?  "<color:ffff00>" : "<color:c8c8c8>";
          if(%cl == %client){
             %line = '<lmargin:0>%9<clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8<color:3cb4b4>';
@@ -3625,8 +3626,9 @@ function DefaultGame::sendCTFDebrif(%game,%client){
       }
    } 
 }
+
 function extendedDebrief(%game, %client){
-   if($dtStats::evoStyleDebrief && !%client.isWatchOnly){
+   if($dtStats::evoStyleDebrief && !%client.isWatchOnly){ 
       if(dtGameStat.gc["flag"] > 0){ 
          messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0> ' );
          messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280><color:00dc00>FLAG STATS\tPLAYER\t' );
@@ -3781,19 +3783,19 @@ function extendedDebrief(%game, %client){
             messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["bellyTurretDmg"],"NA")), mFormatFloat(dtGameStat.stat["bellyTurretDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["bellyTurretKills"],"NA")), dtGameStat.stat["bellyTurretKills"],%color1,%color2);
          }
          if(dtGameStat.stat["bomberBombsKills"] > 0){
-            %line = '<tab:130,280,360,510><color:00dc00>Clamp Farmer\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %line = '<tab:130,280,360,510><color:00dc00>Bomber Bombs\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
             %color1 = (%client == dtGameStat.client["bomberBombsDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
             %color2 = (%client == dtGameStat.client["bomberBombsKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
             messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["bomberBombsDmg"],"NA")), mFormatFloat(dtGameStat.stat["bomberBombsDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["bomberBombsKills"],"NA")), dtGameStat.stat["bomberBombsKills"],%color1,%color2);
          }
          if(dtGameStat.stat["tankChaingunKills"] > 0){
-            %line = '<tab:130,280,360,510><color:00dc00>Tank Gunner (chain)\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %line = '<tab:130,280,360,510><color:00dc00>Tank (chain)\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
             %color1 = (%client == dtGameStat.client["tankChaingunDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
             %color2 = (%client == dtGameStat.client["tankChaingunKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
             messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["tankChaingunDmg"],"NA")), mFormatFloat(dtGameStat.stat["tankChaingunDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["tankChaingunKills"],"NA")), dtGameStat.stat["tankChaingunKills"],%color1,%color2);
          }
          if(dtGameStat.stat["tankMortarKills"] > 0){
-            %line = '<tab:130,280,360,510><color:00dc00>Tank Gunner (mortar)\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %line = '<tab:130,280,360,510><color:00dc00>Tank (mortar)\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
             %color1 = (%client == dtGameStat.client["tankMortarDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
             %color2 = (%client == dtGameStat.client["tankMortarKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
             messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["tankMortarDmg"],"NA")), mFormatFloat(dtGameStat.stat["tankMortarDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["tankMortarKills"],"NA")), dtGameStat.stat["tankMortarKills"],%color1,%color2);
@@ -5316,8 +5318,13 @@ function ArenaGame::setupClientTeams(%game){
 }
 
 function endGameTB(%game){
-   if($TB::TBLog[$dtStats::gtNameShort[%game.class]]){
-      logTB(%game);// log the outcome   
+   if(!$TB::TBEnable[$dtStats::gtNameShort[%game.class]]){
+      if($Host::TournamentMode){// load map data so we can update it as it does not load by default with TournamentMode
+         loadTBMap(%game);
+      }
+      if($TB::TBLog[$dtStats::gtNameShort[%game.class]]){
+         logTB(%game);// log the outcome   
+      }
       for(%x = 0; %x < statsGroup.getCount(); %x++){
          %dtStats = statsGroup.getObject(%x);
          calcTBScores(%dtStats,%game);
@@ -7556,6 +7563,9 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
          }
          else if(%sourceClass $= "Turret"){
             %sourceClient = %sourceObject.owner;
+            if(!isObject(%sourceClient)){
+               %sourceClient = %sourceObject.getControllingClient();
+            }
             %sourceDT = %sourceClient.dtStats;
          }
          else if(%sourceClass $= "VehicleTurret" || %sourceClass $= "FlyingVehicle" || %sourceClass $= "HoverVehicle" || %sourceClass $= "WheeledVehicle"){
@@ -9082,7 +9092,7 @@ function statsMenu(%client,%game){
          switch$(%opt0){
             case "tmc":
                if(!$dtStats::tmCompile){
-                  buildTest(0);
+                  buildTest(1);
                   messageAll('MsgStats', '\c3Tournament stats build started, server performance will degrade for a few minutes~wfx/misc/hunters_greed.wav');
                }
               %client.GlArg3 = 0;
