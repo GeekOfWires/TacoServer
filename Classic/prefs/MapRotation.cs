@@ -531,7 +531,7 @@ addRotationMap("DermCrossingDeluxeLT",			"LCTF",1,1,-1,-1);
 addRotationMap("SuperiorWaterworks",			"LCTF",1,0,-1,12);
 addRotationMap("FrozenForgeLT",					"LCTF",1,1,-1,20);
 addRotationMap("TWL2_CelerityLT",				"LCTF",1,1,-1,20);
-addRotationMap("El_Fin",					    "LCTF",1,1,-1,14);
+addRotationMap("El_FinLT",					    "LCTF",1,1,-1,14);
 addRotationMap("CapriLT",					    "LCTF",1,1,-1,14);
 
 
