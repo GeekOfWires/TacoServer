@@ -479,7 +479,7 @@ addRotationMap("GrassyKnoll",					"LCTF",1,1,-1,-1);
 addRotationMap("TWL2_MuddySwamp",				"LCTF",1,0,8,-1);
 addRotationMap("SandyRunLT",					"LCTF",1,0,-1,12);
 addRotationMap("Sentry",						"LCTF",1,1,-1,-1);
-addRotationMap("Cinerarium",					"LCTF",1,1,-1,-1);
+addRotationMap("DMP_Cinerarium",				"LCTF",1,1,-1,14);
 addRotationMap("Exhumed",						"LCTF",1,1,-1,-1);
 addRotationMap("S8_ZilchLT",					"LCTF",1,1,-1,-1);
 addRotationMap("TWL_BeachBlitzLT",				"LCTF",1,0,-1,-1);
@@ -503,7 +503,7 @@ addRotationMap("HillKingLT",					"LCTF",1,1,-1,-1);
 addRotationMap("DMP_BastardForgeLT",			"LCTF",1,1,-1,-1);
 addRotationMap("VanDamnedLT",					"LCTF",1,1,-1,-1);
 addRotationMap("DMP_Paranoia",					"LCTF",1,0,-1,-1);
-addRotationMap("DMP_Spincycle",					"LCTF",1,1,-1,-1);
+addRotationMap("DMP_SpincycleLT",				"LCTF",1,1,-1,-1);
 addRotationMap("Ravine",						"LCTF",1,1,-1,-1);
 // addRotationMap("DX_Badlands",				"LCTF",1,0,-1,-1);
 // addRotationMap("DX_Desert",					"LCTF",1,0,-1,-1);
@@ -531,7 +531,7 @@ addRotationMap("DermCrossingDeluxeLT",			"LCTF",1,1,-1,-1);
 addRotationMap("SuperiorWaterworks",			"LCTF",1,0,-1,12);
 addRotationMap("FrozenForgeLT",					"LCTF",1,1,-1,20);
 addRotationMap("TWL2_CelerityLT",				"LCTF",1,1,-1,20);
-addRotationMap("El_Fin",					    "LCTF",1,1,-1,14);
+addRotationMap("El_FinLT",					    "LCTF",1,1,-1,14);
 addRotationMap("CapriLT",					    "LCTF",1,1,-1,14);
 
 

@@ -15,14 +15,14 @@
 // Note See bottom of file for full log
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //-----------Settings-----------
-$dtStats::version = 10.47;
+$dtStats::version = 10.53;
 //disable stats system
 $dtStats::Enable = $Host::dtStatsEnable $= "" ? ($Host::dtStatsEnable = 1) : $Host::dtStatsEnable;
 if(!$dtStats::Enable){ return;}// so it disables with a restart
 //set max number of individual game to record
 //Note only tested to 100 games, hard cap at 300
 $dtStats::MaxNumOfGames = 100;
-
+ 
 //how high the player has to be off the ground before it will count
 $dtStats::midAirHeight = 10;
 
@@ -31,7 +31,7 @@ $dtStats::midAirMessage =  $Host::dtStatsMidAirMessage $= "" ? ($Host::dtStatsMi
 
 //capture best cap times restart required if changed
 //only enable if evo system is not available 
-$dtStats::ctfTimes =  $Host::dtStatsCTFTimes $= "" ? ($Host::dtStatsCTFTimes = 1) : $Host::dtStatsCTFTimes;
+$dtStats::ctfTimes =  $Host::dtStatsCTFTimes $= "" ? ($Host::dtStatsCTFTimes = 0) : $Host::dtStatsCTFTimes;
 //number of players before it starts counting captimes
 $dtStats::ctfTimesPlayerLimit =  $Host::dtStatsCTFTimesPlayerLimit $= "" ? ($Host::dtStatsCTFTimesPlayerLimit = 8) : $Host::dtStatsCTFTimesPlayerLimit;
 
@@ -40,8 +40,6 @@ $dtStats::teamDebrief = $Host::dtStatsTeamDebrief $= "" ? ($Host::dtStatsTeamDeb
 //extends the debrief with extra stats done in the evo style 
 $dtStats::evoStyleDebrief = $Host::dtStatsEvoStyleDebrief $= "" ? ($Host::dtStatsEvoStyleDebrief = 1) : $Host::dtStatsEvoStyleDebrief ;
 
-//extends the debrief with extra stats done in the evo style 
-$dtStats::arenaKDRStats = $Host::dtStatsArenaKDRStats $= "" ? ($Host::dtStatsArenaKDRStats = 1) : $Host::dtStatsArenaKDRStats ;
 
 // 30 sec min after not making an action reset
 $dtStats::returnToMenuTimer = (60*1000);
@@ -53,12 +51,14 @@ $dtStats::saveTime = 64;
 //Note atm tournament stats is hard coded and setup only for CTF 
 //outputs a ppm image in serverStats/statsImg this can be open/converted with most editors 
 $dtStats::tmModeCompile = 1;
-$dtStats::tmMode = 0;
+$dtStats::tmMode =0;
 
 //minimum number avg data to  consider for leaderboards
-$dtStats::minAvg = 8;
+$dtStats::minAvg = 4;
 //minimum  number of games for leaderboards
 $dtStats::minGame = 1;
+
+$dtStats::TBMinPlayers = 8;
 
 //sorting speed
 $dtStats::sortSpeed = 64;
@@ -81,10 +81,11 @@ $dtStats::WhtListFile = $Host::dtStatsWhtListFile $= "" ? ($Host::dtStatsWhtList
 $dtStats::fm  = 1;
 //Set 2 or more to enable, this also contorls how much history you want, best to keep this count low
 $dtStats::day = 0;//not used
-$dtStats::week = 12;//~53
+$dtStats::week = 0;//~53
 $dtStats::month = 4; //-12
 $dtStats::quarter = 0;//not used
-$dtStats::year = 0;//not used
+$dtStats::year = 0;//not 
+$dtStats::custom = 12;//not used
 // you gain extra days based on time played extra days = gameCount * expireFactor;
 // example being 100 games * factor of 0.596 = will gain you 60 extra days but if its over the 90 day max it will be deleted
 $dtStats::expireMax = 90;
@@ -110,7 +111,7 @@ $dtStats::returnToMenuTimer = ($dtStats::dev == 1) ?  ((60*1000) * 30) : ((60*10
 //---------------------------------
 //<font:name:size>Sets the current font to the indicated name and size. Example: <font:Arial Bold:20>
 //<tag:ID>Set a tag to which we can scroll a GuiScrollContentCtrl (parent control of the guiMLTextCtrl)
-//<color:RRGGBBAA>Sets text color. Example: <color:dcdcdc> will display red text.
+//<color:RRGGBBAA>Sets text color. Example: <color:c8c8c8> will display red text.
 //<linkcolor:RRGGBBAA>Sets the color of a hyperlink.
 //<linkcolorHL:RRGGBBAA>Sets the color of a hyperlink that is being clicked.
 //<shadow:x:y>Add a shadow to the text, displaced by (x, y).
@@ -341,7 +342,7 @@ $dtStats::FV[$dtStats::FC["CTFGame","TG"]++,"CTFGame","TG"] = "heavyTransportDes
 
 $dtStats::FV[$dtStats::FC["CTFGame","TG"]++,"CTFGame","TG"] = "stalemateReturn";
 $dtStats::FV[$dtStats::FC["CTFGame","TG"]++,"CTFGame","TG"] = "flagTimeMin";
-
+$dtStats::FV[$dtStats::FC["CTFGame","TG"]++,"CTFGame","TG"] = "flagGrabAtStand";
 
 ///////////////////////////////////////////////////////////////////////////////
 //                             		LCTF
@@ -438,7 +439,7 @@ $dtStats::FV[$dtStats::FC["LCTFGame","TG"]++,"LCTFGame","TG"] = "timeFarEnemyFS"
 $dtStats::FV[$dtStats::FC["LCTFGame","TG"]++,"LCTFGame","TG"] = "timeNearFlag";
 $dtStats::FV[$dtStats::FC["LCTFGame","TG"]++,"LCTFGame","TG"] = "timeNearEnemyFlag";
 $dtStats::FV[$dtStats::FC["LCTFGame","TG"]++,"LCTFGame","TG"] = "flagTimeMin";
-
+$dtStats::FV[$dtStats::FC["LCTFGame","TG"]++,"LCTFGame","TG"] = "flagGrabAtStand";
 //////////////////////////////////////////////////////////////////////////////////
 $dtStats::FVG[$dtStats::FCG["SCtFGame","TG"]++,"SCtFGame","TG"] = "score";
 $dtStats::FVG[$dtStats::FCG["SCtFGame","Avg"]++,"SCtFGame","Avg"] = "score";
@@ -532,6 +533,7 @@ $dtStats::FV[$dtStats::FC["SCtFGame","TG"]++,"SCtFGame","TG"] = "timeFarEnemyFS"
 $dtStats::FV[$dtStats::FC["SCtFGame","TG"]++,"SCtFGame","TG"] = "timeNearFlag";
 $dtStats::FV[$dtStats::FC["SCtFGame","TG"]++,"SCtFGame","TG"] = "timeNearEnemyFlag";
 $dtStats::FV[$dtStats::FC["SCtFGame","TG"]++,"SCtFGame","TG"] = "flagTimeMin";
+$dtStats::FV[$dtStats::FC["SCtFGame","TG"]++,"SCtFGame","TG"] = "flagGrabAtStand";
 ///////////////////////////////////////////////////////////////////////////////
 //                            	 LakRabbit
 ///////////////////////////////////////////////////////////////////////////////
@@ -1018,7 +1020,6 @@ $dtStats::FV[$dtStats::FC["Avg"]++,"Avg"] = "grenadeDmgACC";
 $dtStats::FV[$dtStats::FC["Avg"]++,"Avg"] = "mortarDmgACC";
 
 
-
 $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "null";//rng number for testing 
 ////////////////////////////////////////////////////////////////////////////////
 //Unused vars that are not tracked but used for other things and need to be reset every round
@@ -1026,6 +1027,391 @@ $dtStats::FV[$dtStats::FC["TG"]++,"TG"] = "null";//rng number for testing
 $dtStats::unused[$dtStats::unusedCount++] = "timeToLive";
 $dtStats::unused[$dtStats::unusedCount++] = "ksCounter";
 ////////////////////////////////////////////////////////////////////////////////
+
+
+$dtStats::TBGC["CTF"] = -1;
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "score";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "defenseScore";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "offenseScore";
+
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "kills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "deaths";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "suicides";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "teamKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "friendlyFire";
+
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "flagCaps";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "flagGrabs";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "flagGrabAtStand";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "carrierKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "flagReturns";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "escortAssists";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "flagDefends";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "concussFlag";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "depInvyUse";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "concussFlag";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "flagCatch";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "flagToss";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "interceptedFlag";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "stalemateReturn";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "flagTimeMin";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "timeNearTeamFS";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "timeFarTeamFS";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "timeNearEnemyFS";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "timeFarEnemyFS";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "timeNearFlag";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "timeNearEnemyFlag";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "capEfficiency";
+
+
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "genRepairs";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "genSolRepairs";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "SensorRepairs";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "TurretRepairs";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "StationRepairs";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "VStationRepairs";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "solarRepairs";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "sentryRepairs";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "depSensorRepairs";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "depInvRepairs";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "depTurretRepairs";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "repairs";
+
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "tkDestroys";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "genDestroys";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "sensorDestroys";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "turretDestroys";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "iStationDestroys";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "vstationDestroys";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "solarDestroys";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "sentryDestroys";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "depSensorDestroys";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "depTurretDestroys";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "depStationDestroys";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "destruction";
+
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "genDefends";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "turretKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "mannedTurretKills";
+
+
+
+
+//$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "MotionSensorDep";
+//$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "PulseSensorDep";
+//$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "SensorsDep";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "InventoryDep";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "TurretOutdoorDep";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "TurretIndoorDep";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "TurretsDep";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "TotalDep";
+
+
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "OffKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "DefKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "OffKillsL";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "OffKillsM";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "OffKillsH";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "DefKillsL";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "DefKillsM";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "DefKillsH";
+
+
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "roadKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "gravCycleDes";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "assaultTankDes";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "MPBDes";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "turbogravDes";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "bomberDes";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "heavyTransportDes";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "wildRK";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "assaultRK";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "scoutFlyerRK";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "bomberFlyerRK";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "hapcFlyerRK";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "tankMortarDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "tankChaingunDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "bomberBombsDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "bellyTurretDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "shrikeBlasterDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "shrikeBlasterKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "bellyTurretKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "bomberBombsKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "tankChaingunKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "tankMortarKills";
+
+
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "kdr";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "assist";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "cgKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "discKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "grenadeKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "hGrenadeKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "laserKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "mortarKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "missileKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "shockKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "plasmaKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "blasterKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "mineKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "explosionKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "satchelKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "inventoryKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "cgDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "laserDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "blasterDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "discDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "grenadeDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "hGrenadeDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "mortarDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "missileDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "plasmaDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "shockDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "mineDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "satchelDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "indoorDepTurretDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "outdoorDepTurretDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "totalWepDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "elfShotsFired";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "laserHeadShot";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "shockRearShot";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "minePlusDisc";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "minePlusDiscKill";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "totalMA";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "airTime";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "groundTime";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "timeTL";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "killStreak";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "avgSpeed";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "concussHit";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "concussTaken";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "idleTime";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "repairEnemy";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "revenge";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "shieldPackDmg";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "cloakerKills";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "cloakersKilled";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "jammer";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "flipflopCount";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "repairpackpickupCount";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "repairpackpickupEnemy";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "invyEatRepairPack";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "lagSpikes";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "packetLoss";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "txStop";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "pingAvg";
+
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorL";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorM";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorH";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorLK";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorMK";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorHK";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorLL";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorLM";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorLH";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorML";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorMM";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorMH";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorHL";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorHM";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "armorHH";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "discMA";
+$dtStats::TBG[$dtStats::TBGC["CTF"]++,"CTF"] = "laserKillDist";
+$dtStats::TBGC["CTF"]++;
+
+$dtStats::TBGC["LCTF"] = -1;
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "score";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "defenseScore";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "offenseScore";
+
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "kills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "deaths";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "suicides";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "teamKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "friendlyFire";
+
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "flagCaps";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "flagGrabs";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "flagGrabAtStand";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "carrierKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "flagReturns";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "escortAssists";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "flagDefends";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "concussFlag";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "depInvyUse";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "concussFlag";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "flagCatch";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "flagToss";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "interceptedFlag";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "stalemateReturn";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "flagTimeMin";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "timeNearTeamFS";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "timeFarTeamFS";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "timeNearEnemyFS";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "timeFarEnemyFS";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "timeNearFlag";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "timeNearEnemyFlag";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "capEfficiency";
+
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "OffKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "DefKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "OffKillsL";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "OffKillsM";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "OffKillsH";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "DefKillsL";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "DefKillsM";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "DefKillsH";
+
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "kdr";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "assist";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "cgKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "discKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "grenadeKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "hGrenadeKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "laserKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "mortarKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "missileKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "shockKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "plasmaKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "blasterKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "mineKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "explosionKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "satchelKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "inventoryKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "cgDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "laserDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "blasterDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "discDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "grenadeDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "hGrenadeDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "mortarDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "missileDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "plasmaDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "shockDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "mineDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "satchelDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "indoorDepTurretDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "outdoorDepTurretDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "totalWepDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "elfShotsFired";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "laserHeadShot";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "shockRearShot";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "minePlusDisc";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "minePlusDiscKill";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "totalMA";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "airTime";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "groundTime";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "timeTL";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "killStreak";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "avgSpeed";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "concussHit";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "concussTaken";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "idleTime";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "repairEnemy";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "revenge";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "shieldPackDmg";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "cloakerKills";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "cloakersKilled";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "jammer";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "flipflopCount";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "repairpackpickupCount";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "repairpackpickupEnemy";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "invyEatRepairPack";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "lagSpikes";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "packetLoss";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "txStop";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "pingAvg";
+
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "armorL";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "discMA";
+$dtStats::TBG[$dtStats::TBGC["LCTF"]++,"LCTF"] = "laserKillDist";
+$dtStats::TBGC["LCTF"]++;
+
+
+$dtStats::TBGC["Arena"] = -1;
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "score";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "kills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "deaths";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "suicides";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "teamKills";
+
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "kdr";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "assist";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "cgKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "discKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "grenadeKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "hGrenadeKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "laserKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "mortarKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "missileKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "shockKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "plasmaKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "blasterKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "mineKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "explosionKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "satchelKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "inventoryKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "cgDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "laserDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "blasterDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "discDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "grenadeDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "hGrenadeDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "mortarDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "missileDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "plasmaDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "shockDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "mineDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "satchelDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "indoorDepTurretDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "outdoorDepTurretDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "totalWepDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "elfShotsFired";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "laserHeadShot";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "shockRearShot";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "minePlusDisc";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "minePlusDiscKill";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "totalMA";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "airTime";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "groundTime";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "timeTL";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "killStreak";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "avgSpeed";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "concussHit";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "concussTaken";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "idleTime";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "repairEnemy";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "revenge";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "shieldPackDmg";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "cloakerKills";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "cloakersKilled";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "jammer";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "flipflopCount";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "repairpackpickupCount";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "repairpackpickupEnemy";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "invyEatRepairPack";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "lagSpikes";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "packetLoss";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "txStop";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "pingAvg";
+
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "armorL";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "armorM";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "armorLK";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "armorMK";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "armorLL";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "armorLM";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "armorML";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "armorMM";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "armorHL";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "armorHM";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "discMA";
+$dtStats::TBG[$dtStats::TBGC["Arena"]++,"Arena"] = "laserKillDist";
+
+$dtStats::TBGC["Arena"]++;
+
+
 
 
 
@@ -2044,12 +2430,8 @@ package dtStats{
          messageClient( %client, 'MsgDebriefAddLine', "", ' ' );
          
 
-         if($dtStats::arenaKDRStats){
-               messageClient( %client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>PLAYER<lmargin%%:20>TEAM<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>DEATHS<lmargin%%:65>KDR<lmargin%%:75>ASSISTS<lmargin%%:85>DISC MA<spop>' );
-         }
-         else{
-            messageClient( %client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>PLAYER<lmargin%%:20>TEAM<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>ASSISTS<lmargin%%:65>TOTAL DMG<lmargin%%:75>ROUNDS FIRED<lmargin%%:85>DISC MA<spop>' );
-         }
+         messageClient( %client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>PLAYER<lmargin%%:20>TEAM<lmargin%%:37>SCORE<lmargin%%:49>KILLS<lmargin%%:61>KDR<lmargin%%:73>ASSISTS<lmargin%%:85>DISC MA<spop>' );
+
          for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
             %count[%team] = 0;
 
@@ -2072,14 +2454,14 @@ package dtStats{
             %score = %cl.score $= "" ? 0 : %cl.score;
             %kills = %cl.kills $= "" ? 0 : %cl.kills;
             %deaths = %cl.deaths $= "" ? 0 : %cl.deaths;
-            if($dtStats::arenaKDRStats){
-               %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
-               messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, %game.getTeamName(%cl.team), %score, %kills , %deaths, cropFloat(%cl.dtStats.stat["kdr"],2), %cl.dtStats.stat["assist"], %cl.dtStats.stat["discMA"] );
+            if(%client == %cl){
+               %line = '<lmargin:0><color:ffff00><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:37>%3<lmargin%%:49>%4<lmargin%%:61>%6<lmargin%%:73>%7<lmargin%%:85>%8<color:3cb4b4>';
             }
             else{
-               %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
-               messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, %game.getTeamName(%cl.team), %score, %kills, %cl.dtStats.stat["assist"], cropFloat(%cl.dtStats.stat["totalWepDmg"],1), %cl.dtStats.stat["shotsFired"], %cl.dtStats.stat["discMA"] );
+               %line = '<lmargin:0><color:c8c8c8><clip%%:40>%1</clip><color:3cb4b4><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:37>%3<lmargin%%:49>%4<lmargin%%:61>%6<lmargin%%:73>%7<lmargin%%:85>%8';
             }
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(getTaggedString(%cl.name)), %game.getTeamName(%cl.team), %score, %kills , %deaths, cropFloat(%cl.dtStats.stat["kdr"],2), %cl.dtStats.stat["assist"], %cl.dtStats.stat["discMA"] );
+
             %count[%highTeam]++; 
             %notDone = false;
             for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
@@ -2107,25 +2489,21 @@ package dtStats{
                   %score = %cl.score $= "" ? 0 : %cl.score;
                   %kills = %cl.kills $= "" ? 0 : %cl.kills;
                   %deaths = %cl.deaths $= "" ? 0 : %cl.deaths;
-                  if($dtStats::arenaKDRStats){
-                     messageClient(%client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>OBSERVERS<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>DEATHS<lmargin%%:65>KDR<lmargin%%:75>ASSISTS<lmargin%%:85>DISC MA<spop>');
-                  }
-                  else{
-                     messageClient(%client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>OBSERVERS<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>ASSISTS<lmargin%%:65>TOTAL DMG<lmargin%%:75>ROUNDS FIRED<lmargin%%:85>DISC MA<spop>');
-                  }
+                     
+                  messageClient(%client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>OBSERVERS<lmargin%%:37>SCORE<lmargin%%:49>KILLS<lmargin%%:61>KDR<lmargin%%:73>ASSISTS<lmargin%%:85>DISC MA<spop>');
+   
                }
 
                //print out the client
-               if($dtStats::arenaKDRStats){
                   %score = %cl.score $= "" ? 0 : %cl.score;//<bitmap:bullet_2>
-                  %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
-                  messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, "", %score, %kills , %deaths, cropFloat(%cl.dtStats.stat["kdr"],2), %cl.dtStats.stat["assist"], %cl.dtStats.stat["discMA"] );
-               }
-               else {
-                  %score = %cl.score $= "" ? 0 : %cl.score;//<bitmap:bullet_2>
-                  %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
-                  messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, "", %score, %kills, %cl.dtStats.stat["assist"], cropFloat(%cl.dtStats.stat["totalWepDmg"],1), %cl.dtStats.stat["shotsFired"], %cl.dtStats.stat["discMA"] );
-               }
+                  if(%client == %cl){
+                     %line = '<lmargin:0><color:ffff00><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:37>%3<lmargin%%:49>%4<lmargin%%:61>%6<lmargin%%:73>%7<lmargin%%:85>%8<color:3cb4b4>';
+                  }
+                  else{
+                     %line = '<lmargin:0><color:c8c8c8><clip%%:40>%1</clip><color:3cb4b4><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:37>%3<lmargin%%:49>%4<lmargin%%:61>%6<lmargin%%:73>%7<lmargin%%:85>%8';
+                  }
+                  messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(getTaggedString(%cl.name)), "", %score, %kills , %deaths, cropFloat(%cl.dtStats.stat["kdr"],2), %cl.dtStats.stat["assist"], %cl.dtStats.stat["discMA"] );
+
             }
          }
          extendedDebrief(%game, %client);
@@ -2232,7 +2610,7 @@ package dtStats{
    }
    function SCtFGame::onClientKilled(%game, %clVictim, %clKiller, %damageType, %implement, %damageLocation){
       clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %damageLocation);//for stats collection
-      if(%clKiller.team != %clVictim.team){
+      if(%clKiller.team != %clVictim.team && isObject(%clKiller.player)){
          %dist = vectorDist($dtStats::FlagPos[%clKiller.team], %clKiller.player.getPosition());
          if(%dist > ($dtStats::FlagTotalDist*0.5)){// kill made closer to the enemy flag
             %clKiller.dtStats.stat["OffKills"]++;
@@ -2275,7 +2653,11 @@ package dtStats{
       $dtStats::gameID = formattimestring("yymmddHHnnss");
       if($dtStats::debugEchos)
          error("GAME ID" SPC $dtStats::gameID SPC "//////////////////////////////");
-   }
+      if($TB::TBEnable[$dtStats::gtNameShort[%game.class]] && !$Host::TournamentMode){// note this happens before clients start there load 
+         ballenceTeams(%game,0);
+      }
+   } 
+  
    function DefaultGame::forceObserver( %game, %client, %reason ){
       parent::forceObserver( %game, %client, %reason );
       if(%reason $= "spawnTimeout"){
@@ -3097,101 +3479,7 @@ function CTFGame::sendDebriefing(%game, %client){
    }
    messageClient( %client, 'MsgClearDebrief', "" );
    if($dtStats::teamDebrief == 1){
-      %topScore = "";
-      %topCount = 0;
-      for ( %team = 1; %team <= %game.numTeams; %team++ )
-      {
-         if ( %topScore $= "" || $TeamScore[%team] > %topScore )
-         {
-            %topScore = $TeamScore[%team];
-            %firstTeam = %team;
-            %topCount = 1;
-         }
-         else if ( $TeamScore[%team] == %topScore )
-         {
-            %secondTeam = %team;
-            %topCount++;
-         }
-      }
-
-      // Mission result:
-      if ( %topCount == 1 )
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 wins!', %game.getTeamName(%firstTeam) );
-      else if ( %topCount == 2 )
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 and Team %2 tie!', %game.getTeamName(%firstTeam), %game.getTeamName(%secondTeam) );
-      else
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>The mission ended in a tie.' );
-
-      // Team scores:
-      messageClient( %client, 'MsgDebriefAddLine', "", '<spush><color:00dc00><font:univers condensed:18>TEAM<lmargin%%:35>SCORE<spop>' );
-      for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
-      {
-         if ( $TeamScore[%team] $= "" )
-            %score = 0;
-         else
-            %score = $TeamScore[%team];
-         messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0><clip%%:60> %1</clip><lmargin%%:35><clip%%:40> %2</clip>', %game.getTeamName(%team), %score );
-      }
-
-      // Player scores:
-      messageClient( %client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>PLAYER<lmargin%%:20>TEAM<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>Assists<lmargin%%:65>OffKills<lmargin%%:75>DefKills<lmargin%%:85>Disc MA<spop>' );
-      for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
-         %count[%team] = 0;
-
-      %notDone = true;
-      while ( %notDone )
-      {
-         // Get the highest remaining score:
-         %highScore = "";
-         for ( %team = 1; %team <= %game.numTeams; %team++ )
-         {
-            if ( %count[%team] < $TeamRank[%team, count] && ( %highScore $= "" || $TeamRank[%team, %count[%team]].score > %highScore ) )
-            {
-               %highScore = $TeamRank[%team, %count[%team]].score;
-               %highTeam = %team;
-            }
-         }
-
-         // Send the debrief line:
-         %cl = $TeamRank[%highTeam, %count[%highTeam]];
-         %score = %cl.score $= "" ? 0 : %cl.score;
-         %kills = %cl.kills $= "" ? 0 : %cl.kills;
-         %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
-         messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, %game.getTeamName(%cl.team), %score, %kills, %cl.dtStats.stat["assist"], %cl.dtStats.stat["OffKills"], %cl.dtStats.stat["DefKills"], %cl.dtStats.stat["discMA"] );
-
-         %count[%highTeam]++; 
-         %notDone = false;
-         for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
-         {
-            if ( %count[%team] < $TeamRank[%team, count] )
-            {
-               %notDone = true;
-               break;
-            }
-         }
-      }
-      
-      //now go through an list all the observers:
-      %count = ClientGroup.getCount();
-      %printedHeader = false;
-      for (%i = 0; %i < %count; %i++)
-      {
-         %cl = ClientGroup.getObject(%i);
-         if (%cl.team <= 0)
-         {
-            //print the header only if we actually find an observer
-            if (!%printedHeader)
-            {
-               %printedHeader = true;
-               messageClient(%client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>OBSERVERS<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>Assists<lmargin%%:65>OffKills<lmargin%%:75>DefKills<lmargin%%:85>Disc MA<spop>');
-            }
-
-            //print out the client
-            %score = %cl.score $= "" ? 0 : %cl.score;//<bitmap:bullet_2>
-            %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, "", %score, %kills, %cl.dtStats.stat["assist"], %cl.dtStats.stat["OffKills"], %cl.dtStats.stat["DefKills"], %cl.dtStats.stat["discMA"] );
-         }
-      }
+      %game.sendCTFDebrif(%client);
       extendedDebrief(%game, %client);
    }
    else{
@@ -3206,101 +3494,7 @@ function LCTFGame::sendDebriefing(%game, %client){
    }
    messageClient( %client, 'MsgClearDebrief', "" );
    if($dtStats::teamDebrief == 1){
-      %topScore = "";
-      %topCount = 0;
-      for ( %team = 1; %team <= %game.numTeams; %team++ )
-      {
-         if ( %topScore $= "" || $TeamScore[%team] > %topScore )
-         {
-            %topScore = $TeamScore[%team];
-            %firstTeam = %team;
-            %topCount = 1;
-         }
-         else if ( $TeamScore[%team] == %topScore )
-         {
-            %secondTeam = %team;
-            %topCount++;
-         }
-      }
-
-      // Mission result:
-      if ( %topCount == 1 )
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 wins!', %game.getTeamName(%firstTeam) );
-      else if ( %topCount == 2 )
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 and Team %2 tie!', %game.getTeamName(%firstTeam), %game.getTeamName(%secondTeam) );
-      else
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>The mission ended in a tie.' );
-
-      // Team scores:
-      messageClient( %client, 'MsgDebriefAddLine', "", '<spush><color:00dc00><font:univers condensed:18>TEAM<lmargin%%:35>SCORE<spop>' );
-      for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
-      {
-         if ( $TeamScore[%team] $= "" )
-            %score = 0;
-         else
-            %score = $TeamScore[%team];
-         messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0><clip%%:60> %1</clip><lmargin%%:35><clip%%:40> %2</clip>', %game.getTeamName(%team), %score );
-      }
-
-      // Player scores:
-      messageClient( %client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>PLAYER<lmargin%%:20>TEAM<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>Assists<lmargin%%:65>OffKills<lmargin%%:75>DefKills<lmargin%%:85>Disc MA<spop>' );
-      for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
-         %count[%team] = 0;
-
-      %notDone = true;
-      while ( %notDone )
-      {
-         // Get the highest remaining score:
-         %highScore = "";
-         for ( %team = 1; %team <= %game.numTeams; %team++ )
-         {
-            if ( %count[%team] < $TeamRank[%team, count] && ( %highScore $= "" || $TeamRank[%team, %count[%team]].score > %highScore ) )
-            {
-               %highScore = $TeamRank[%team, %count[%team]].score;
-               %highTeam = %team;
-            }
-         }
-
-         // Send the debrief line:
-         %cl = $TeamRank[%highTeam, %count[%highTeam]];
-         %score = %cl.score $= "" ? 0 : %cl.score;
-         %kills = %cl.kills $= "" ? 0 : %cl.kills;
-         %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
-         messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, %game.getTeamName(%cl.team), %score, %kills, %cl.dtStats.stat["assist"], %cl.dtStats.stat["OffKills"], %cl.dtStats.stat["DefKills"], %cl.dtStats.stat["discMA"] );
-
-         %count[%highTeam]++; 
-         %notDone = false;
-         for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
-         {
-            if ( %count[%team] < $TeamRank[%team, count] )
-            {
-               %notDone = true;
-               break;
-            }
-         }
-      }
-      
-      //now go through an list all the observers:
-      %count = ClientGroup.getCount();
-      %printedHeader = false;
-      for (%i = 0; %i < %count; %i++)
-      {
-         %cl = ClientGroup.getObject(%i);
-         if (%cl.team <= 0)
-         {
-            //print the header only if we actually find an observer
-            if (!%printedHeader)
-            {
-               %printedHeader = true;
-               messageClient(%client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>OBSERVERS<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>Assists<lmargin%%:65>OffKills<lmargin%%:75>DefKills<lmargin%%:85>Disc MA<spop>');
-            }
-
-            //print out the client
-            %score = %cl.score $= "" ? 0 : %cl.score;//<bitmap:bullet_2>
-            %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, "", %score, %kills, %cl.dtStats.stat["assist"], %cl.dtStats.stat["OffKills"], %cl.dtStats.stat["DefKills"], %cl.dtStats.stat["discMA"] );
-         }
-      }
+      %game.sendCTFDebrif(%client);
       extendedDebrief(%game, %client);
    }
    else{
@@ -3315,252 +3509,308 @@ function SCtFGame::sendDebriefing(%game, %client){
    }
    messageClient( %client, 'MsgClearDebrief', "" );
    if($dtStats::teamDebrief == 1){
-      %topScore = "";
-      %topCount = 0;
-      for ( %team = 1; %team <= %game.numTeams; %team++ )
-      {
-         if ( %topScore $= "" || $TeamScore[%team] > %topScore )
-         {
-            %topScore = $TeamScore[%team];
-            %firstTeam = %team;
-            %topCount = 1;
-         }
-         else if ( $TeamScore[%team] == %topScore )
-         {
-            %secondTeam = %team;
-            %topCount++;
-         }
-      }
-
-      // Mission result:
-      if ( %topCount == 1 )
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 wins!', %game.getTeamName(%firstTeam) );
-      else if ( %topCount == 2 )
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 and Team %2 tie!', %game.getTeamName(%firstTeam), %game.getTeamName(%secondTeam) );
-      else
-         messageClient( %client, 'MsgDebriefResult', "", '<just:center>The mission ended in a tie.' );
-
-      // Team scores:
-      messageClient( %client, 'MsgDebriefAddLine', "", '<spush><color:00dc00><font:univers condensed:18>TEAM<lmargin%%:35>SCORE<spop>' );
-      for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
-      {
-         if ( $TeamScore[%team] $= "" )
-            %score = 0;
-         else
-            %score = $TeamScore[%team];
-         messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0><clip%%:60> %1</clip><lmargin%%:35><clip%%:40> %2</clip>', %game.getTeamName(%team), %score );
-      }
-
-      // Player scores:
-      messageClient( %client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>PLAYER<lmargin%%:20>TEAM<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>Assists<lmargin%%:65>OffKills<lmargin%%:75>DefKills<lmargin%%:85>Disc MA<spop>' );
-      for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
-         %count[%team] = 0;
-
-      %notDone = true;
-      while ( %notDone )
-      {
-         // Get the highest remaining score:
-         %highScore = "";
-         for ( %team = 1; %team <= %game.numTeams; %team++ )
-         {
-            if ( %count[%team] < $TeamRank[%team, count] && ( %highScore $= "" || $TeamRank[%team, %count[%team]].score > %highScore ) )
-            {
-               %highScore = $TeamRank[%team, %count[%team]].score;
-               %highTeam = %team;
-            }
-         }
-
-         // Send the debrief line:
-         %cl = $TeamRank[%highTeam, %count[%highTeam]];
-         %score = %cl.score $= "" ? 0 : %cl.score;
-         %kills = %cl.kills $= "" ? 0 : %cl.kills;
-         %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
-         messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, %game.getTeamName(%cl.team), %score, %kills, %cl.dtStats.stat["assist"], %cl.dtStats.stat["OffKills"], %cl.dtStats.stat["DefKills"], %cl.dtStats.stat["discMA"] );
-
-         %count[%highTeam]++; 
-         %notDone = false;
-         for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
-         {
-            if ( %count[%team] < $TeamRank[%team, count] )
-            {
-               %notDone = true;
-               break;
-            }
-         }
-      }
-      
-      //now go through an list all the observers:
-      %count = ClientGroup.getCount();
-      %printedHeader = false;
-      for (%i = 0; %i < %count; %i++)
-      {
-         %cl = ClientGroup.getObject(%i);
-         if (%cl.team <= 0)
-         {
-            //print the header only if we actually find an observer
-            if (!%printedHeader)
-            {
-               %printedHeader = true;
-               messageClient(%client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>OBSERVERS<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>Assists<lmargin%%:65>OffKills<lmargin%%:75>DefKills<lmargin%%:85>Disc MA<spop>');
-            }
-
-            //print out the client
-            %score = %cl.score $= "" ? 0 : %cl.score;//<bitmap:bullet_2>
-            %line = '<lmargin:0><clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, %cl.name, "", %score, %kills, %cl.dtStats.stat["assist"], %cl.dtStats.stat["OffKills"], %cl.dtStats.stat["DefKills"], %cl.dtStats.stat["discMA"] );
-         }
-      }
+      %game.sendCTFDebrif(%client);
       extendedDebrief(%game, %client);
    }
    else{
       parent::sendDebriefing(%game, %client);
    }
 }
+function DefaultGame::sendCTFDebrif(%game,%client){
+   %topScore = "";
+   %topCount = 0;
+   for ( %team = 1; %team <= %game.numTeams; %team++ )
+   {
+      if ( %topScore $= "" || $TeamScore[%team] > %topScore )
+      {
+         %topScore = $TeamScore[%team];
+         %firstTeam = %team;
+         %topCount = 1;
+      }
+      else if ( $TeamScore[%team] == %topScore )
+      {
+         %secondTeam = %team;
+         %topCount++;
+      }
+   }
+
+   // Mission result:
+   if ( %topCount == 1 )
+      messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 wins!', %game.getTeamName(%firstTeam) );
+   else if ( %topCount == 2 )
+      messageClient( %client, 'MsgDebriefResult', "", '<just:center>Team %1 and Team %2 tie!', %game.getTeamName(%firstTeam), %game.getTeamName(%secondTeam) );
+   else
+      messageClient( %client, 'MsgDebriefResult', "", '<just:center>The mission ended in a tie.' );
+
+   // Team scores:
+   messageClient( %client, 'MsgDebriefAddLine', "", '<spush><color:00dc00><font:univers condensed:18>TEAM<lmargin%%:35>SCORE<spop>' );
+   for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
+   {
+      if ( $TeamScore[%team] $= "" )
+         %score = 0;
+      else
+         %score = $TeamScore[%team];
+      messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0><clip%%:60> %1</clip><lmargin%%:35><clip%%:40> %2</clip>', %game.getTeamName(%team), %score );
+   }
+
+   // Player scores:
+   messageClient( %client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>PLAYER<lmargin%%:20>TEAM<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>Assists<lmargin%%:65>OffKills<lmargin%%:75>DefKills<lmargin%%:85>Disc MA<spop>' );
+   for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
+      %count[%team] = 0;
+
+   %notDone = true;
+   while ( %notDone )
+   {
+      // Get the highest remaining score:
+      %highScore = "";
+      for ( %team = 1; %team <= %game.numTeams; %team++ )
+      {
+         if ( %count[%team] < $TeamRank[%team, count] && ( %highScore $= "" || $TeamRank[%team, %count[%team]].score > %highScore ) )
+         {
+            %highScore = $TeamRank[%team, %count[%team]].score;
+            %highTeam = %team;
+         }
+      }
+
+      // Send the debrief line:
+      %cl = $TeamRank[%highTeam, %count[%highTeam]];
+      %score = %cl.score $= "" ? 0 : %cl.score;
+      %kills = %cl.kills $= "" ? 0 : %cl.kills;
+      %nameColor = %cl == %client ?  "<color:ffff00>" : "<color:c8c8c8>";//<color:3cb4b4>
+      if(%cl == %client){
+         %line = '<lmargin:0>%9<clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
+
+      }else{
+         %line = '<lmargin:0>%9<clip%%:40>%1</clip><color:3cb4b4><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8';
+      }
+      messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(getTaggedString(%cl.name)), %game.getTeamName(%cl.team), %score, %kills, %cl.dtStats.stat["assist"], %cl.dtStats.stat["OffKills"], %cl.dtStats.stat["DefKills"], %cl.dtStats.stat["discMA"],%nameColor);
+
+      %count[%highTeam]++; 
+      %notDone = false;
+      for ( %team = 1; %team - 1 < %game.numTeams; %team++ )
+      {
+         if ( %count[%team] < $TeamRank[%team, count] )
+         {
+            %notDone = true;
+            break;
+         }
+      }
+   }
+   
+   //now go through an list all the observers:
+   %count = ClientGroup.getCount();
+   %printedHeader = false;
+   for (%i = 0; %i < %count; %i++)
+   {
+      %cl = ClientGroup.getObject(%i);
+      if (%cl.team <= 0)
+      {
+         //print the header only if we actually find an observer
+         if (!%printedHeader)
+         {
+            %printedHeader = true;
+            messageClient(%client, 'MsgDebriefAddLine', "", '\n<lmargin:0><spush><color:00dc00><font:univers condensed:18>OBSERVERS<lmargin%%:35>SCORE<lmargin%%:45>KILLS<lmargin%%:55>Assists<lmargin%%:65>OffKills<lmargin%%:75>DefKills<lmargin%%:85>Disc MA<spop>');
+         }
+
+         //print out the client
+         %score = %cl.score $= "" ? 0 : %cl.score;//<bitmap:bullet_2>
+         %kills = %cl.kills $= "" ? 0 : %cl.kills;
+         %nameColor = %cl == %client ?  "<color:ffff00>" : "<color:c8c8c8>";
+         if(%cl == %client){
+            %line = '<lmargin:0>%9<clip%%:40>%1</clip><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8<color:3cb4b4>';
+         }
+         else{
+            %line = '<lmargin:0>%9<clip%%:40>%1</clip><color:3cb4b4><lmargin%%:20><clip%%:30> %2</clip><lmargin%%:35>%3<lmargin%%:45>%4<lmargin%%:55>%5<lmargin%%:65>%6<lmargin%%:75>%7<lmargin%%:85>%8'; 
+         }
+         messageClient( %client, 'MsgDebriefAddLine', "", %line,StripMLControlChars(getTaggedString(%cl.name)), "", %score, %kills, %cl.dtStats.stat["assist"], %cl.dtStats.stat["OffKills"], %cl.dtStats.stat["DefKills"], %cl.dtStats.stat["discMA"],%nameColor );
+      }
+   } 
+}
 
 function extendedDebrief(%game, %client){
-   if($dtStats::evoStyleDebrief && !%client.isWatchOnly){
+   if($dtStats::evoStyleDebrief && !%client.isWatchOnly){ 
       if(dtGameStat.gc["flag"] > 0){ 
          messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0> ' );
-         messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280><color:00dc00>FLAG STATS\tPLAYER\t' );
+         messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280><color:00dc00>FLAG STATS\tPLAYER\t' );
          if(dtGameStat.stat["heldTimeSec"] > 0)
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280><color:00dc00>Fastest Cap\t<color:3cb4b4>%1\t%2 Sec', dtGameStat.name["heldTimeSec"], dtGameStat.stat["heldTimeSec"]);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280><color:00dc00>Fastest Cap\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2 Sec', StripMLControlChars(hasValueS(dtGameStat.name["heldTimeSec"],"NA")), dtGameStat.stat["heldTimeSec"],(%client == dtGameStat.client["heldTimeSec"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          if(dtGameStat.stat["grabSpeed"] > 0)
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280><color:00dc00>Flaming Ass\t<color:3cb4b4>%1\t%2 Kmh', dtGameStat.name["grabSpeed"], dtGameStat.stat["grabSpeed"]);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280><color:00dc00>Flaming Ass\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2 Kmh', StripMLControlChars(hasValueS(dtGameStat.name["grabSpeed"],"NA")), dtGameStat.stat["grabSpeed"],(%client == dtGameStat.client["grabSpeed"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          if(dtGameStat.stat["flagCaps"] > 0)
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280><color:00dc00>Cap Mastah\t<color:3cb4b4>%1\t%2', dtGameStat.name["flagCaps"], dtGameStat.stat["flagCaps"]);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280><color:00dc00>Cap Mastah\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2', StripMLControlChars(hasValueS(dtGameStat.name["flagCaps"],"NA")), dtGameStat.stat["flagCaps"],(%client == dtGameStat.client["flagCaps"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          if(dtGameStat.stat["flagGrabs"] > 0)
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280><color:00dc00>Grabz0r\t<color:3cb4b4>%1\t%2', dtGameStat.name["flagGrabs"], dtGameStat.stat["flagGrabs"]);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280><color:00dc00>Grabz0r\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2', StripMLControlChars(hasValueS(dtGameStat.name["flagGrabs"],"NA")), dtGameStat.stat["flagGrabs"],(%client == dtGameStat.client["flagGrabs"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          if(dtGameStat.stat["carrierKills"] > 0)
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280><color:00dc00>FC killer\t<color:3cb4b4>%1\t%2', dtGameStat.name["carrierKills"], dtGameStat.stat["carrierKills"]);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280><color:00dc00>FC killer\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2', StripMLControlChars(hasValueS(dtGameStat.name["carrierKills"],"NA")), dtGameStat.stat["carrierKills"],(%client == dtGameStat.client["carrierKills"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          if(dtGameStat.stat["flagDefends"] > 0)
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280><color:00dc00>Flag Guardian\t<color:3cb4b4>%1\t%2', dtGameStat.name["flagDefends"], dtGameStat.stat["flagDefends"]);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280><color:00dc00>Flag Guardian\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2', StripMLControlChars(hasValueS(dtGameStat.name["flagDefends"],"NA")), dtGameStat.stat["flagDefends"],(%client == dtGameStat.client["flagDefends"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          if(dtGameStat.stat["escortAssists"] > 0)
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280><color:00dc00>Flag Escort\t<color:3cb4b4>%1\t%2', dtGameStat.name["escortAssists"], dtGameStat.stat["escortAssists"]);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280><color:00dc00>Flag Escort\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2', StripMLControlChars(hasValueS(dtGameStat.name["escortAssists"],"NA")), dtGameStat.stat["escortAssists"],(%client == dtGameStat.client["escortAssists"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          if(dtGameStat.stat["stalemateReturn"] > 0)
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280><color:00dc00>Stalemate Breaker\t<color:3cb4b4>%1\t%2', dtGameStat.name["stalemateReturn"], dtGameStat.stat["stalemateReturn"]);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280><color:00dc00>Stalemate Breaker\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2', StripMLControlChars(hasValueS(dtGameStat.name["stalemateReturn"],"NA")), dtGameStat.stat["stalemateReturn"],(%client == dtGameStat.client["stalemateReturn"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          if(dtGameStat.stat["flagReturns"] > 0)
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280><color:00dc00>Flag Returns\t<color:3cb4b4>%1\t%2', dtGameStat.name["flagReturns"], dtGameStat.stat["flagReturns"]);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280><color:00dc00>Flag Returns\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2', StripMLControlChars(hasValueS(dtGameStat.name["flagReturns"],"NA")), dtGameStat.stat["flagReturns"],(%client == dtGameStat.client["flagReturns"]) ? "<color:ffff00>" : "<color:c8c8c8>");
       }
       if(dtGameStat.gc["ma"] > 0){
          messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0> ' );
-         messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280,380,510><color:00dc00>\tPLAYER\tMA\tPLAYER\tDISTANCE');
+         messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280,360,510><color:00dc00>\tPLAYER\tMA\tPLAYER\tDISTANCE');
          if(dtGameStat.stat["discMA"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Disc\t<color:3cb4b4>%1\t%2\t%3\t%4m';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["discMA"], dtGameStat.stat["discMA"], dtGameStat.name["discMAHitDist"], mFormatFloat(dtGameStat.stat["discMAHitDist"], "%.2f"));
+            %line = '<tab:130,280,360,510><color:00dc00>Disc\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4m';
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["discMA"],"NA")), dtGameStat.stat["discMA"], StripMLControlChars(hasValueS(dtGameStat.name["discMAHitDist"],"NA")), mFormatFloat(dtGameStat.stat["discMAHitDist"], "%.2f"),(%client == dtGameStat.client["discMA"]) ? "<color:ffff00>" : "<color:c8c8c8>", (%client == dtGameStat.client["discMAHitDist"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          }
          if(dtGameStat.stat["plasmaMA"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Plasma\t<color:3cb4b4>%1\t%2\t%3\t%4m';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["plasmaMA"], dtGameStat.stat["plasmaMA"], dtGameStat.name["plasmaMAHitDist"], mFormatFloat(dtGameStat.stat["plasmaMAHitDist"], "%.2f"));
+            %line = '<tab:130,280,360,510><color:00dc00>Plasma\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4m';
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["plasmaMA"],"NA")), dtGameStat.stat["plasmaMA"], StripMLControlChars(hasValueS(dtGameStat.name["plasmaMAHitDist"],"NA")), mFormatFloat(dtGameStat.stat["plasmaMAHitDist"], "%.2f"),(%client == dtGameStat.client["plasmaMA"]) ? "<color:ffff00>" : "<color:c8c8c8>", (%client == dtGameStat.client["plasmaMAHitDist"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          }
          if(dtGameStat.stat["blasterMA"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Blaster\t<color:3cb4b4>%1\t%2\t%3\t%4m';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["blasterMA"], dtGameStat.stat["blasterMA"], dtGameStat.name["blasterMAHitDist"], mFormatFloat(dtGameStat.stat["blasterMAHitDist"], "%.2f"));
+            %line = '<tab:130,280,360,510><color:00dc00>Blaster\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4m';
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["blasterMA"],"NA")), dtGameStat.stat["blasterMA"], StripMLControlChars(hasValueS(dtGameStat.name["blasterMAHitDist"],"NA")), mFormatFloat(dtGameStat.stat["blasterMAHitDist"], "%.2f"),(%client == dtGameStat.client["blasterMA"]) ? "<color:ffff00>" : "<color:c8c8c8>", (%client == dtGameStat.client["blasterMAHitDist"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          }
          if(dtGameStat.stat["grenadeMA"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Grenade Launcher\t<color:3cb4b4>%1\t%2\t%3\t%4m';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["grenadeMA"], dtGameStat.stat["grenadeMA"], dtGameStat.name["grenadeMAHitDist"], mFormatFloat(dtGameStat.stat["grenadeMAHitDist"], "%.2f"));
+            %line = '<tab:130,280,360,510><color:00dc00>Grenade Launcher\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4m';
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["grenadeMA"],"NA")), dtGameStat.stat["grenadeMA"], StripMLControlChars(hasValueS(dtGameStat.name["grenadeMAHitDist"],"NA")), mFormatFloat(dtGameStat.stat["grenadeMAHitDist"], "%.2f"),(%client == dtGameStat.client["grenadeMA"]) ? "<color:ffff00>" : "<color:c8c8c8>", (%client == dtGameStat.client["grenadeMAHitDist"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          }
          if(dtGameStat.stat["mortarMA"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Mortar\t<color:3cb4b4>%1\t%2\t%3\t%4m';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["mortarMA"], dtGameStat.stat["mortarMA"], dtGameStat.name["mortarMAHitDist"], mFormatFloat(dtGameStat.stat["mortarMAHitDist"], "%.2f"));
+            %line = '<tab:130,280,360,510><color:00dc00>Mortar\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4m';
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["mortarMA"],"NA")), dtGameStat.stat["mortarMA"], StripMLControlChars(hasValueS(dtGameStat.name["mortarMAHitDist"],"NA")), mFormatFloat(dtGameStat.stat["mortarMAHitDist"], "%.2f"),(%client == dtGameStat.client["mortarMA"]) ? "<color:ffff00>" : "<color:c8c8c8>", (%client == dtGameStat.client["mortarMAHitDist"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          } 
       }
       if(dtGameStat.gc["misc"] > 0){
          messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0> ' );
          messageClient( %client, 'MsgDebriefAddLine', "", '<color:00dc00>MISC' );
          if(dtGameStat.stat["laserHeadShot"] > 0)
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280,380><color:00dc00>Headhunter <color:3cb4b4>\t%1\t%2',dtGameStat.name["laserHeadShot"],dtGameStat.stat["laserHeadShot"]);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280,360><color:00dc00>Headhunter\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2',StripMLControlChars(dtGameStat.name["laserHeadShot"]),dtGameStat.stat["laserHeadShot"],(%client == dtGameStat.client["flagReturns"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          if(dtGameStat.stat["laserHitDist"] > 0)   
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280,380><color:00dc00>Longest Snipeshot<color:3cb4b4>\t%1\t%2m',dtGameStat.name["laserHitDist"],mFormatFloat(dtGameStat.stat["laserHitDist"], "%.2f"));
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280,360><color:00dc00>Longest Snipe\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2m',StripMLControlChars(dtGameStat.name["laserHitDist"]),mFormatFloat(dtGameStat.stat["laserHitDist"], "%.2f"),(%client == dtGameStat.client["laserHitDist"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          if(dtGameStat.stat["shockRearShot"] > 0)   
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280,380><color:00dc00>Taser Tailgater<color:3cb4b4>\t%1\t%2',dtGameStat.name["shockRearShot"],dtGameStat.stat["shockRearShot"]);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280,360><color:00dc00>Taser Tailgater\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2',StripMLControlChars(dtGameStat.name["shockRearShot"]),dtGameStat.stat["shockRearShot"],(%client == dtGameStat.client["shockRearShot"]) ? "<color:ffff00>" : "<color:c8c8c8>");
          if(dtGameStat.stat["repairs"] > 0)   
-            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280,380><color:00dc00>Fixer Upper<color:3cb4b4>\t%1\t%2',dtGameStat.name["repairs"],dtGameStat.stat["repairs"]);
+            messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280,360><color:00dc00>Fixer Upper\t%3<clip:150>%1</clip>\t<color:3cb4b4>%2',StripMLControlChars(dtGameStat.name["repairs"]),dtGameStat.stat["repairs"],(%client == dtGameStat.client["repairs"]) ? "<color:ffff00>" : "<color:c8c8c8>");
       }
       
       if(dtGameStat.gc["wep"] > 0){
          messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0> ' );
-         messageClient( %client, 'MsgDebriefAddLine', "", '<tab:150,280,380,510><color:00dc00>\tPLAYER\tDAMAGE\tPLAYER\tKILLS');
+         messageClient( %client, 'MsgDebriefAddLine', "", '<tab:130,280,360,510><color:00dc00>\tPLAYER\tDMG\tPLAYER\tKILLS');
                    
-         if(dtGameStat.stat["blasterDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Blaster Master\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["blasterDmg"], mFormatFloat(dtGameStat.stat["blasterDmg"], "%.2f"), dtGameStat.name["blasterKills"], dtGameStat.stat["blasterKills"]);
+         if(dtGameStat.stat["blasterKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Blaster Master\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["blasterDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["blasterKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["blasterDmg"],"NA")), mFormatFloat(dtGameStat.stat["blasterDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["blasterKills"],"NA")), dtGameStat.stat["blasterKills"],%color1,%color2);
          }       
-         if(dtGameStat.stat["plasmaDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Plasma Roaster\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["plasmaDmg"], mFormatFloat(dtGameStat.stat["plasmaDmg"], "%.2f"), dtGameStat.name["plasmaKills"], dtGameStat.stat["plasmaKills"]);
+         if(dtGameStat.stat["plasmaKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Plasma Roaster\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["plasmaDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["plasmaKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["plasmaDmg"],"NA")), mFormatFloat(dtGameStat.stat["plasmaDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["plasmaKills"],"NA")), dtGameStat.stat["plasmaKills"],%color1,%color2);
          }      
-         if(dtGameStat.stat["discDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Disc-O-maniac\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["discDmg"], mFormatFloat(dtGameStat.stat["discDmg"], "%.2f"), dtGameStat.name["discKills"], dtGameStat.stat["discKills"]);
+         if(dtGameStat.stat["discKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Disc-O-maniac\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["discDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["discKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["discDmg"],"NA")), mFormatFloat(dtGameStat.stat["discDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["discKills"],"NA")), dtGameStat.stat["discKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["cgDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Chainwh0re\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["cgDmg"], mFormatFloat(dtGameStat.stat["cgDmg"], "%.2f"), dtGameStat.name["cgKills"], dtGameStat.stat["cgKills"]);
+         if(dtGameStat.stat["cgKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Chainwh0re\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["cgDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["cgKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["cgDmg"],"NA")), mFormatFloat(dtGameStat.stat["cgDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["cgKills"],"NA")), dtGameStat.stat["cgKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["hGrenadeDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Grenade puppy\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["hGrenadeDmg"], mFormatFloat(dtGameStat.stat["hGrenadeDmg"], "%.2f"), dtGameStat.name["hGrenadeKills"], dtGameStat.stat["hGrenadeKills"]);
+         if(dtGameStat.stat["hGrenadeKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Grenade puppy\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["hGrenadeDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["hGrenadeKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["hGrenadeDmg"],"NA")), mFormatFloat(dtGameStat.stat["hGrenadeDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["hGrenadeKills"],"NA")), dtGameStat.stat["hGrenadeKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["laserDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Laser Turret\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["laserDmg"], mFormatFloat(dtGameStat.stat["laserDmg"], "%.2f"), dtGameStat.name["laserKills"], dtGameStat.stat["laserKills"]);
+         if(dtGameStat.stat["laserKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Laser Turret\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["laserDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["laserKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["laserDmg"],"NA")), mFormatFloat(dtGameStat.stat["laserDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["laserKills"],"NA")), dtGameStat.stat["laserKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["mortarDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Mortar Maniac\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["mortarDmg"], mFormatFloat(dtGameStat.stat["mortarDmg"], "%.2f"), dtGameStat.name["mortarKills"], dtGameStat.stat["mortarKills"]);
+         if(dtGameStat.stat["mortarKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Mortar Maniac\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["mortarDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["mortarKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["mortarDmg"],"NA")), mFormatFloat(dtGameStat.stat["mortarDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["mortarKills"],"NA")), dtGameStat.stat["mortarKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["missileDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Missile Lamer\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["missileDmg"], mFormatFloat(dtGameStat.stat["missileDmg"], "%.2f"), dtGameStat.name["missileKills"], dtGameStat.stat["missileKills"]);
+         if(dtGameStat.stat["missileKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Missile Lamer\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["missileDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["missileKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["missileDmg"],"NA")), mFormatFloat(dtGameStat.stat["missileDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["missileKills"],"NA")), dtGameStat.stat["missileKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["shockDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Shocklance Bee\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["shockDmg"], mFormatFloat(dtGameStat.stat["shockDmg"], "%.2f"), dtGameStat.name["shockKills"], dtGameStat.stat["shockKills"]);
+         if(dtGameStat.stat["shockKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Shocklance Bee\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["shockDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["shockKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["shockDmg"],"NA")), mFormatFloat(dtGameStat.stat["shockDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["shockKills"],"NA")), dtGameStat.stat["shockKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["mineDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Mine Mayhem\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["mineDmg"], mFormatFloat(dtGameStat.stat["mineDmg"], "%.2f"), dtGameStat.name["mineKills"], dtGameStat.stat["mineKills"]);
+         if(dtGameStat.stat["mineKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Mine Mayhem\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["mineDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["mineKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["mineDmg"],"NA")), mFormatFloat(dtGameStat.stat["mineDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["mineKills"],"NA")), dtGameStat.stat["mineKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["outdoorDepTurretDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Road Killer\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["outdoorDepTurretDmg"], mFormatFloat(dtGameStat.stat["outdoorDepTurretDmg"], "%.2f"), dtGameStat.name["outdoorDepTurretKills"], dtGameStat.stat["outdoorDepTurretKills"]);
+         if(dtGameStat.stat["outdoorDepTurretKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Spike Farmer\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["outdoorDepTurretDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["outdoorDepTurretKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["outdoorDepTurretDmg"],"NA")), mFormatFloat(dtGameStat.stat["outdoorDepTurretDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["outdoorDepTurretKills"],"NA")), dtGameStat.stat["outdoorDepTurretKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["indoorDepTurretDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Clamp Farmer\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["indoorDepTurretDmg"], mFormatFloat(dtGameStat.stat["indoorDepTurretDmg"], "%.2f"), dtGameStat.name["indoorDepTurretKills"], dtGameStat.stat["indoorDepTurretKills"]);
+         if(dtGameStat.stat["indoorDepTurretKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Clamp Farmer\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["indoorDepTurretDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["indoorDepTurretKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["indoorDepTurretDmg"],"NA")), mFormatFloat(dtGameStat.stat["indoorDepTurretDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["indoorDepTurretKills"],"NA")), dtGameStat.stat["indoorDepTurretKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["roadDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Spike Farmer\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["roadDmg"], mFormatFloat(dtGameStat.stat["roadDmg"], "%.2f"), dtGameStat.name["roadKills"], dtGameStat.stat["roadKills"]);
+         if(dtGameStat.stat["roadKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Road Killer\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["roadDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["roadKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["roadDmg"],"NA")), mFormatFloat(dtGameStat.stat["roadDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["roadKills"],"NA")), dtGameStat.stat["roadKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["shrikeBlasterDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Shrike Gunner\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["shrikeBlasterDmg"], mFormatFloat(dtGameStat.stat["shrikeBlasterDmg"], "%.2f"), dtGameStat.name["shrikeBlasterKills"], dtGameStat.stat["shrikeBlasterKills"]);
+         if(dtGameStat.stat["shrikeBlasterKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Shrike Gunner\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["shrikeBlasterDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["shrikeBlasterKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["shrikeBlasterDmg"],"NA")), mFormatFloat(dtGameStat.stat["shrikeBlasterDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["shrikeBlasterKills"],"NA")), dtGameStat.stat["shrikeBlasterKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["bellyTurretDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Tailgunner\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["bellyTurretDmg"], mFormatFloat(dtGameStat.stat["bellyTurretDmg"], "%.2f"), dtGameStat.name["bellyTurretKills"], dtGameStat.stat["bellyTurretKills"]);
+         if(dtGameStat.stat["bellyTurretKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Tailgunner\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["bellyTurretDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["bellyTurretKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["bellyTurretDmg"],"NA")), mFormatFloat(dtGameStat.stat["bellyTurretDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["bellyTurretKills"],"NA")), dtGameStat.stat["bellyTurretKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["bomberBombsDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Clamp Farmer\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["bomberBombsDmg"], mFormatFloat(dtGameStat.stat["bomberBombsDmg"], "%.2f"), dtGameStat.name["bomberBombsKills"], dtGameStat.stat["bomberBombsKills"]);
+         if(dtGameStat.stat["bomberBombsKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Bomber Bombs\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["bomberBombsDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["bomberBombsKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["bomberBombsDmg"],"NA")), mFormatFloat(dtGameStat.stat["bomberBombsDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["bomberBombsKills"],"NA")), dtGameStat.stat["bomberBombsKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["tankChaingunDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Tank Gunner (chain)\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["tankChaingunDmg"], mFormatFloat(dtGameStat.stat["tankChaingunDmg"], "%.2f"), dtGameStat.name["tankChaingunKills"], dtGameStat.stat["tankChaingunKills"]);
+         if(dtGameStat.stat["tankChaingunKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Tank (chain)\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["tankChaingunDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["tankChaingunKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["tankChaingunDmg"],"NA")), mFormatFloat(dtGameStat.stat["tankChaingunDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["tankChaingunKills"],"NA")), dtGameStat.stat["tankChaingunKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["tankMortarDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Tank Gunner (mortar)\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["tankMortarDmg"], mFormatFloat(dtGameStat.stat["tankMortarDmg"], "%.2f"), dtGameStat.name["tankMortarKills"], dtGameStat.stat["tankMortarKills"]);
+         if(dtGameStat.stat["tankMortarKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Tank (mortar)\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["tankMortarDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["tankMortarKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["tankMortarDmg"],"NA")), mFormatFloat(dtGameStat.stat["tankMortarDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["tankMortarKills"],"NA")), dtGameStat.stat["tankMortarKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["satchelDmg"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Satchel Punk\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["satchelDmg"], mFormatFloat(dtGameStat.stat["satchelDmg"], "%.2f"), dtGameStat.name["satchelKills"], dtGameStat.stat["satchelKills"]);
+         if(dtGameStat.stat["satchelKills"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Satchel Punk\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["satchelDmg"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["satchelKills"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["satchelDmg"],"NA")), mFormatFloat(dtGameStat.stat["satchelDmg"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["satchelKills"],"NA")), dtGameStat.stat["satchelKills"],%color1,%color2);
          }
-         if(dtGameStat.stat["minePlusDisc"] > 0){
-            %line = '<tab:150,280,380,510><color:00dc00>Combo King\t<color:3cb4b4>%1\t%2\t%3\t%4';
-            messageClient( %client, 'MsgDebriefAddLine', "", %line, dtGameStat.name["minePlusDisc"], mFormatFloat(dtGameStat.stat["minePlusDisc"], "%.2f"), dtGameStat.name["minePlusDiscKill"], dtGameStat.stat["minePlusDiscKill"]);
+         if(dtGameStat.stat["minePlusDiscKill"] > 0){
+            %line = '<tab:130,280,360,510><color:00dc00>Combo King\t%5<clip:150>%1</clip>\t<color:3cb4b4>%2\t%6<clip:150>%3</clip>\t<color:3cb4b4>%4';
+            %color1 = (%client == dtGameStat.client["minePlusDisc"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            %color2 = (%client == dtGameStat.client["minePlusDiscKill"]) ? "<color:ffff00>" : "<color:c8c8c8>";
+            messageClient( %client, 'MsgDebriefAddLine', "", %line, StripMLControlChars(hasValueS(dtGameStat.name["minePlusDisc"],"NA")), mFormatFloat(dtGameStat.stat["minePlusDisc"], "%.2f"), StripMLControlChars(hasValueS(dtGameStat.name["minePlusDiscKill"],"NA")), dtGameStat.stat["minePlusDiscKill"],%color1,%color2);
          }
       }
    }
@@ -3590,7 +3840,7 @@ package dtStatsGame{
             %missionType = $HostTypeName[%arg4] @ "Game";
             %map = cleanMapName(%mission);
             $dtServer::voteFor[%map,%missionType]++;
-            getMapID(%map,%missionType,0,0);
+            getMapID(%map,%missionType,0);
          }
       }
    }
@@ -3788,6 +4038,7 @@ package dtStatsGame{
    function CTFGame::playerTouchEnemyFlag(%game, %player, %flag){
       if(%flag.isHome){
          %game.dtTotalFlagTime[%flag] = getSimTime();
+         %player.client.dtStats.stat["flagGrabAtStand"]++;
       }
       if(!%player.flagTossWait){
          if(%flag.speed > 10 && %flag.pass && %player.client.dtStats != %flag.lastDTStat){
@@ -3850,7 +4101,7 @@ package dtStatsGame{
             dtMinMax("heldTimeSec", "flag", 2, %heldTime,  %player.client);
             
            
-         }
+         } 
          if($dtStats::ctfTimes){
             %heldTimeMS = getSimTime() - %game.dtTotalFlagTime[%flag];
             %fTime = %game.formatTime(%heldTimeMS, true);
@@ -3919,6 +4170,7 @@ package dtStatsGame{
    function LCTFGame::playerTouchEnemyFlag(%game, %player, %flag){
       if(%flag.isHome){
          %game.dtTotalFlagTime[%flag] = getSimTime();
+         %player.client.dtStats.stat["flagGrabAtStand"]++;
       }
       if(!%player.flagTossWait){
          if(%flag.speed > 10 && %flag.pass && %player.client.dtStats != %flag.lastDTStat){
@@ -4041,6 +4293,7 @@ package dtStatsGame{
    function SCtFGame::playerTouchEnemyFlag(%game, %player, %flag){
       if(%flag.isHome){
          %game.dtTotalFlagTime[%flag] = getSimTime();
+         %player.client.dtStats.stat["flagGrabAtStand"]++;
       }
       if(!%player.flagTossWait){
          if(%flag.speed > 10 && %flag.pass && %player.client.dtStats != %flag.lastDTStat){
@@ -4262,7 +4515,7 @@ function ArenaHud( %game, %client, %tag )
 
       if ( %cl == %client )
         if ( %cl.isAlive )
-          %clStyle = "<color:dcdcdc>";
+          %clStyle = "<color:c8c8c8>";
         else
           %clStyle = "<color:dd7a7a>";
       else if ( %cl.isAlive )
@@ -4321,8 +4574,8 @@ function ArenaHud( %game, %client, %tag )
 
   // Arena Footer
    messageClient( %client, 'SetLineHud', "", %tag, %index++, '<tab:10, 310>\t<a:gamelink\tS\tLBOARDS\t0\tmonth-%1\t0>[View Server Stats]</a>', %game.class);
-   messageClient( %client, 'SetLineHud', "", %tag, %index++, "<tab:10, 310><spush><font:Univers Condensed:14><color:ffffff>\tTribes 2 Arena - 1.0 Final - http://www.planettribes.com/t2arena/<spop>" );
-//  messageClient( %client, 'SetLineHud', "", %tag, %index++, "<tab:10, 310><spush><font:Univers Condensed:14><color:ffffff>\thttp://www.planettribes.com/t2arena/<spop>" );
+   messageClient( %client, 'SetLineHud', "", %tag, %index++, "<tab:10, 310><spush><font:Univers Condensed:14><color:c8c8c8>\tTribes 2 Arena - 1.0 Final - http://www.planettribes.com/t2arena/<spop>" );
+//  messageClient( %client, 'SetLineHud', "", %tag, %index++, "<tab:10, 310><spush><font:Univers Condensed:14><color:c8c8c8>\thttp://www.planettribes.com/t2arena/<spop>" );
   messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
 
   // Clear the rest of HUD so we don't get old lines hanging around...
@@ -4355,7 +4608,7 @@ function DMHud(%game, %client, %tag){// note in this game type the score hud can
       %clKills = mFloatLength( %cl.kills, 0 );
       %clDeaths = mFloatLength( %cl.deaths + %cl.suicides, 0 );
 	  %clBonus = mFloor((%cl.Bonus * %game.SCORE_PER_BONUS) + (%cl.MidAir * %game.SCORE_PER_MIDAIR) + (%cl.KillStreakBonus * %game.SCORE_PER_KILLSTREAKBONUS ));
-      %clStyle = %cl == %client ? "<color:dcdcdc>" : "";
+      %clStyle = %cl == %client ? "<color:c8c8c8>" : "";
 
 	  //%BonusValue = %client.Bonus * %game.SCORE_PER_BONUS;
 	  //%MidAirValue = %client.MidAir * %game.SCORE_PER_MIDAIR;
@@ -4462,7 +4715,7 @@ function LakRabbitHud(%game, %client, %tag){
       {
          %col1ClientTimeMS = %col1Client.flagTimeMS;
          if ( %col1Client == %client )
-            %col1Style = "<color:dcdcdc>";
+            %col1Style = "<color:c8c8c8>";
       }
 
       if (%col1ClientTimeMS <= 0)
@@ -4503,7 +4756,7 @@ function LakRabbitHud(%game, %client, %tag){
             {
                %col2ClientTimeMS = %col2Client.flagTimeMS;
                if ( %col2Client == %client )
-                  %col2Style = "<color:dcdcdc>";
+                  %col2Style = "<color:c8c8c8>";
             }
 
             if (%col2ClientTimeMS <= 0)
@@ -4545,9 +4798,9 @@ function LakRabbitHud(%game, %client, %tag){
                               %col2Client.name, %col2ClientScore, %col2ClientTime,
                               %col1Style, %col1Client, %col2Client );
             }
-            else if (%col2Style $= "<color:dcdcdc>")
+            else if (%col2Style $= "<color:c8c8c8>")
             {
-               messageClient( %client, 'SetLineHud', "", %tag, %index, '<tab:10><spush>%7\t<clip:150><a:gamelink\t%8>%1</a></clip><rmargin:205><just:right>%2<rmargin:270><just:right>%3<spop><rmargin:505><lmargin:310><color:dcdcdc><just:left><clip:150><a:gamelink\t%9>%4</a></clip><rmargin:505><just:right>%5<rmargin:570><just:right>%6',
+               messageClient( %client, 'SetLineHud', "", %tag, %index, '<tab:10><spush>%7\t<clip:150><a:gamelink\t%8>%1</a></clip><rmargin:205><just:right>%2<rmargin:270><just:right>%3<spop><rmargin:505><lmargin:310><color:c8c8c8><just:left><clip:150><a:gamelink\t%9>%4</a></clip><rmargin:505><just:right>%5<rmargin:570><just:right>%6',
                               %col1Client.name, %col1ClientScore, %col1ClientTime,
                               %col2Client.name, %col2ClientScore, %col2ClientTime,
                               %col1Style, %col1Client, %col2Client );
@@ -4671,7 +4924,7 @@ function CTFHud(%game, %client, %tag){// defaultGame/evo
                else
                   %team1ClientScore = %team1Client.score $= "" ? 0 : %team1Client.score;
 
-               %col1Style = %team1Client == %client ? "<color:dcdcdc>" : "";
+               %col1Style = %team1Client == %client ? "<color:c8c8c8>" : "";
 
                if(!$Host::TournamentMode && !$Host::ShowIngamePlayerScores)
                   %team1playersTotalScore = 0;
@@ -4700,7 +4953,7 @@ function CTFHud(%game, %client, %tag){// defaultGame/evo
                else
                   %team2ClientScore = %team2Client.score $= "" ? 0 : %team2Client.score;
 
-               %col2Style = %team2Client == %client ? "<color:dcdcdc>" : "";
+               %col2Style = %team2Client == %client ? "<color:c8c8c8>" : "";
 
                if(!$Host::TournamentMode && !$Host::ShowIngamePlayerScores)
                   %team2playersTotalScore = 0;
@@ -4795,17 +5048,20 @@ function dtStatsMissionDropReady(%game, %client){ // called when client has fini
             %client.dtStats = %dtStats;
             %dtStats.client = %client;
             %dtStats.clientLeft = 0;
-            %dtStats.stat["clientQuit"] = 0;
+            %dtStats.stat["clientQuit"] = 0; 
             %dtStats.markForDelete = 0;
-            if(%dtStats.leftID == $dtStats::leftID)
+            if(%dtStats.leftID == $dtStats::leftID){
                $dtServer::mapReconnects[cleanMapName($CurrentMission),%game.class]++;
-            if(isGameRun() && %dtStats.leftID == $dtStats::leftID && %dtStats.stat["score"] != 0)// make sure game is running and we are on the same map
+            }
+            if(isGameRun() && %dtStats.leftID == $dtStats::leftID && %dtStats.stat["score"] != 0){// make sure game is running and we are on the same map
                resGameStats(%client,%game.class); // restore stats;
-            else
+            }
+            else{
                resetDtStats(%dtStats,%game.class,1);
-
-            if(%client.stat["score"] != 0)
+            }
+            if(%client.stat["score"] != 0){
                messageClient(%client, 'MsgClient', '\crWelcome back %1. Your score has been restored.~wfx/misc/rolechange.wav', %client.name);
+            }
             break;
          }
       }
@@ -4819,11 +5075,13 @@ function dtStatsMissionDropReady(%game, %client){ // called when client has fini
          %dtStats.stat["clientQuit"] = 0;
          %dtStats.markForDelete = 0;
          %dtStats.name = %name;
+         $dtStats::tbLookUP[%client.guid] = %dtStats;
       }
    }
-   else
+   else{
      %dtStats = %client.dtStats;
-
+   }
+   
    %dtStats.joinPCT = (isGameRun() == 1) ? %game.getGamePct() : 0;
    updateTeamTime(%dtStats, -1);
    %dtStats.team = %client.team;// should be 0
@@ -4834,6 +5092,7 @@ function dtStatsMissionDropReady(%game, %client){ // called when client has fini
       resetDtStats(%dtStats,%game.class,1);
       %dtStats.gameData[%game.class] = 0;
    }
+   %dtStats.mapTime = getSimTime();
 }
 
 function dtStatsClientLeaveGame(%client){
@@ -4869,9 +5128,10 @@ function dtStatsGameOver( %game ){
    $dtStats::LastMissionDN = $MissionDisplayName;
    $dtStats::LastMissionCM = $CurrentMission;
    $dtStats::LastGameType = %game.class;
-   if($Host::TournamentMode){
-      $dtStats::tmMode = (%game.getGamePct() > 50);
-   }
+   $dtStats::LastGameID = $dtStats::gameID;
+   
+   $dtStats::tmMode = $Host::TournamentMode;
+   
    if(%game.class $= "CTFGame" || %game.class $= "LCTFGame" || %game.class $= "SCtFGame"  || %game.class $= "ArenaGame" ){ 
       if($dtStats::tmMode){
          if(!isObject(pugList)){
@@ -4896,7 +5156,7 @@ function dtStatsGameOver( %game ){
             mark = dtMarkDate();
          };
          %tmClass.add(%so);
-         if(%tmClass.getCount() > 100){
+         if(%tmClass.getCount() > 50){
             %max = 0;
             for(%i = 0; %i < %tmClass.getCount(); %i++){
                %obj =  %tmClass.getObject(%i);  
@@ -4950,6 +5210,7 @@ function dtStatsGameOver( %game ){
          }  
       }
    }
+   
    if(%game.getGamePct() > 90){
       $dtServer::playCount[cleanMapName($CurrentMission),%game.class]++;
       $dtServer::lastPlay[cleanMapName($CurrentMission),%game.class] = getDayNum() TAB getYear() TAB formattimestring("mm/dd/yy hh:nn:a");
@@ -4987,6 +5248,10 @@ function dtStatsGameOver( %game ){
                   %time += $dtStats::saveTime;
                   schedule(%time,0,"loadGameStats",%dtStats,%game.class);
                }
+               else if($dtStats::reloadTotal){
+                     %time += $dtStats::saveTime;
+                   schedule(%time,0,"loadGameTotalStats",%dtStats,%game.class);  
+               }
                %time += $dtStats::saveTime;
                schedule(%time,0,"incGameStats",%dtStats,%game.class);
                %time += $dtStats::saveTime;
@@ -5005,6 +5270,10 @@ function dtStatsGameOver( %game ){
                   %time += $dtStats::saveTime;
                   schedule(%time,0,"loadGameStats",%dtStats,%game.class);
                }
+                else if($dtStats::reloadTotal){
+                   %time += $dtStats::saveTime;
+                   schedule(%time,0,"loadGameTotalStats",%dtStats,%game.class);  
+               }
                %time += $dtStats::saveTime; // this will chain them
                schedule(%time ,0,"incGameStats",%dtStats,%game.class); //resetDtStats after incGame
                %time += $dtStats::saveTime;
@@ -5021,9 +5290,437 @@ function dtStatsGameOver( %game ){
       }
       %time += $dtStats::saveTime;
       schedule(%time,0,"dtSaveDone");
+      endGameTB(%game);
+      $dtStats::reloadTotal = 0;
    }
 }
 
+// happens in gameover
+function CTFGame::setupClientTeams(%game){
+   if(!$TB::TBEnable[$dtStats::gtNameShort[%game.class]]){
+      parent::setupClientTeams(%game);
+   }
+}
+function LCTFGame::setupClientTeams(%game){
+   if(!$TB::TBEnable[$dtStats::gtNameShort[%game.class]]){
+      parent::setupClientTeams(%game);
+   }
+}
+function SCtFGame::setupClientTeams(%game){
+   if(!$TB::TBEnable[$dtStats::gtNameShort[%game.class]]){
+      parent::setupClientTeams(%game);
+   }
+}
+function ArenaGame::setupClientTeams(%game){
+   if(!$TB::TBEnable[$dtStats::gtNameShort[%game.class]]){
+      parent::setupClientTeams(%game);
+   }
+}
+
+function endGameTB(%game){
+   if(!$TB::TBEnable[$dtStats::gtNameShort[%game.class]]){
+      if($Host::TournamentMode){// load map data so we can update it as it does not load by default with TournamentMode
+         loadTBMap(%game);
+      }
+      if($TB::TBLog[$dtStats::gtNameShort[%game.class]]){
+         logTB(%game);// log the outcome   
+      }
+      for(%x = 0; %x < statsGroup.getCount(); %x++){
+         %dtStats = statsGroup.getObject(%x);
+         calcTBScores(%dtStats,%game);
+      }
+      saveTBMap(%game);// save map stats 
+   }
+}
+
+function calcTBScores(%dtStats,%game){
+   if(%game.class $= "CTFGame" || %game.class $= "LCTFGame" || %game.class $= "SCtFGame" || %game.class $= "ArenaGame"){
+      if($dtStats::debugEchos){error("calcTBScores"  SPC %dtStats SPC %game);}
+      
+      if(%dtStats.tScore $= ""){
+         %dtStats.tScore = 0;
+      }
+      if(%dtStats.mTScore $= ""){
+         %dtStats.mTScore = 0;
+      }
+      if(!getFieldCount(%dtStats.gScore)){
+         %dtStats.gScore = "0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0";
+      }
+      if(!getFieldCount(%dtStats.mGScore)){
+         %dtStats.mGScore = "0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0";
+      }
+      
+      if(isObject(%dtStats) && ((getSimTime() - $missionStartTime)  >  ((15 * 60) * 1000))){// make sre we dident short cycle 
+         %tgame = $dtStats::gtNameShort[%game.class];
+         %tScore = 0;
+         for(%i = 0; %i < $TB::statGroupCount[%tgame]; %i++){
+            %gScore = 0;
+            if($TB::statCount[%tgame, %i] !$= ""){
+               for(%x = 0; %x < $TB::statCount[%tgame, %i]; %x++){
+                  %var = $TB::statName[%x,%tgame, %i];
+                  %w = $TB::statWeight[%x,%tgame, %i];
+                  %gScore += %dtstats.stat[%var] * (%w/100);
+                  %tScore += %dtstats.stat[%var] * (%w/100);
+               }
+            }
+            
+            if(%tScore > 0){
+               %dtStats.tScore =  expoMovAvg(%dtStats.tScore, %tScore);
+               %dtStats.mTScore =  expoMovAvg(%dtStats.mTScore, %tScore);
+            }
+            
+            if(%gScore > 0){
+
+               %value  = getField(%dtStats.gScore,%i);
+               %newValue = expoMovAvg(%value , %gScore);
+               %dtStats.gScore = setField(%dtStats.gScore, %i, %newValue);
+
+
+               %value  = getField(%dtStats.mGScore,%i);
+               %newValue = expoMovAvg(%value , %gScore);
+               %dtStats.mGScore = setField(%dtStats.mGScore, %i, %newValue);
+            }
+            
+         }
+      }
+   }
+}
+
+
+function logTB(%game) {
+   %log = new fileObject();
+   RootGroup.add(%log);
+   %log.openForWrite("serverStats/TB/Logs/" @ $dtStats::gameID @ ".txt");
+   %numRoles = statCol.getCount();
+   %log.writeLine($dtStats::LastMissionCM);
+   for (%t = 1; %t <= %game.numTeams; %t++) { // teams
+      %log.writeLine("Game Score" SPC $TeamScore[%t]);
+      %output = "Team" @ %t  SPC "Rating" SPC  $dtTeamScore[%t]  @ %t;
+      
+      // Print role headers
+      for (%r = 0; %r < %numRoles; %r++) {
+         %output = %output @ "\tRole" @ %r;
+      }
+      echo(%output);
+      %log.writeLine(%output);
+      %maxClients = 0;
+      
+      // Find the max number of clients in any role to determine rows needed
+      for (%r = 0; %r < %numRoles; %r++) {
+         if ($TT::LOGC[%t, %r] > %maxClients) {
+            %maxClients = $TT::LOGC[%t, %r];
+         }
+      }
+      // Print users under each role in rows
+      for (%c = 0; %c < %maxClients; %c++) {
+         %row = " "; // First column is blank for alignment
+         for (%r = 0; %r < %numRoles; %r++) {
+            if (%c < $TT::LOGC[%t, %r]) {
+               %dt = $TT::LOG[%t, %r, %c];
+               %row = %row @ "\t" @ %dt.name @ "-" @ getField(%dt.mGScore,%r);
+            } else {
+               %row = %row @ "\t"; // Empty space for alignment
+            }
+         }
+         echo(%row);
+         %log.writeLine(%row);
+      }
+      
+      echo("\n"); // Extra line break for clarity
+   }
+   
+   %log.writeLine("");
+   %log.writeLine(""); 
+   %log.writeLine("Teams Summary:");
+   for (%i = 0; %i < %game.numTeams; %i++) {
+      %log.writeLine("Team " @ %i + 1 @ " - " @  $dtTeamScore[%i + 1]);
+      // Print role headers
+      %output = "\t";
+      for (%r = 0; %r < %numRoles; %r++) {
+         %output = %output @ "\tRole" @ %r;
+      }
+      %log.writeLine(%output);
+      for (%j = 0; %j < $dtTeamCount[%i+1]; %j++) {
+         %dtStats = $dtTeamList[%i+1,%j];
+         %msg = "\t" SPC %dtStats.name;
+         for (%v  = 0; %v < %numRoles; %v++) {
+            %msg = %msg SPC "\t" SPC getField(%dtStats.mGScore,%v); 
+            %teamStats[%i+1,%v] += getField(%dtStats.mGScore,%v); 
+         } 
+         %log.writeLine(%msg);
+      }
+      %teamMsg ="\t"; 
+      for (%v  = 0; %v < $weightsTestCount; %v++) {
+         %teamMsg = %teamMsg  SPC "\t" SPC %teamStats[%i+1,%v];
+      }
+      %log.writeLine(%teamMsg);
+   }
+   %log.writeLine("Team Score Dif" SPC mabs($dtTeamScore[1] - $dtTeamScore[2]));
+    
+   %log.close();
+   %log.delete();
+}
+
+function listTBInfo(%val){
+   for(%x = 0; %x < statsGroup.getCount(); %x++){
+      %dtStats = statsGroup.getObject(%x);
+      if(%val){
+         calcTBScores(%dtStats,Game);
+      }
+      echo(%dtStats.sel SPC "Score" SPC %dtStats.name SPC  %dtStats.tScore SPC %dtStats.gScore); 
+   }
+   if(%val == 2){
+      ballenceTeams(Game,0);  
+   }
+}
+function listStat(){
+   for(%x = 0; %x < statsGroup.getCount(); %x++){
+      %dtStats = statsGroup.getObject(%x);
+      echo(%dtStats.name SPC %dtStats.stat["flagGrabs"] SPC %dtStats.client.flagGrabs);
+   }
+}
+function forceTeamBal(){
+   for(%x = 0; %x < statsGroup.getCount(); %x++){
+      %dtStats = statsGroup.getObject(%x);
+      calcTBScores(%dtStats,Game);
+   }
+   ballenceTeams(Game,1);  
+}
+function ballenceTeams(%game,%forceTeam){
+   if(%game.class $= "CTFGame" || %game.class $= "LCTFGame" || %game.class $= "SCtFGame" || %game.class $= "ArenaGame"){
+      if($dtStats::debugEchos){error("ballenceTeams"  SPC %game.class SPC %forceTeam);}
+      if(statsGroup.getCount() < 1){
+        return;  
+      }
+      loadTBMap(%game);// load up exisitng map stats 
+      %tgame = $dtStats::gtNameShort[%game.class];
+      if(isObject(statCol)){
+         statCol.delete();  
+      }
+      new simGroup(statCol);
+      statCol.tzc = 0; 
+      statCol.rbc = 0;
+      RootGroup.add(statCol);
+      
+      for (%i = 0; %i < ClientGroup.getCount(); %i++){
+         %client = ClientGroup.getObject(%i);
+         if(!%client.team){
+            statCol.teamZero[statCol.tzc] = %client;
+            statCol.tzc++;
+         }
+      }
+      
+      
+      for (%y  = 0; %y < $TB::statGroupCount[%tgame]; %y++) {
+         %set = new simSet();
+         %set.rbc = 0;
+         statCol.add(%set);
+         for(%x = 0; %x < statsGroup.getCount(); %x++){
+            %dtStats = statsGroup.getObject(%x);
+            %dtStats.sel = 0;
+            if(isObject(%dtStats.client)){
+               %map = getField(%dtStats.mGScore,%y);
+               %lg = getField(%dtStats.gScore,%y);
+               %rateing = (%map > (%lg*0.75)) ? %map :%lg;//0.75 makes it so it favors map stats unless theres a massive disparity
+               if(%dtStats.client.team != 0 && (%rateing > 0 || %y == 0)){
+                  %set.add(%dtStats);  
+               } 
+            }
+         }
+         
+         %len = %set.getCount();
+         // sort are groups by there group scores
+         for (%i = 0; %i < %len - 1; %i++) {
+            for (%j = 0; %j < %len - %i - 1; %j++) {
+               %aObj = %set.getObject(%j);
+               %bObj = %set.getObject(%j + 1);
+               
+               %aMap = getField(%aObj.mGScore,%y); %aLG = getField(%aObj.gScore,%y);
+               %A = (%aMap > (%aLG * 0.75)) ? %aMap : %aLG;//derate the last game score  so it favors the map score unless it not avalable or lacking
+               
+               %bMap = getField(%bObj.mGScore,%y); %bLG = getField(%bObj.gScore,%y);
+               %B = (%bMap > (%bLG * 0.75)) ? %bMap : %bLG;
+               if (%A < %B) {
+                  %set.bringToFront(%bObj);
+               } 
+            }
+         } 
+      }
+      
+      deleteVariables("$TT::*");
+      for (%i = 0; %i < %game.numTeams; %i++) {
+         $dtTeamScore[%i+1] = 0; 
+         $dtTeamCount[%i+1] = 0; 
+         for(%x = 0; %x < statsGroup.getCount(); %x++){
+            $TT::LOGC[%i+1,%x] = 0;
+         }
+      }
+
+      %i = 0;
+      %rtfc = 0;
+      %x = (statCol.getCount() > 1) ? 1 : 0; // Start at 1 if more than one role
+      %rt = 0;
+      %end = 0;
+      %lockedGroups = 0; 
+
+      while (!%end) {
+         %x = (%rt++ % %game.numTeams == 0) ? %x + 1 : %x; // Cycle every `numTeams` loops
+         if (%x >= statCol.getCount()) { 
+            %x = 1;
+            %rt = 1;
+            if (%lockedGroups >= statCol.getCount() - 1) { // All groups are empty
+               %x = 0; 
+            }
+         }
+         
+
+         %role = statCol.getObject(%x);
+         if (!%role || %role.rbc) { // If group is locked, continue
+            if (%x == 0) {
+               %end = 1;
+            }
+            continue;
+         }
+
+         %found = 0;
+         for (%w = 0; %w < %role.getCount(); %w++) {
+            %dtStats = %role.getObject(%w);
+            if (!%dtStats.sel) {
+               %dtStats.sel = 1;
+               %found = 1;
+               break;
+            }
+         }
+
+         if (!%found) {
+            %role.rbc = 1; // Lock this group
+            %lockedGroups++;
+            continue;
+         }
+
+         if (isObject(%dtStats.client)) {
+            %y = (%i % %game.numTeams) + 1;
+            %i++;
+            $dtTeamList[%y, $dtTeamCount[%y]] = %dtStats;
+            $dtTeamCount[%y]++;
+            $dtTeamScore[%y] += %dtStats.tScore;
+            $TT::LOG[%y, %x, $TT::LOGC[%y, %x]] = %dtStats;
+            $TT::LOGC[%y, %x]++;
+
+            if(%forceTeam){
+               Game.clientChangeTeam( %dtStats.client, %y, 0);
+            }
+            else{
+               %dtStats.client.lastTeam = %y;
+            }
+         }
+      }
+      
+
+      // team zero
+      for(%i = 0; %i < statCol.tzc; %i++){
+          %client = statCol.teamZero[%i];
+          %client.lastTeam = 0;
+      }
+   }
+}
+      
+function expoMovAvg(%ema, %value){
+   %alpha = 0.2;
+   return %alpha * %value + (1 - %alpha) * %ema; 
+}
+
+
+function saveTBVars(){
+   if($dtStats::debugEchos){error("saveTBVars");}
+ if(!isEventPending($tbSystem))
+   $tbSystem = schedule(10000, 0, "export", "$TB::*", "serverStats/tbVars.cs", false);
+}
+
+function saveTBMap(%game){
+   if($dtStats::debugEchos){error("saveTBMap"  SPC %game);}
+   if($TB::TBEnable[$dtStats::gtNameShort[%game.class]]){//($HostGamePlayerCount - $HostGameBotCount) >=  $dtStats::TBMinPlayers)
+      %fobj = new fileObject(); 
+      RootGroup.add(%fobj);  
+      %path = "serverStats/TB/map/" @ $dtStats::LastMissionCM @ "-" @ %game.class @ ".cs"; //note $dtStats::LastMissionCM is set in gameover 
+      %fobj.openForWrite(%path);
+      %fobj.writeLine("res");
+      %fobj.writeLine("res");
+      %fobj.writeLine("res");
+      %fobj.writeLine("res");
+      %fobj.writeLine("res");
+      %fobj.writeLine("res");
+      %fobj.writeLine("res");
+      %fobj.writeLine("res");
+      
+      for(%x = 0; %x < statsGroup.getCount(); %x++){
+         %dtStats = statsGroup.getObject(%x);
+         if(getFieldCount($tempMap::data[%dtStats.guid]) < 5){ // write new entires 
+            %newData = %dtStats.guid TAB %dtStats.name TAB dtMarkDate() TAB %dtStats.mTScore TAB %dtStats.mGScore;
+            %line = strreplace(%newData ,"\t","%t");
+            %fobj.writeLine(%line);
+         }
+      }
+      for(%i = 0; %i < $tempMap::count; %i++){
+         %guid =  $tempMap::guid[%i]; 
+         %dtStats = $dtStats::tbLookUP[%guid];
+         if(isObject(%dtStats)){
+            %newData = %guid TAB %dtStats.name TAB dtMarkDate() TAB %dtStats.mTScore TAB %dtStats.mGScore;
+            %line = strreplace(%newData ,"\t","%t");
+            %fobj.writeLine(%line); 
+         }
+         else{
+            %date = getField($tempMap::data[%guid],2);
+            if(getTimeDelta(%date) <  (1440*180)){// skip over old old stuff 
+               %line = strreplace($tempMap::data[%guid],"\t","%t");
+               %fobj.writeLine(%line); 
+            }
+         }
+      }
+      %fobj.close();
+      %fobj.delete();
+   }
+}
+
+function loadTBMap(%game){
+   if($dtStats::debugEchos){error("loadTBMap"  SPC %game);}
+   if($TB::TBEnable[$dtStats::gtNameShort[%game.class]]){
+      deleteVariables("$tempMap::*");
+      %path = "serverStats/TB/map/" @ $CurrentMission @ "-" @ %game.class @ ".cs"; 
+      if(isFile(%path)){
+         %fobj = new fileObject();   
+         RootGroup.add(%fobj); 
+         %fobj.openForRead(%path);
+         %unused = %fobj.readline(); //reserved
+         %unused = %fobj.readline();
+         %unused = %fobj.readline();
+         %unused = %fobj.readline();
+         %unused = %fobj.readline();
+         %unused = %fobj.readline();
+         %unused = %fobj.readline();
+         %unused = %fobj.readline();
+         $tempMap::count = 0;
+         while( !%fobj.isEOF() ){
+            %line = strreplace(%fobj.readline(),"%t","\t");
+            %guid = getField(%line, 0);
+            %name = getField(%line, 1);
+            %date = getField(%line, 2);
+            %tScore = getField(%line, 3);
+            %gScore = getFields(%line, 4 ,4+16);
+            $tempMap::guid[$tempMap::count] = %guid;
+            $tempMap::count++;
+            $tempMap::data[%guid] = %line;
+            %dtStats = $dtStats::tbLookUP[%guid];
+            if(isObject(%dtStats)){
+               %dtStats.mGScore = %gScore;
+               %dtStats.mTScore = %tScore;
+            }
+         }
+         %fobj.close();
+         %fobj.delete();
+      }
+   }
+}
 
 function dtSaveDone(){
    $dtStats::statsSave = 0;
@@ -5454,13 +6151,11 @@ function setGUIDName(%client){
       return 1;
    }
 }
-function getMapID(%map,%game,%type,%clean){
+function getMapID(%map,%game,%clean){
    if(%clean)
       %map = cleanMapName(%map);
    if(%game !$= "" && %map !$= ""){
-      if($mapID::IDGame[%map,%game] && %type)
-         return $mapID::IDGame[%map,%game];
-      else if($mapID::ID[%map,%game])
+      if($mapID::ID[%map,%game])
          return $mapID::ID[%map,%game];
       else{
          $mapID::count++;
@@ -5472,11 +6167,8 @@ function getMapID(%map,%game,%type,%clean){
          $mapID::IDNameGame[$mapID::countGame[%game],%game] = %map;
          $mapID::IDName[$mapID::count] = %map;
 
-         export( "$mapID::*", "serverStats/mapIDList.cs", false );
-         if(%type)
-            return $mapID::IDGame[%map,%game];
-         else
-            return $mapID::ID[%map,%game];
+         export( "$mapID::*", "serverStats/mapIDList.cs", false);
+         return $mapID::ID[%map,%game];
       }
    }
    else
@@ -5574,13 +6266,13 @@ function loadGameTotalStats(%dtStats,%game){
    else{
       %filename = "serverStats/stats/" @ %game @ "/" @ %dtStats.guid  @ "t.cs";
    }
-   %d = $dtStats::curDay; %w = $dtStats::curWeek; %m = $dtStats::curMonth; %q = $dtStats::curQuarter; %y = $dtStats::curYear;
+   %d = $dtStats::curDay; %w = $dtStats::curWeek; %m = $dtStats::curMonth; %q = $dtStats::curQuarter; %y = $dtStats::curYear; %c = $dtStats::curCustom;
    if(isFile(%filename)){
       %file = new FileObject();
       RootGroup.add(%file);
       %file.OpenForRead(%filename);
 
-      %day  = %week = %month = %quarter = %year = 0;
+      %day  = %week = %month = %quarter = %year = %custom = 0;
       %dateLine = strreplace(%file.readline(),"%t","\t"); // first line should allways be the date line
       if(getField(%dateLine,0) $= "days"){
          if(getField(%dateLine,2) != %d){%day = 1;} // see what has changed sence we last played
@@ -5588,19 +6280,22 @@ function loadGameTotalStats(%dtStats,%game){
          if(getField(%dateLine,6) != %m){%month = 1;}
          if(getField(%dateLine,8) != %q){%quarter = 1;}
          if(getField(%dateLine,10) != %y){%year = 1;}
+         if(getField(%dateLine,12) != %c){%custom = 1;}
 
          %d0 = getField(%dateLine,1);%d1 = getField(%dateLine,2);
          %w0 = getField(%dateLine,3);%w1 = getField(%dateLine,4);
          %m0 = getField(%dateLine,5);%m1 = getField(%dateLine,6);
          %q0 = getField(%dateLine,7);%q1 = getField(%dateLine,8);
          %y0 = getField(%dateLine,9);%y1 = getField(%dateLine,10);
-
+         %c0 = getField(%dateLine,11);%c1 = getField(%dateLine,12);
+         
          if(%day){ %d0 = %d1; %d1 = %d;} //if there was a change flip new with old and reset new
          if(%week){%w0 = %w1;%w1 = %w;}
          if(%month){%m0 = %m1;%m1 = %m;}
          if(%quarter){%q0 = %q1;%q1 = %q;}
          if(%year){ %y0 = %y1; %y1 = %y;}
-         %dtStats.gameStats["dwmqy","t",%game,$dtStats::tmMode] =  %d0 TAB %d1 TAB %w0 TAB %w1 TAB %m0 TAB %m1 TAB %q0 TAB %q1 TAB %y0 TAB %y1; // update line
+         if(%custom){ %c0 = %c1; %c1 = %c;}
+         %dtStats.gameStats["dwmqy","t",%game,$dtStats::tmMode] =  %d0 TAB %d1 TAB %w0 TAB %w1 TAB %m0 TAB %m1 TAB %q0 TAB %q1 TAB %y0 TAB %y1 TAB %c0 TAB %c1; // update line
       }
       while( !%file.isEOF() ){
          %line = strreplace(%file.readline(),"%t","\t");
@@ -5611,21 +6306,22 @@ function loadGameTotalStats(%dtStats,%game){
             %m0 = getField(%line,5);%m1 = getField(%line,6);
             %q0 = getField(%line,7);%q1 = getField(%line,8);
             %y0 = getField(%line,9);%y1 = getField(%line,10);
-
+            %c0 = getField(%line,11);%c1 = getField(%line,12);
+            
             if(%day){ %d0 = %d1; %d1 = 0;} //if there was a change flip new with old and reset new
             if(%week){%w0 = %w1;%w1 = 0;}
             if(%month){%m0 = %m1;%m1 = 0;}
             if(%quarter){%q0 = %q1;%q1 = 0;}
             if(%year){ %y0 = %y1;%y1 = 0;}
-
-            %dtStats.gameStats[%var,"t",%game,$dtStats::tmMode] = %d0 TAB %d1 TAB %w0 TAB %w1 TAB %m0 TAB %m1 TAB %q0 TAB %q1 TAB %y0 TAB %y1;
+            if(%custom){ %c0 = %c1;%c1 = 0;}
+            %dtStats.gameStats[%var,"t",%game,$dtStats::tmMode] = %d0 TAB %d1 TAB %w0 TAB %w1 TAB %m0 TAB %m1 TAB %q0 TAB %q1 TAB %y0 TAB %y1 TAB %c0 TAB %c1;
          }
       }
       %file.close();
       %file.delete();
    }
    else// must be new person so be sure to set the dates
-      %dtStats.gameStats["dwmqy","t",%game, $dtStats::tmMode] =  %d TAB %d TAB %w TAB %w TAB %m TAB %m TAB %q TAB %q TAB %y TAB %y;
+      %dtStats.gameStats["dwmqy","t",%game, $dtStats::tmMode] =  %d TAB %d TAB %w TAB %w TAB %m TAB %m TAB %q TAB %q TAB %y TAB %y TAB %c TAB %c;
 }
 function saveGameTotalStats(%dtStats,%game){
    if($dtStats::debugEchos){error("saveGameTotalStats GUID = "  SPC %dtStats.guid);}
@@ -5692,16 +6388,9 @@ function saveGameTotalStats(%dtStats,%game){
       }
       if(%dtStats.markForDelete){
          if($dtStats::debugEchos){error("Client Left, Deleting Stat Object = "  SPC %dtStats SPC %dtStats.guid);}
+         $dtStats::tbLookUP[%dtStats.guid] = "";
          %dtStats.delete();
       }
-}
-
-function getMapIDName(%game){
-   %map = cleanMapName($dtStats::LastMissionCM);
-   %mid = getMapID(%map,%game,0,1);
-   %gid = getMapID(%map,%game,1,1);
-   %mapNameID = %map @ "-" @ %mid @ "-" @ %gid;
-   return %mapNameID;
 }
 
 function incGameStats(%dtStats,%game) {// record that games stats and inc by one
@@ -5725,6 +6414,8 @@ function incGameStats(%dtStats,%game) {// record that games stats and inc by one
    setValueField(%dtStats,"gameCount","t",%game,7,%c90++);
    %c365 = getField(%dtStats.gameStats["gameCount","t",%game,$dtStats::tmMode],9);
    setValueField(%dtStats,"gameCount","t",%game,9,%c365++);
+   %cc = getField(%dtStats.gameStats["gameCount","t",%game,$dtStats::tmMode],11);
+   setValueField(%dtStats,"gameCount","t",%game,11,%cc++);
 
    setValueField(%dtStats,"dayStamp","g",%game,%c,$dtStats::curDay);
    setValueField(%dtStats,"weekStamp","g",%game,%c,$dtStats::curWeek);
@@ -5734,8 +6425,8 @@ function incGameStats(%dtStats,%game) {// record that games stats and inc by one
    setValueField(%dtStats,"dateStamp","g",%game,%c,formattimestring("yy-mm-dd HH:nn:ss"));
    setValueField(%dtStats,"timeDayMonth","g",%game,%c,formattimestring("hh:nn:a, mm-dd"));
    setValueField(%dtStats,"map","g",%game,%c,$dtStats::LastMissionDN);
-   setValueField(%dtStats,"mapID","g",%game,%c,getMapID($dtStats::LastMissionCM,%game,0,1));
-   setValueField(%dtStats,"mapGameID","g",%game,%c,getMapID($dtStats::LastMissionCM,%game,1,1));
+   setValueField(%dtStats,"mapID","g",%game,%c,getMapID($dtStats::LastMissionCM,%game,1));
+   setValueField(%dtStats,"mapGameID","g",%game,%c,getMapID($dtStats::LastMissionCM,%game,1));
    setValueField(%dtStats,"gameID","g",%game,%c,$dtStats::gameID);
    setValueField(%dtStats,"gamePCT","g",%game,%c,%dtStats.gamePCT);
    setValueField(%dtStats,"versionNum","g",%game,%c,$dtStats::version);
@@ -5754,20 +6445,20 @@ function incGameStats(%dtStats,%game) {// record that games stats and inc by one
             %val = %dtStats.stat[%varName];
             setValueField(%dtStats,%varNameType,"g",%game,%c,%val);
 
-            for(%x = 1; %x <= 9; %x+=2){
+            for(%x = 1; %x <= 11; %x+=2){
                %t = getField(%dtStats.gameStats[%varNameType,"t",%game,$dtStats::tmMode],%x);
                setValueField(%dtStats,%varNameType,"t",%game,%x,addNum(%t,%val));
             }
          case "TTL":
             %val = %dtStats.stat[%varName];
-            for(%x = 1; %x <= 9; %x+=2){
+            for(%x = 1; %x <= 11; %x+=2){
                %t = getField(%dtStats.gameStats[%varNameType,"t",%game,$dtStats::tmMode],%x);
                setValueField(%dtStats,%varNameType,"t",%game,%x,addNum(%t,%val));
             }
          case "Max":
             %val = %dtStats.stat[%varName];
             setValueField(%dtStats,%varNameType,"g",%game,%c,%val);
-            for(%x = 1; %x <= 9; %x+=2){
+            for(%x = 1; %x <= 11; %x+=2){
                %t =    getField(%dtStats.gameStats[%varNameType,"t",%game,$dtStats::tmMode],%x);
                if(%val > %t){
                   setValueField(%dtStats,%varNameType,"t",%game,%x,%val);
@@ -5780,7 +6471,7 @@ function incGameStats(%dtStats,%game) {// record that games stats and inc by one
             %val = %dtStats.stat[%varName];
             setValueField(%dtStats,%varNameType,"g",%game,%c,%val);
 
-            for(%x = 1; %x <= 9; %x+=2){
+            for(%x = 1; %x <= 11; %x+=2){
                %t = getField(%dtStats.gameStats[%varNameType,"t",%game,$dtStats::tmMode],%x);
                if(%val < %t && %val != 0 || !%t){
                   setValueField(%dtStats,%varNameType,"t",%game,%x,%val);
@@ -5793,7 +6484,7 @@ function incGameStats(%dtStats,%game) {// record that games stats and inc by one
             %val = %dtStats.stat[%varName];
             setValueField(%dtStats,%varNameType,"g",%game,%c,%val);
 
-            for(%x = 1; %x <= 9; %x+=2){
+            for(%x = 1; %x <= 11; %x+=2){
                %t = strreplace(getField(%dtStats.gameStats[%varNameType,"t",%game,$dtStats::tmMode],%x),"%a","\t");
                if(%val != 0){
                   %total = getField(%t,1) + %val;
@@ -5996,7 +6687,7 @@ function genBlanks(){ // optimization thing saves on haveing to do it with every
    for(%i=0; %i < $dtStats::MaxNumOfGames-1; %i++){
       $dtStats::blank["g"] = $dtStats::blank["g"] TAB 0;
    }
-   for(%i=0; %i < 9; %i++){
+   for(%i=0; %i < 11; %i++){
       $dtStats::blank["t"] = $dtStats::blank["t"] TAB 0;
    }
 }
@@ -6388,7 +7079,7 @@ function clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %d
    armorTimer(%victimDT, 0, 1);
 //------------------------------------------------------------------------------
    %victimDT.timeToLive += getSimTime() - %clVictim.spawnTime;
-   %victimDT.stat["timeTL"] = mFloor((%victimDT.timeToLive/(%clVictim.stat["deaths"]+%clVictim.stat["suicides"] ? %clVictim.stat["deaths"]+%clVictim.stat["suicides"] : 1))/1000);
+   %victimDT.stat["timeTL"] = mFloor(((%victimDT.timeToLive/(%clVictim.stat["deaths"]+%clVictim.stat["suicides"] ? %clVictim.stat["deaths"]+%clVictim.stat["suicides"] : 1))/1000)/60);
 //------------------------------------------------------------------------------
    if(%clKiller.team == %clVictim.team && %clKiller != %clVictim){
       %killerDT.stat["teamkillCount"]++;
@@ -6860,7 +7551,6 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
       }
       return;
    }
-   
 //------------------------------------------------------------------------------
    if(%amount > 0 && %damageType > 0){
       if(isObject(%sourceObject)){
@@ -6873,6 +7563,9 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
          }
          else if(%sourceClass $= "Turret"){
             %sourceClient = %sourceObject.owner;
+            if(!isObject(%sourceClient)){
+               %sourceClient = %sourceObject.getControllingClient();
+            }
             %sourceDT = %sourceClient.dtStats;
          }
          else if(%sourceClass $= "VehicleTurret" || %sourceClass $= "FlyingVehicle" || %sourceClass $= "HoverVehicle" || %sourceClass $= "WheeledVehicle"){
@@ -6895,7 +7588,8 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
                %sourceDT.stat["friendlyFire"]++;
                if(getSimTime() - %sourceClient.stat["flareHit"] < 256){%sourceClient.flareSource.dtStats.stat["flareHit"]++;}
             }
-            if(%sourceClass $= "Player" && %targetClient.team != %sourceClient.team && %sourceObject != %targetObject){
+            %ssc = (%sourceClass $= "VehicleTurret" || %sourceClass $= "FlyingVehicle" || %sourceClass $= "HoverVehicle" || %sourceClass $= "WheeledVehicle" || %sourceClass $= "Player" || %sourceClass $= "Turret");
+            if(%ssc && %targetClient.team != %sourceClient.team && %sourceObject != %targetObject){
                if((getSimTime() - %sourceClient.lastExpTime) < 32){
                   %dis = vectorDist(getField(%sourceClient.lastExp,1),getField(%sourceClient.lastExp,2));
                }
@@ -7167,28 +7861,28 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
                      dtMinMax("satchelDmg", "wep", 1, %sourceDT.stat["satchelDmg"], %sourceClient);
                   case $DamageType::Impact:
                      %sourceDT.stat["roadDmg"] += %amount;
-                     dtMinMax("roadDmg", "wep", 1, %killerDT.stat["roadDmg"], %sourceClient);
+                     dtMinMax("roadDmg", "wep", 1, %sourceDT.stat["roadDmg"], %sourceClient);
                   case $DamageType::IndoorDepTurret:
                      %sourceDT.stat["indoorDepTurretDmg"] += %amount;
-                     dtMinMax("indoorDepTurretDmg", "wep", 1, %killerDT.stat["indoorDepTurretDmg"], %sourceClient);
+                     dtMinMax("indoorDepTurretDmg", "wep", 1, %sourceDT.stat["indoorDepTurretDmg"], %sourceClient);
                   case $DamageType::OutdoorDepTurret:
                      %sourceDT.stat["outdoorDepTurretDmg"] += %amount;
-                     dtMinMax("outdoorDepTurretDmg", "wep", 1, %killerDT.stat["outdoorDepTurretDmg"], %sourceClient);
+                     dtMinMax("outdoorDepTurretDmg", "wep", 1, %sourceDT.stat["outdoorDepTurretDmg"], %sourceClient);
                   case $DamageType::TankMortar:
                      %sourceDT.stat["tankMortarDmg"] += %amount;
-                     dtMinMax("tankMortarDmg", "wep", 1, %killerDT.stat["tankMortarDmg"], %sourceClient);
+                     dtMinMax("tankMortarDmg", "wep", 1, %sourceDT.stat["tankMortarDmg"], %sourceClient);
                   case $DamageType::TankChaingun:
                      %sourceDT.stat["tankChaingunDmg"] += %amount;
-                     dtMinMax("tankChaingunDmg", "wep", 1, %killerDT.stat["tankChaingunDmg"], %sourceClient);
+                     dtMinMax("tankChaingunDmg", "wep", 1, %sourceDT.stat["tankChaingunDmg"], %sourceClient);
                   case $DamageType::BomberBombs:
                      %sourceDT.stat["bomberBombsDmg"] += %amount;
-                     dtMinMax("bomberBombsDmg", "wep", 1, %killerDT.stat["bomberBombsDmg"], %sourceClient);
+                     dtMinMax("bomberBombsDmg", "wep", 1, %sourceDT.stat["bomberBombsDmg"], %sourceClient);
                   case $DamageType::BellyTurret:
                      %sourceDT.stat["bellyTurretDmg"] += %amount;
-                     dtMinMax("bellyTurretDmg", "wep", 1, %killerDT.stat["bellyTurretDmg"], %sourceClient);
+                     dtMinMax("bellyTurretDmg", "wep", 1, %sourceDT.stat["bellyTurretDmg"], %sourceClient);
                   case $DamageType::ShrikeBlaster:
                      %sourceDT.stat["shrikeBlasterDmg"] += %amount;
-                     dtMinMax("shrikeBlasterDmg", "wep", 1, %killerDT.stat["shrikeBlasterDmg"], %sourceClient);
+                     dtMinMax("shrikeBlasterDmg", "wep", 1, %sourceDT.stat["shrikeBlasterDmg"], %sourceClient);
                }
             }
          }
@@ -7223,17 +7917,10 @@ function dtLaserShotMessage(%client,%distance){
 
 
 function clientShotsFired(%data, %sourceObject, %projectile){ // could do a fov check to see if we are trying to aim at a player
-   if(isObject(%projectile.sourceObject) && isObject(%sourceObject)){
-      if(%projectile.sourceObject.getClassName() !$= "Player"){
-         %sourceClient = %projectile.sourceObject.getControllingClient();
-      }
-      else
-         %sourceClient = %sourceObject.client;
-   }
-   if(!isObject(%sourceClient.dtStats))
+  
+   %dtStats = %sourceObject.client.dtStats;
+   if(!isObject(%dtStats))
       return;
-
-   %dtStats = %sourceClient.dtStats;
    if(%data.hasDamageRadius || %data $= "BasicShocker")
       %damageType =  %data.radiusDamageType;
    else
@@ -7435,43 +8122,23 @@ function statsMenu(%client,%game){
    messageClient( %client, 'ClearHud', "", 'scoreScreen', 0 );
 
    switch$(%menu){
-      case "View":
-         messageClient( %client, 'SetScoreHudHeader', "", "<just:center>" @  getTaggedString(0.name) @ "'s Stats");
-         messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tReset\t%1>  Back</a>',0);
+      case "TBNOTES":
+         %line = '<just:center>Team Balancer Read Me';
+         messageClient( %client, 'SetScoreHudHeader', "",%line);
+         %line = '<a:gamelink\tS\tTBX\t0>  Back</a>   -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>';
+         messageClient( %client, 'SetScoreHudSubheader', "",%line);
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Group 0 is the default catch-all group; avoid crossover with this.");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Groups 1-11 are custom roles; use higher numbers mean more niche roles.");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Players are sorted within groups by their weighted stats for that role.");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Players are picked from role groups in a round-robin method for each team");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Roles swap after both teams pick, repeating until groups are empty.");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Any remaining players are pulled from Group 0 to complete the selection.");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Fewer groups improve balance accuracy, especially in smaller game modes.");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Try your best to use different stats in groups 1-11");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Limit crossover for important roles; use it more for niche ones.");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Stat crossover between groups can pull players into unintended roles.");
          
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>View Player and Game Stats at <a:URL>https://stats.playt2.com/</a>");  
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
-
-         if(%isAdmin && %game $= "CTFGame")
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tSZ\t%1\t1\t1-1>  + Running Game Averages (Experimental)</a>',0);
-            
-         if(%isAdmin && %game $= "CTFGame")
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tTB\t%1\t1\t1>  + Team Ballance (Experimental)</a>',0);
-            
-         if(%client.isSuperAdmin && $dtStats::liveStats)// for testing
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tLIVE\t%1>  + %2 Live Stats</a>',0,$dtStats::gtNameShort[%game]);
-
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tMAPLIST\t%1\t1\t%2-%3>  + PUGs/Tournaments/Recorded Games',0,%game,$dtStats::curMonth);
-           
-         if($dtStats::day > 1)
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tLBOARDS\t%1\tday-%2\t0>  + %3 Daily Leaderboards </a>',0,%game,$dtStats::gtNameShort[%game]);
-         if($dtStats::week > 1)
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tLBOARDS\t%1\tweek-%2\t0>  + %3 Weekly Leaderboards </a>',0,%game,$dtStats::gtNameShort[%game]);
-         if($dtStats::month > 1)
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tLBOARDS\t%1\tmonth-%2\t0>  + %3 Monthly Leaderboards ',0,%game,$dtStats::gtNameShort[%game]);
-         if($dtStats::quarter > 1)
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tLBOARDS\t%1\tquarter-%2\t0>  + %3 Quarterly Leaderboards </a>',0,%game,$dtStats::gtNameShort[%game]);
-         if($dtStats::year > 1)
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, '<a:gamelink\tS\tLBOARDS\t%1\tyear-%2\t0>  + %3 Yearly Leaderboards </a>',0,%game,$dtStats::gtNameShort[%game]);
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
-         if(%client.isSuperAdmin){
-            %line = '<a:gamelink\tS\tSP\t%1\t1\t%2-%3>  + Server Admin Panel</a>';
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%game,1);
-         }
-
-         for(%v = %index; %v < 15; %v++)
-            messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, '<just:center>Stats Update Daily.');
       case "TBX":
          %opt0 = %client.GlArg3;
          %opt1 = %client.GlArg4;
@@ -7479,29 +8146,44 @@ function statsMenu(%client,%game){
          if(%client.tgame $= ""){
             %client.tgame = $dtStats::gtNameShort[%game];   
          }
-         if($TB::statGroupCount[%client.tgame] $= ""){
-            $TB::statGroupCount[%client.tgame] = 1;   
-         }
          switch$(%opt0){
             case "AG":
                $TB::statGroupCount[%client.tgame]++;
-               if($TB::statGroupCount[%client.tgame] > 7){//cap it no need for this many 
-                  $TB::statGroupCount[%client.tgame] = 8;   
+               if($TB::statGroupCount[%client.tgame] > 11){//cap it no need for this many 
+                  $TB::statGroupCount[%client.tgame] = 12;   
                }
             case "RG":
                $TB::statGroupCount[%client.tgame]--;
-               if($TB::statGroupCount[%client.tgame] < 0){
-                  $TB::statGroupCount[%client.tgame] = 0;
+               if($TB::statGroupCount[%client.tgame] < 1){
+                  $TB::statGroupCount[%client.tgame] = 1;
                }
             case "G":
                %client.tgame = %opt1;   
+            case "Enable":
+               $TB::TBEnable[%client.tgame] =  !$TB::TBEnable[%client.tgame];
+            case "FORCE":
+               if(%client.isSuperAdmin){
+                  messageAll('MsgStats', '\c3Super Admin has forced a team rebalance. ~wfx/misc/hunters_greed.wav');
+                  forceTeamBal();
+               }
+            case "Log":
+               $TB::TBLog[%client.tgame] =  !$TB::TBLog[%client.tgame];
+            case "RESET":
+               deleteVariables("$TB::*");  
+               $TB::TBEnable[%client.tgame] = 0;
+               $TB::TBLog[%client.tgame]  = 0;
+               $TB::statGroupCount[%client.tgame] = 1;
          }
          %client.GlArg3 = 0;
          %client.GlArg4 = 0;
          %client.GlArg5 = 0;
+         if($TB::statGroupCount[%client.tgame] $= ""){
+            $TB::statGroupCount[%client.tgame] = 1;   
+         }
+         saveTBVars();
          %line = '<just:center>Team Balancer';
          messageClient( %client, 'SetScoreHudHeader', "",%line);
-         %line = '<a:gamelink\tS\tSP\t%1>  Back</a>   -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>';
+         %line = '<a:gamelink\tS\tSP\t%1>  Back</a>   -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>         <a:gamelink\tS\tTBX\tRESET\t0><color:ff0000>[RESET ALL]</a><color:00ff00> <just:right><a:gamelink\tS\tTBNOTES\t0>[Read Me]</a>';
          messageClient( %client, 'SetScoreHudSubheader', "",%line);
          
          if(%client.tgame $= "CTF"){
@@ -7517,13 +8199,29 @@ function statsMenu(%client,%game){
             messageClient(%client, 'SetLineHud', "", %tag, %index++, %line);
          }
          messageClient(%client, 'SetLineHud', "", %tag, %index++, "");
-         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Group 0 is the default genaric catch all group");
-         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Group 1-7 is your roles in the game type, with 1 being most important");
-         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Less groups is going to be better for smaller player counts and role ballencing");
-         messageClient(%client, 'SetLineHud', "", %tag, %index++, "Avoid using the same stats in every group other then group 0");
-         messageClient(%client, 'SetLineHud', "", %tag, %index++, "This could cause players to be stolen from other groups/roles");
-         messageClient(%client, 'SetLineHud', "", %tag, %index++, "");
-         %line = 'Add Groups/Roles - 8 Max <a:gamelink\tS\tTBX\tRG\t0\t0><</a>%1<a:gamelink\tS\tTBX\tAG\t0\t0>></a> ';
+         if($TB::TBEnable[%client.tgame]){
+            %line = 'Team Balancer<a:gamelink\tS\tTBX\tEnable\t0\t0>    <color:ff0000>[Disable]</a>';
+            messageClient(%client, 'SetLineHud', "", %tag, %index++, %line); 
+         }
+         else{
+            %line = 'Team Balancer<a:gamelink\tS\tTBX\tEnable\t0\t0>   <color:00ff00>[Enable]</a>';
+            messageClient(%client, 'SetLineHud', "", %tag, %index++, %line);
+         } 
+         if($TB::TBLog[%client.tgame]){
+            %line = 'Balancer Logging<a:gamelink\tS\tTBX\tLog\t0\t0>    <color:ff0000>[Disable]</a>';
+            messageClient(%client, 'SetLineHud', "", %tag, %index++, %line);   
+         }
+         else{
+            %line = 'Balancer Logging<a:gamelink\tS\tTBX\tLog\t0\t0>   <color:00ff00>[Enable]</a>';
+            messageClient(%client, 'SetLineHud', "", %tag, %index++, %line);
+         }
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, "");  
+         if($TB::TBEnable[%client.tgame]){
+            %line = '<a:gamelink\tS\tTBX\tForce\t0\t0><color:00ff00>[Force Team Balance]</a><color:0befe7> - May Cause the server to hitch';
+            messageClient(%client, 'SetLineHud', "", %tag, %index++, %line);   
+            messageClient(%client, 'SetLineHud', "", %tag, %index++, "");  
+         }
+         %line = 'Add Groups/Roles - 12 Max <a:gamelink\tS\tTBX\tRG\t0\t0><</a>%1<a:gamelink\tS\tTBX\tAG\t0\t0>></a> ';
          messageClient(%client, 'SetLineHud', "", %tag, %index++, %line, $TB::statGroupCount[%client.tgame]);
          
          for(%i = 0; %i < $TB::statGroupCount[%client.tgame]; %i++){
@@ -7556,7 +8254,7 @@ function statsMenu(%client,%game){
             %client.curPage = 1;
          }
          if(%client.tgame $= ""){
-            %client.tgame = $dtStats::gtNameShort[%game];   
+            %client.tgame = $dtStats::gtNameShort[%game.class];   
          }
          if(%client.arrowRes $= ""){
             %client.arrowRes = 1;   
@@ -7572,55 +8270,54 @@ function statsMenu(%client,%game){
             case "G":
                %client.tgame = %opt1;
             case "AW":
-               %var = $statsVars::varName[%opt1, $dtStats::gtNameType[%client.tgame]];
-               %sindex = $TB::statIndex[%var, %client.tgame];
-               $TB::statWeight[%sindex, %client.tgame] += %opt2;
+               %var = $dtStats::TBG[%opt1, %client.tgame];
+               %sindex = $TB::statIndex[%var, %client.tgame, %client.editGrp];
+               $TB::statWeight[%sindex, %client.tgame, %client.editGrp] += %opt2;
             case "RW":
-               %var = $statsVars::varName[%opt1, $dtStats::gtNameType[%client.tgame]];
-               %sindex = $TB::statIndex[%var, %client.tgame];
-               $TB::statWeight[%sindex,%client.tgame] -= %opt2;
+               %var = $dtStats::TBG[%opt1, %client.tgame];
+               %sindex = $TB::statIndex[%var, %client.tgame, %client.editGrp];
+               $TB::statWeight[%sindex,%client.tgame,%client.editGrp] -= %opt2;
             case "AS":
-               %var = $statsVars::varName[%opt1, $dtStats::gtNameType[%client.tgame]];
-               if($TB::statCount[%client.tgame] $= ""){
-                  $TB::statCount[%client.tgame] = 0;
+               %var = $dtStats::TBG[%opt1, %client.tgame];
+               if($TB::statCount[%client.tgame,%client.editGrp] $= ""){
+                  $TB::statCount[%client.tgame, %client.editGrp] = 0;
                }
-               if($TB::statWeight[%var,%client.tgame] $= ""){
-                  $TB::statName[$TB::statCount[%client.tgame],%client.tgame] = %var @ %cat;
-                  $TB::statWeight[$TB::statCount[%client.tgame],%client.tgame] = 100;
-                  $TB::statGroup[$TB::statCount[%client.tgame],%client.tgame] = 0;
-                  $TB::statIndex[%var, %client.tgame] = $TB::statCount[%client.tgame];
-                  $TB::statCount[%client.tgame]++;
+               
+               if($TB::statWeight[%var,%client.tgame, %client.editGrp] $= ""){
+                  %count = $TB::statCount[%client.tgame,%client.editGrp];
+                  $TB::statName[%count,%client.tgame,%client.editGrp] = %var;
+                  $TB::statWeight[%count,%client.tgame,%client.editGrp] = 100;
+                  
+                  $TB::statIndex[%var, %client.tgame, %client.editGrp] = %count;
+                  $TB::statCount[%client.tgame,%client.editGrp]++;
                }
             case "RS":
-               %var = $statsVars::varName[%opt1, %client.tgame];
-               %sindex = $TB::statIndex[%var, %client.tgame];
-
+               %var = $dtStats::TBG[%opt1,  %client.tgame];
+               %sindex = $TB::statIndex[%var, %client.tgame, %client.editGrp];
                if (%sindex !$= "") {
                   // Shift all elements down
-                  for (%i = %sindex; %i < $TB::statCount[%client.tgame] - 1; %i++) {
-                     $TB::statName[%i, %client.tgame] = $TB::statName[%i + 1, %client.tgame];
-                     $TB::statWeight[%i, %client.tgame] = $TB::statWeight[%i + 1, %client.tgame];
-                     $TB::statGroup[%i, %client.tgame] = $TB::statGroup[%i + 1, %client.tgame];
+                  for (%i = %sindex; %i < $TB::statCount[%client.tgame, %client.editGrp] - 1; %i++) {
+                     $TB::statName[%i, %client.tgame, %client.editGrp] = $TB::statName[%i + 1, %client.tgame, %client.editGrp];
+                     $TB::statWeight[%i, %client.tgame, %client.editGrp] = $TB::statWeight[%i + 1, %client.tgame, %client.editGrp];
                      // Update index for the moved stat
-                     %movedVar = $TB::statName[%i, %client.tgame]; 
-                     $TB::statIndex[%movedVar, %client.tgame] = %i;
+                     %movedVar = $TB::statName[%i, %client.tgame, %client.editGrp]; 
+                     $TB::statIndex[%movedVar, %client.tgame, %client.editGrp] = %i;
                   }
 
                   // Clear last index after shifting
-                  %last = $TB::statCount[%client.tgame] - 1;
-                  $TB::statName[%last, %client.tgame] = "";
-                  $TB::statWeight[%last, %client.tgame] = "";
-                  $TB::statGroup[%last, %client.tgame] = "";
+                  %last = $TB::statCount[%client.tgame, %client.editGrp] - 1;
+                  $TB::statName[%last, %client.tgame, %client.editGrp] = "";
+                  $TB::statWeight[%last, %client.tgame, %client.editGrp] = "";
                   
                   // Remove reference from index mapping
-                  $TB::statIndex[%var, %client.tgame] = "";
+                  $TB::statIndex[%var, %client.tgame, %client.editGrp] = "";
 
                   // Decrease weight count
-                  $TB::statCount[%client.tgame]--;
+                  $TB::statCount[%client.tgame, %client.editGrp]--;
                }
             case "N":
                %client.curPage++;
-               if(%client.curPage * %perPage > $statsVars::count[$dtStats::gtNameType[%client.tgame]]){
+               if(%client.curPage * %perPage > $dtStats::TBGC[%client.tgame]){
                   %client.curPage--;
                }
             case "B":
@@ -7636,6 +8333,8 @@ function statsMenu(%client,%game){
          %client.GlArg3 = 0;
          %client.GlArg4 = 0;
          %client.GlArg5 = 0;
+         %gc = $dtStats::TBGC[%client.tgame];
+         saveTBVars();
          if(%client.arrowRes == 1){
             %line = '<color:00ff00> 0.01 <color:0befe7><a:gamelink\tS\tTBV\tAR\t10\t0> 0.1</a> <a:gamelink\tS\tTBV\tAR\t100\t0> 1.0</a><lmargin:250>Stat Weights';
          }
@@ -7647,206 +8346,51 @@ function statsMenu(%client,%game){
          }
          messageClient( %client, 'SetScoreHudHeader', "",%line);
          if(%client.curPage == 1){
-            %line = '<a:gamelink\tS\tSP\t%1>  Back</a>   -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tTBV\tN\t0> Next Page ></a>';
+            %line = '<a:gamelink\tS\tTBX\t0>  Back</a>   -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tTBV\tN\t0> Next Page ></a>';
             messageClient( %client, 'SetScoreHudSubheader', "",%line);
          }
-         else if(%client.curPage * %perPage > $statsVars::count[$dtStats::gtNameType[%client.tgame]]){
-            %line = '<a:gamelink\tS\tSP\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tTBV\tB\t0> < Back Page</a> <a:gamelink\tS\tTBV\tR\t0><First page>';
+         else if(%client.curPage * %perPage > %gc){
+            %line = '<a:gamelink\tS\tTBX\t0>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> - <a:gamelink\tS\tTBV\tB\t0> < Back Page</a> <a:gamelink\tS\tTBV\tR\t0><First page>';
             messageClient( %client, 'SetScoreHudSubheader', "",%line);
          }
          else if(%client.curPage > 1){
-            %line = '<a:gamelink\tS\tSP\t%1>  Back</a>   -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> -<a:gamelink\tS\tTBV\tB\t0\> < Back Page </a>|<a:gamelink\tS\tTBV\tN\t0> Next Page ></a> <a:gamelink\tS\tTBV\tR\t0><First Page></a>';
+            %line = '<a:gamelink\tS\tTBX\t0>  Back</a>   -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a> -<a:gamelink\tS\tTBV\tB\t0\> < Back Page </a>|<a:gamelink\tS\tTBV\tN\t0> Next Page ></a> <a:gamelink\tS\tTBV\tR\t0><First Page></a>';
             messageClient( %client, 'SetScoreHudSubheader', "",%line);
          }
-         
-         %line = 'Variable Name<lmargin:200>Add/Remove<lmargin:300>Adjust Weight<lmargin:430> Adjust Group';
+         %line = 'Variable Name<lmargin:200>Add/Remove<lmargin:300>Adjust Weight<lmargin:430> Group Crossover';
          messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
-         %gc = $statsVars::count[$dtStats::gtNameType[%client.tgame]];
+
+         
+         //$dtStats::TBG[$dtStats::TBGC["ArenaGame"]++,"ArenaGame"] = "laserKillDist";
+         //$dtStats::TBGC["ArenaGame"]++;
+
          %displayedCount = 0; // Track how many valid entries we've displayed
          %startIndex = (%client.curPage - 1) * %perPage;
          %indexInArray = %startIndex;
-
          while (%displayedCount < %perPage && %indexInArray < %gc) {
-             %var = $statsVars::varName[%indexInArray, $dtStats::gtNameType[%client.tgame]];
-             %cat = $statsVars::varType[%var, $dtStats::gtNameType[%client.tgame]];
-             %sindex = $TB::statIndex[%var, %client.tgame];
-
-             // Skip over "Game" category variables but continue looping
-             if (%cat !$= "Game") {
-                 error(%sindex SPC %var); // Debugging log
-
-                 if (%sindex $= "") { 
-                     %line = '   %3<a:gamelink\tS\tTBV\t%1\t%2\t0><lmargin:200>ADD</a>';
-                     messageClient(%client, 'SetLineHud', "", %tag, %index++, %line, "AS", %indexInArray, %var);
-                 } else {
-                     %w = $TB::statWeight[%sindex, %client.tgame];
-                     %g = $TB::statGroup[%sindex,%client.tgame];
-                     %line = '<tab:200,300,450>   %3<a:gamelink\tS\tTBV\t%1\t%2\t0>\tRmv</a>\t <a:gamelink\tS\tTBV\tRW\t%2\t%5><</a>%4<a:gamelink\tS\tTBV\tAW\t%2\t0>></a> \t<a:gamelink\tS\tTBV\tRG\t%2\t%5><</a>6<a:gamelink\tS\tTBV\t%AG\t%2\t0>></a> ';
-                     messageClient(%client, 'SetLineHud', "", %tag, %index++, %line, "RS", %indexInArray, %var, mFormatFloat(%w / 100, "%.2f"),%client.arrowRes,%g);
-                 }
-
-                 %displayedCount++; // Increase count only for valid entries
-             }
-
-             %indexInArray++; // Always increase this to scan through full dataset
-         }
-      case "TB":
-         %inc = %client.GlArg4;
-         %cycle = %client.GlArg5;
-         messageClient( %client, 'SetScoreHudHeader', "", "<just:center>Team Balance");
-         messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tView\t%1>  Back</a>  -  <a:gamelink\tS\tReset\t%1>Return To Score Screen</a>',0);
-         %LOArmorCount[1] = %LDArmorCount[1] =  %MOArmorCount[1] = %MDArmorCount[1] = %HOArmorCount[1] = %HDArmorCount[1] = 0;
-         %LOArmorCount[2] = %LDArmorCount[2] =  %MOArmorCount[2] = %MDArmorCount[2] = %HOArmorCount[2] = %HDArmorCount[2] = 0;
-         %Offensive[1] = %Offensive[2] = %Defensive[1] = %Defensive[2] =  0;
-         %capperCount[1] = %capperCount[2] = %baseOpCount[1] = %baseOpCount[2] = 0;
-         
-         %SLOArmorCount[1] = %SLDArmorCount[1] =  %SMOArmorCount[1] = %SMDArmorCount[1] = %SHOArmorCount[1] = %SHDArmorCount[1] = 0;
-         %SLOArmorCount[2] = %SLDArmorCount[2] =  %SMOArmorCount[2] = %SMDArmorCount[2] = %SHOArmorCount[2] = %SHDArmorCount[2] = 0;
-         %SOffensive[1] = %SOffensive[2] = %SDefensive[1] = %SDefensive[2] =  0;
-         %ScapperCount[1] = %ScapperCount[2] = %SbaseOpCount[1] = %SbaseOpCount[2] = 0;
-         for(%i =0; %i < ClientGroup.getCount(); %i++){
-            %client = ClientGroup.getObject(%i); 
-            %dtStats = %client.dtStats;
-            %team = %client.team;
-            
-            if(isObject(%dtStats)){
-               %armorBD = getField(getArmorBreakDown(%game, %dtStats),4);
-               %offKills = getGameDataAvg(%game,%dtStats,"OffKillsTG");
-               %defKills = getGameDataAvg(%game,%dtStats,"DefKillsTG");
-               %kills =  getGameDataAvg(%game,%dtStats,"killsTG");
-               %totalDep =  getGameDataAvg(%game,%dtStats,"TotalDepTG");
-               %turretKills =  getGameDataAvg(%game,%dtStats,"turretkillsTG");
-               %flagCaps =  getGameDataAvg(%game,%dtStats,"flagCapsTG");
-               %flagGrabs =  getGameDataAvg(%game,%dtStats,"flagGrabsTG");
-               if(%armorBD $= "Light"){
-                  if (((%turretKills > (%kills - %defKills)) || (%totalDep > 8 && %defKills >   %offKills)) && !%SbaseOpCount[%team]){
-                     %SbaseOp[%SbaseOpCount[%team],%team] = %client;
-                     %SbaseOpCount[%team]++;
+            %var = $dtStats::TBG[%indexInArray, %client.tgame];
+            %sindex = $TB::statIndex[%var, %client.tgame,  %client.editGrp];
+            // Skip over "Game" category variables but continue looping
+            if (%sindex $= "") { 
+               %line = '   %3<a:gamelink\tS\tTBV\t%1\t%2\t0><lmargin:200>ADD</a>';
+               messageClient(%client, 'SetLineHud', "", %tag, %index++, %line, "AS", %indexInArray, %var);
+            } 
+            else {
+               %g  = "";
+               for(%m = 0; %m < $TB::statGroupCount[%client.tgame]; %m++){
+                  %si = $TB::statIndex[%var, %client.tgame,  %m];   
+                  if(%si !$= ""){
+                     %g = %g SPC %m;   
                   }
-                  else if(%flagCaps > 0 && %flagGrabs > 0){//cappers
-                     %Scapper[%capperCount[%team],%team] = %client;
-                     %ScapperCount[%team]++;
-                  }
-                  else if( %offKills > %defKills){ // off
-                     %SLOArmorClients[%SLOArmorCount[%team],%team] = %client; 
-                     %SLOArmorCount[%team]++;
-                     %SOffensive[%team]++;
-                  }
-                  else if( %offKills <%defKills){// def
-                     %SLDArmorClients[%SLDArmorCount[%team],%team] = %client; 
-                     %SLDArmorCount[%team]++;
-                     %SDefensive[%team]++;
-                  }
-               }
-               else if(%armorBD $= "Medium"){
-                  if (((%turretKills > (%kills - %defKills)) || (%totalDep > 8 && %defKills >   %offKills)) && !%SbaseOpCount[%team]){
-                     %SbaseOp[%baseOpCount[%team],%team] = %client;
-                     %SbaseOpCount[%team]++;
-                  }
-                  else if(%offKills > %defKills){ // off
-                     %SMOArmorClients[%MOArmorCount[%team],%team] = %client; 
-                     %SMOArmorCount[%team]++;
-                     %SOffensive[%team]++;
-                  }
-                  else if(%offKills < %defKills){// def
-                     %SMDArmorClients[%SMDArmorCount[%team],%team] = %client; 
-                     %SMDArmorCount[%team]++;
-                     %SDefensive[%team]++;
-                  }
-               }
-               else if(%armorBD $= "Heavy"){
-                  if (((%turretKills > (%kills - %defKills)) || (%totalDep > 8 && %defKills >   %offKills)) && !%SbaseOpCount[%team]){
-                     %SbaseOp[%baseOpCount[%team],%team] = %client;
-                     %SbaseOpCount[%team]++;
-                  }
-                  else if(%offKills > %defKills){ // off
-                     %SHOArmorClients[%SHOArmorCount[%team],%team] = %client; 
-                     %SHOArmorCount[%team]++;
-                     %SOffensive[%team]++;
-                  }
-                  else if(%offKills < %defKills){// def
-                     %SHDArmorClients[%SHDArmorCount[%team],%team] = %client; 
-                     %SHDArmorCount[%team]++;
-                     %SDefensive[%team]++;
-                  }
-               }
+               } 
+               %w = $TB::statWeight[%sindex, %client.tgame, %client.editGrp];
+               %line = '<tab:200,300,450>   %3<a:gamelink\tS\tTBV\t%1\t%2\t0>\tRmv</a>\t <a:gamelink\tS\tTBV\tRW\t%2\t%5><</a>%4<a:gamelink\tS\tTBV\tAW\t%2\t%5>></a> \t%6';
+               messageClient(%client, 'SetLineHud', "", %tag, %index++, %line, "RS", %indexInArray, %var, mFormatFloat(%w / 100, "%.2f"),%client.arrowRes,%g);
             }
-            
-            
-            if(isObject(%client.player)){
-               %armor = %client.player.getArmorSize();
-               if(%armor $= "Light"){
-                  if (((%client.turretKills > (%client.kills - %dtStats.stat["DefKills"])) || (%dtStats.stat["TotalDep"] > 8 && %dtStats.stat["DefKills"] >  %dtStats.stat["OffKills"])) && !%baseOpCount[%team]){
-                     %baseOp[%baseOpCount[%team],%team] = %client;
-                     %baseOpCount[%team]++;
-                  }
-                  else if(%client.flagCaps > 0 && %client.flagGrabs > 0){//cappers
-                     %capper[%capperCount[%team],%team] = %client;
-                     %capperCount[%team]++;
-                  }
-                  else if(%dtStats.stat["OffKills"] > %dtStats.stat["DefKills"]){ // off
-                     %LOArmorClients[%LOArmorCount[%team],%team] = %client; 
-                     %LOArmorCount[%team]++;
-                     %Offensive[%team]++;
-                  }
-                  else if(%dtStats.stat["OffKills"] < %dtStats.stat["DefKills"]){// def
-                     %LDArmorClients[%LDArmorCount[%team],%team] = %client; 
-                     %LDArmorCount[%team]++;
-                     %Defensive[%team]++;
-                  }
-               }
-               else if(%armor $= "Medium"){
-                  if (((%client.turretKills > (%client.kills - %dtStats.stat["DefKills"])) || (%dtStats.stat["TotalDep"] > 8 && %dtStats.stat["DefKills"] >  %dtStats.stat["OffKills"])) && !%baseOpCount[%team]){
-                     %baseOp[%baseOpCount[%team],%team] = %client;
-                     %baseOpCount[%team]++;
-                  }
-                  else if(%dtStats.stat["OffKills"] > %dtStats.stat["DefKills"]){ // off
-                     %MOArmorClients[%MOArmorCount[%team],%team] = %client; 
-                     %MOArmorCount[%team]++;
-                     %Offensive[%team]++;
-                  }
-                  else if(%dtStats.stat["OffKills"] < %dtStats.stat["DefKills"]){// def
-                     %MDArmorClients[%MDArmorCount[%team],%team] = %client; 
-                     %MDArmorCount[%team]++;
-                     %Defensive[%team]++;
-                  }
-               }
-               else if(%armor $= "Heavy"){
-                  if (((%client.turretKills > (%client.kills - %dtStats.stat["DefKills"])) || (%dtStats.stat["TotalDep"] > 8 && %dtStats.stat["DefKills"] >  %dtStats.stat["OffKills"])) && !%baseOpCount[%team]){
-                     %baseOp[%baseOpCount[%team],%team] = %client;
-                     %baseOpCount[%team]++;
-                  }
-                  else if(%dtStats.stat["OffKills"] > %dtStats.stat["DefKills"]){ // off
-                     %HOArmorClients[%HOArmorCount[%team],%team] = %client; 
-                     %HOArmorCount[%team]++;
-                     %Offensive[%team]++;
-                  }
-                  else if(%dtStats.stat["OffKills"] < %dtStats.stat["DefKills"]){// def
-                     %HDArmorClients[%HDArmorCount[%team],%team] = %client; 
-                     %HDArmorCount[%team]++;
-                     %Defensive[%team]++;
-                  }
-               }
-            }
-         }
 
-         %line = '<tab:114,164,214,284,334,384,464,464><color:0befe7><font:univers condensed:18>%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line, "Current",  "Team 1", "Team 2", "Stats Calc", "Team 1", "Team 2");
-         
-         %line = '<tab:114,164,214,284,334,384,464,464><color:0befe7><font:univers condensed:18><clip:110>%1</clip>\t<color:03d597>%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9';
-         %na = 0;
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"Light Off", %LOArmorCount[1], %LOArmorCount[2], "|", %SLOArmorCount[1], %SLOArmorCount[2],"","","");
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"Medium Off", %MOArmorCount[1], %MOArmorCount[2], "|", %SMOArmorCount[1], %SMOArmorCount[2],"","","");
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"Heavy Off", %HOArmorCount[1], %HOArmorCount[2], "|", %SHOArmorCount[1], %SHOArmorCount[2],"","","");
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"Offensive", %Offensive[1], %Offensive[2], "|", %SOffensive[1], %SOffensive[2],"","","");
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"Light Def", %LDArmorCount[1], %LDArmorCount[2], "|", %SLDArmorCount[1], %SLDArmorCount[2],"","","");
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"Medium Def", %MDArmorCount[1], %MDArmorCount[2], "|", %SMDArmorCount[1], %SMDArmorCount[2],"","","");
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"Heavy Def", %HDArmorCount[1], %HDArmorCount[2], "|", %SHDArmorCount[1], %SHDArmorCount[2],"","","");
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"Defensive", %Defensive[1], %Defensive[2], "|", %SDefensive[1], %SDefensive[2],"","","");
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, "");
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"Cappers", %capperCount[1], %capperCount[2], "|", %ScapperCount[1], %ScapperCount[2],"","","");
-         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,"Base Op", %baseOpCount[1], %baseOpCount[2], "|", %SbaseOpCount[1], %SbaseOpCount[2],"","","");
+            %displayedCount++; // Increase count only for valid entries
+            %indexInArray++; // Always increase this to scan through full dataset
+         }
       case "SP":
          if(!%client.isSuperAdmin){
             error(%client.nameBase SPC "failed to access server panel");
@@ -8354,13 +8898,26 @@ function statsMenu(%client,%game){
                   compileStats();
                   %client.GlArg4 = 0;
                }
-            case "tmEnable":
-               if($dtStats::tmMode)
-                  $dtStats::tmMode = 0;
-               else
-                  $dtStats::tmMode = 1;
                   
                %client.GlArg4 = 0;
+            case "customAdd":
+               $dtServerVars::custom++;
+               $dtStats::curCustom = $dtServerVars::custom;
+               %client.GlArg4 = 0;
+               if(isEventPending(%client.expSch)){
+                  cancel(%client.expSch);   
+               }
+               %client.expSch = schedule(10000,0,"export", "$dtServerVars::*", "serverStats/serverVars.cs", false );
+               $dtStats::reloadTotal = 1;
+            case "customRmv":
+               $dtServerVars::custom--;
+               $dtStats::curCustom = $dtServerVars::custom;
+               %client.GlArg4 = 0;
+               if(isEventPending(%client.expSch)){
+                  cancel(%client.expSch);   
+               }
+              %client.expSch = schedule(10000,0,"export", "$dtServerVars::*", "serverStats/serverVars.cs", false );
+              $dtStats::reloadTotal = 1;
             case "plotEnable":
                %start = startPlayerPlot(%client.GlArg5*1000);
                if(!%start)
@@ -8401,18 +8958,12 @@ function statsMenu(%client,%game){
          }
 //------------------------------------------------------------------------------
          if(%game $= "CTFGame" || %game $= "LCTFGame" || %game $= "SCtFGame"){
-            if(!$dtStats::tmMode){
-               %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  + Enable Tournament Map Stats - records to separate stats</a>';
-               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"tmEnable");
-            }
-            else{
-               %line = '<a:gamelink\tS\tSP\t%1\t%2\t%3>  + Disable Tournament Map Stats</a> - records to normal stats';
-               messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"tmEnable");
-            }
             %tlist = 0;
-            for(%i = 0; %i < pugList.getCount(); %i++){
-               %gobj =  pugList.getObject(%i);
-               %tlist += %gobj.getCount();
+            if(isObject(pugList)){
+               for(%i = 0; %i < pugList.getCount(); %i++){
+                  %gobj =  pugList.getObject(%i);
+                  %tlist += %gobj.getCount();
+               }
             }
             if(%tlist > 0){
                if(!$Host::TournamentMode){
@@ -8435,10 +8986,12 @@ function statsMenu(%client,%game){
                messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);    
             }
             %glist = 0;
-            for(%i = 0; %i < pubList.getCount(); %i++){
-               %gobj =  pubList.getObject(%i);
-               %glist += %gobj.getCount();
-            }   
+            if(isObject(pubList)){
+               for(%i = 0; %i < pubList.getCount(); %i++){
+                  %gobj =  pubList.getObject(%i);
+                  %glist += %gobj.getCount();
+               }   
+            }
             if(%glist > 0){
                if(!$Host::TournamentMode){
                   if(!$dtStats::tmCompile){
@@ -8478,6 +9031,10 @@ function statsMenu(%client,%game){
          
          %line = '<a:gamelink\tS\tTBX\t0\t0\t0>  + Team Balancer</a>';
          messageClient( %client, 'SetLineHud', "", %tag, %index++, %line);
+         
+         %statIndex = $dtServerVars::custom > 1 ? $dtServerVars::custom : 1;
+         %line = '  <a:gamelink\tS\tSP\t%1\tcustomAdd\t%3>+ Custom Stat Interval</a> - Current Index:  <a:gamelink\tS\tSP\t%1\tcustomRmv\t%3><</a> %4 <a:gamelink\tS\tSP\t%1\tcustomAdd\t%3>></a>';
+         messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,0,0,%statIndex);
          // if(!$pathMaps::running){
          //    %line = '  Start Player Plot  <a:gamelink\tS\tSP\t%1\t%2\t30>+ 30k</a> <a:gamelink\tS\tSP\t%1\t%2\t60>+ 60k</a> <a:gamelink\tS\tSP\t%1\t%2\t90>+ 90k</a> <a:gamelink\tS\tSP\t%1\t%2\t120>+ 120k</a>';
          //    messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,"plotEnable");
@@ -8535,8 +9092,8 @@ function statsMenu(%client,%game){
          switch$(%opt0){
             case "tmc":
                if(!$dtStats::tmCompile){
-                  buildTest(0);
-                  messageAll('MsgStats', '\c3Tournament stats build started, server preformance will degrade for a few minutes~wfx/misc/hunters_greed.wav');
+                  buildTest(1);
+                  messageAll('MsgStats', '\c3Tournament stats build started, server performance will degrade for a few minutes~wfx/misc/hunters_greed.wav');
                }
               %client.GlArg3 = 0;
             case "rmv":
@@ -8605,7 +9162,7 @@ function statsMenu(%client,%game){
             case "gmc":
                if(!$dtStats::tmCompile){
                   buildTest(0);
-                  messageAll('MsgStats', '\Map stats build started, server preformance will degrade for a few minutes~wfx/misc/hunters_greed.wav');
+                  messageAll('MsgStats', '\Map stats build started, server performance will degrade for a few minutes~wfx/misc/hunters_greed.wav');
                }
                %client.GlArg3 = 0;
             case "rmv":
@@ -9418,6 +9975,9 @@ function statsMenu(%client,%game){
       case "SV"://Server
          %vLPage = %client.GlArg4;
          %field5 = strreplace(%client.GlArg5,"-","\t");
+         if(%client.lgame !$=  getField(%field5,0)){
+            %new = 1;   
+         }
          %client.lgame = %switch = getField(%field5,0);
          %client.cat = %cat = getField(%field5,1);
          if(%vLPage == -1)
@@ -9427,7 +9987,7 @@ function statsMenu(%client,%game){
 
          %perPage = 14;// num of games listed per page
          if(%cat $= "R"){
-            getMapID($CurrentMission,%game,0,1);
+            getMapID($CurrentMission,%game,1);
             for(%i = 1; %i <= $mapID::countGame[%client.lgame]; %i++){
                %map = $mapID::IDNameGame[%i,%client.lgame];
                $dtServer::playCount[%map,%client.lgame] = 0;
@@ -9457,7 +10017,7 @@ function statsMenu(%client,%game){
             %client.cat = %cat = 1;
          }
          else if(%cat !$= "C"){
-            if($dtStats::sortCat != %cat){
+            if($dtStats::sortCat != %cat || %new){
                for(%i = 1; %i <= $mapID::countGame[%client.lgame]; %i++){
                   %maxCount = %i;
                   switch$(%cat){
@@ -9619,7 +10179,6 @@ function statsMenu(%client,%game){
                         $dtStats::sortCat = 1;
                   }
                }
-               error($dtStats::sortCat);
             }
             %client.GlArg5 = %client.lgame @ "-C";
          }
@@ -9912,7 +10471,7 @@ function statsMenu(%client,%game){
             %mon = $lData::mon[%lType, %client.lgame, %page];
             if(%build $= "Build" && !$dtStatsImgBuild){
                genBigStats(%client.lgame, %lType, getField(%mon,0),getField(%mon,1));
-               messageAll('MsgStats', '\c3Stats build started, server preformance may degrade for a few minutes~wfx/misc/hunters_greed.wav');
+               messageAll('MsgStats', '\c3Stats build started, server performance may degrade for a few minutes~wfx/misc/hunters_greed.wav');
                $dtStatsImgBuild = 1;            
             }
          }
@@ -9947,12 +10506,16 @@ function statsMenu(%client,%game){
                   %lTypeName = "Yearly";
                   %lTypeNameShort = "Year";
                   messageClient( %client, 'SetScoreHudHeader', "", '<just:center>%1 Leaderboards For %2',%lTypeName,%year);
+               case "custom":
+                  %lTypeName = "Custom";
+                  %lTypeNameShort = "Custom";
+                  messageClient( %client, 'SetScoreHudHeader', "", '<just:center>%1 Leaderboards For %2',%lTypeName,%mon);
             }
             if(%client.isSuperAdmin){
                if($dtStatsImgBuild || $dtStats::tmCompile)
-                  messageClient( %client, 'SetScoreHudSubheader', "", '<tab:210,455><a:gamelink\tS\tReset\t%1> Return To Score Screen</a> \t <color:ff0000><a:gamelink\tS\tLBOARDS\t%1\t%6-%2\tBuild-%5> Generate Img For %4</a> \t <color:0befe7><a:gamelink\tS\tSP\t%1\t1\t%2-%3>Server Admin Panel</a> ',0,%client.lgame,1,%lType $= "month" ? monthString(%mon) : ("Week" SPC %mon),%page,%lType);
+                  messageClient( %client, 'SetScoreHudSubheader', "", '<tab:210,455><a:gamelink\tS\tReset\t%1> Return To Score Screen</a> \t <color:ff0000><a:gamelink\tS\tLBOARDS\t%1\t%6-%2\tBuild-%5> Generate Img For %4</a> \t <color:0befe7><a:gamelink\tS\tSP\t%1\t1\t%2-%3>Server Admin Panel</a> ',0,%client.lgame,1,%lType $= "month" ? monthString(%mon) : ("custom" SPC %mon),%page,%lType);
                else
-                  messageClient( %client, 'SetScoreHudSubheader', "", '<tab:210,455><a:gamelink\tS\tReset\t%1> Return To Score Screen</a> \t <a:gamelink\tS\tLBOARDS\t%1\t%6-%2\tBuild-%5> Generate Img For %4</a> \t <a:gamelink\tS\tSP\t%1\t1\t%2-%3>Server Admin Panel</a> ',0,%client.lgame,1,%lType $= "month" ? monthString(%mon) : ("Week" SPC %mon) , %page, %lType);
+                  messageClient( %client, 'SetScoreHudSubheader', "", '<tab:210,455><a:gamelink\tS\tReset\t%1> Return To Score Screen</a> \t <a:gamelink\tS\tLBOARDS\t%1\t%6-%2\tBuild-%5> Generate Img For %4</a> \t <a:gamelink\tS\tSP\t%1\t1\t%2-%3>Server Admin Panel</a> ',0,%client.lgame,1,%lType $= "month" ? monthString(%mon) : ("custom" SPC %mon) , %page, %lType);
             }
             else  
                messageClient( %client, 'SetScoreHudSubheader', "", '<a:gamelink\tS\tReset\t%1> Return To Score Screen</a>',0,%game,1);
@@ -9996,23 +10559,25 @@ function statsMenu(%client,%game){
             }
 
             if($lData::monCount[%client.lgame,%lType] > 1){
-                %vw = (%lType $= "week") ? "month" : "week";
+               error(%lTypeNameShort);
+                %vw = (%lType $= "custom") ? "month" : "custom";
+                %vn = (%lType $= "custom") ? "Monthly" : "Custom";
                if(%page == 1){
-                   %line = '<just:center><a:gamelink\tS\tLBOARDS\t0\t%6-%4\t0> [View %5 Stats]</a> <just:right><a:gamelink\tS\tLBOARDS\t%1\t%2-%4\t%3>Previous %5</a>';
-                   messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%lType,%page+1,%client.lgame,%lTypeNameShort,%vw);
+                   %line = '<just:center><a:gamelink\tS\tLBOARDS\t0\t%6-%4\t0> [View %6 Stats]</a> <just:right><a:gamelink\tS\tLBOARDS\t%1\t%2-%4\t%3>Previous %5</a>';
+                   messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%lType,%page+1,%client.lgame,%lTypeNameShort,%vn);
                }
                else if(%page >= $lData::monCount[%client.lgame,%lType]){
-                  %line = '<just:center><a:gamelink\tS\tLBOARDS\t0\t%6-%4\t0> [View %5 Stats]</a> <just:right><a:gamelink\tS\tLBOARDS\t%1\t%2-%4\t%3>Next %5</a>';
-                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%lType,%page-1,%client.lgame,%lTypeNameShort,%vw);
+                  %line = '<just:center><a:gamelink\tS\tLBOARDS\t0\t%6-%4\t0> [View %6 Stats]</a> <just:right><a:gamelink\tS\tLBOARDS\t%1\t%2-%4\t%3>Next %5</a>';
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%lType,%page-1,%client.lgame,%lTypeNameShort,%vn);
                }
                else{
                   %line = '<just:center><a:gamelink\tS\tLBOARDS\t0\t%7-%5\t0> [View %6 Stats]</a> <just:right><a:gamelink\tS\tLBOARDS\t%1\t%2-%5\t%4>Previous %6</a> | <a:gamelink\tS\tLBOARDS\t%1\t%2-%5\t%3>Next %6</a>';
-                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%lType,%page-1,%page+1,%client.lgame,%lTypeNameShort,%vw); 
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, %line,0,%lType,%page-1,%page+1,%client.lgame,%lTypeNameShort,%vn); 
                }
             }
             else{
-               if(%lType !$= "week"){
-                  messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" @ "<a:gamelink\tS\tLBOARDS\t0\tweek-" @ %client.lgame @ "\t0> [View Weekly Stats]</a>");
+               if(%lType !$= "custom"){
+                  messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" @ "<a:gamelink\tS\tLBOARDS\t0\tcustom-" @ %client.lgame @ "\t0> [View Custom Stats]</a>");
                }
                else{
                   messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" @ "<a:gamelink\tS\tLBOARDS\t0\tmonth-" @ %client.lgame @ "\t0> [View Monthly Stats]</a>");  
@@ -10043,8 +10608,8 @@ function statsMenu(%client,%game){
                messageClient( %client, 'SetLineHud', "", %tag, %index++, '<just:center>View other gametypes');
                messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" @ %line);
             }
-            if(%lType !$= "week"){
-               messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" @ "<a:gamelink\tS\tLBOARDS\t0\tweek-" @ %client.lgame @ "\t0> [View Weekly Stats]</a>");
+            if(%lType !$= "custom"){
+               messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" @ "<a:gamelink\tS\tLBOARDS\t0\tcustom-" @ %client.lgame @ "\t0> [View Custom Stats]</a>");
             }
             else{
                messageClient( %client, 'SetLineHud', "", %tag, %index++, "<just:center>" @ "<a:gamelink\tS\tLBOARDS\t0\tmonth-" @ %client.lgame @ "\t0> [View Monthly Stats]</a>");  
@@ -11633,7 +12198,7 @@ function statsMenu(%client,%game){
 // LeaderBoards
 ////////////////////////////////////////////////////////////////////////////////
 
-function  getTimeDelta(%d, %year){
+function  getTimeDayDelta(%d, %year){
    %dif = $dtStats::curYear - %year;
    %days += 365 * (%dif-1);
    %days += 366 - %d;
@@ -11662,8 +12227,8 @@ function compileStats(){
 }
 
 function lStatsCycle(%build,%runReset){ // starts and manages the build/sort cycle
-  if($dtStats::debugEchos){error("lStatsCycle" SPC $dtStats::build["day"] SPC $dtStats::week && !$dtStats::build["week"] SPC
-  $dtStats::build["month"] SPC $dtStats::build["quarter"] SPC $dtStats::build["year"] SPC $dtStats::lCount);}
+  if($dtStats::debugEchos){error("lStatsCycle" SPC $dtStats::build["day"] SPC $dtStats::build["week"] SPC
+  $dtStats::build["month"] SPC $dtStats::build["quarter"] SPC $dtStats::build["year"] SPC $dtStats::build["custom"] SPC $dtStats::lCount);}
    if(%runReset){
       if(!$dtStats::statsSave){
          $dtStats::statReset = 1;
@@ -11687,6 +12252,7 @@ function lStatsCycle(%build,%runReset){ // starts and manages the build/sort cyc
          $dtStats::build["month"] = 0;
          $dtStats::build["quarter"] = 0;
          $dtStats::build["year"] = 0;
+         $dtStats::build["custom"] = 0;
          $dtStats::lCount = 0;
          $dtStats::building = 1;
          if(!$dtStats::timeChange){
@@ -11743,6 +12309,14 @@ function lStatsCycle(%build,%runReset){ // starts and manages the build/sort cyc
       }
       preLoadStats(%game,"year");
    }
+   else if($dtStats::custom > 0 && !$dtStats::build["custom"]){
+      %game = $dtStats::gameType[$dtStats::lCount];
+      if($dtStats::lCount++ >= $dtStats::gameTypeCount){
+         $dtStats::build["custom"] = 1; // mark as done
+         $dtStats::lCount = 0; // reset
+      }
+      preLoadStats(%game,"custom");
+   }
    else{
        if($dtStats::debugEchos){error("leaderBoards finished building");}
       schedule(5000,0,"loadLeaderboards",1);// reset and reload leaderboards
@@ -11776,7 +12350,8 @@ function markNewDay(){// updates are dates when the server is ready to cycle ove
    $dtStats::curMonth = getMonthNum();
    $dtStats::curQuarter = getQuarterNum();
    $dtStats::curYear = getYear();
-   if($dtStats::debugEchos){error("MarkNewDay =" SPC $dtStats::curDay SPC $dtStats::curWeek SPC $dtStats::curMonth SPC $dtStats::curQuarter SPC $dtStats::curYear);}
+   $dtStats::curCustom = $dtServerVars::custom > 1 ? $dtServerVars::custom : 1;
+   if($dtStats::debugEchos){error("MarkNewDay =" SPC $dtStats::curDay SPC $dtStats::curWeek SPC $dtStats::curMonth SPC $dtStats::curQuarter SPC $dtStats::curYear SPC $dtStats::curCustom);}
 }
 // var old new old  new  old   new    old     new     old  new
 // var day day week week month month  quarter quarter year year
@@ -11789,6 +12364,7 @@ function loadStatsData(%filepath,%game,%lType,%fileNum,%total){
       case "month":  %mon = $dtStats::curMonth;   %fieldOld = 5;  %fieldNew = 6;
       case "quarter":%mon = $dtStats::curQuarter; %fieldOld = 7;  %fieldNew = 8;
       case "year":   %mon = $dtStats::curYear;    %fieldOld = 9;  %fieldNew = 10;
+      case "custom": %mon = $dtStats::curCustom;    %fieldOld = 11;  %fieldNew = 12;
       default:       %mon = getMonthNum();   %fieldOld = 5;  %fieldNew = 6;
    }
    %file = new FileObject();
@@ -11844,6 +12420,7 @@ function  sortLStats(%c,%game,%lType){
             case "month":  %mon = $dtStats::curMonth;
             case "quarter":%mon = $dtStats::curQuarter;
             case "year":   %mon = $dtStats::curYear;
+            case "custom": %mon = $dtStats::curCustom;
             default:       error("ltype is not set"); return;
          }
          //%fc = getFileCount("serverStats/LData/-CTFGame*.cs");
@@ -12207,6 +12784,8 @@ function isFileExpired(%lType,%d,%year){
          if(%mon <= $dtStats::year){
             return 0;
          }
+      case "custom":
+         return 0;
    }
    return 1;
 }
@@ -12698,7 +13277,7 @@ function  sortTurStatsT(%c, %game){
 
 $dtStats::prefTestTime = 512;// the lower the better tracking
 $dtStats::prefTestIdleTime = 60*1000;// if no one is playing just run slow
-$dtStats::prefTolerance = 128;//this number is to account for base line preformance and differences between engine simTime and realtime
+$dtStats::prefTolerance = 128;//this number is to account for base line performance and differences between engine simTime and realtime
 $dtStats::prefLog = 0; // enable logging of server hangs
 $dtStats::eventLockout = 15*1000;//every 10 sec
 $dtStats::tsLimit = 0.22; //note this value is heavly effected by packet rate so if you change this be sure to test low and high client rates 
@@ -12980,8 +13559,12 @@ function dtSaveServerVars(){
    schedule(1000 * %i++,0,"export", "$dtServer::team*", "serverStats/teamWL.cs", false );
    schedule(1000 * %i++,0,"export", "$mapID::*", "serverStats/mapIDList.cs", false );
    schedule(1000 * %i++,0,"export", "$dtServer::event*", "serverStats/eventLog.cs", false );
-   pugList.schedule(1000 * %i++,"save","serverStats/pugLog.cs", 0);
-   pubList.schedule(1000 * %i++,"save","serverStats/pubLog.cs", 0);
+   if(isObject(pugList)){
+      pugList.schedule(1000 * %i++,"save","serverStats/pugLog.cs", 0);
+   }
+   if(isObject(pubList)){
+      pubList.schedule(1000 * %i++,"save","serverStats/pubLog.cs", 0);
+   }
    if($dtStats::ctfTimes)
       schedule(1000 * %i++,0,"export", "$dtServer::capTimes*", "serverStats/capTimes.cs", false );
 }
@@ -13009,7 +13592,7 @@ function dtLoadServerVars(){// keep function at the bottom
             $dtServerVars::crashLog[$dtServerVars::crashLogCount++] = %date @ "-" @ %upTime @ "-" @ %mis @ "-" @  $dtServerVars::lastGameType @ "-" @ $dtServerVars::lastPlayerCount;
             schedule(30000,0,"dtEventLog","Server Crash" SPC %date SPC "Pl Count =" SPC $dtServerVars::lastPlayerCount SPC "Map =" SPC %mis, 0);
          }
-         schedule(30001,0,"dtEventLog","Last Server Uptime =" SPC %date SPC "Up Time =" SPC %upTime, 0);
+         schedule(30001,0,"dtEventLog","Last Server Uptime =" SPC %date SPC "Up Time =" SPC %upTime SPC %mis, 0);
       }
       if($dtServerVars::upTimeCount >= 30)
          $dtServerVars::upTimeCount = 0;
@@ -13048,6 +13631,8 @@ function dtLoadServerVars(){// keep function at the bottom
          exec("serverStats/pugLog.cs");
       if(isFile("serverStats/pubLog.cs"))
          exec("serverStats/pubLog.cs");  
+      if(isFile("serverStats/tbVars.cs"))
+         exec("serverStats/tbVars.cs");   
       $dtServer::eventLogCount = 0;
       if(isFile("serverStats/eventLog.cs"))
          exec("serverStats/eventLog.cs");
@@ -13721,6 +14306,7 @@ function saveBanList(){
 
 function banSaveExport(%file){
    %fobj = new fileObject();
+   RootGroup.add(%fobj);
    %fobj.openForWrite(%file);
    %fobj.writeLine("new SimGroup(dtBanList) {");
    for(%i = 0; %i < dtBanList.getCount(); %i++){
@@ -15868,8 +16454,8 @@ function genBigStats(%game, %lType, %mon, %year){
    if(%lType $= "month"){
       %header = "Monthly Stats For" SPC monthString(%mon) SPC %year SPC "-" SPC $dtStats::gtNameLong[%game];   
    }
-   else if(%lType $= "week"){
-       %header = "Weekly Stats For week" SPC %mon SPC %year SPC "-" SPC $dtStats::gtNameLong[%game];   
+   else if(%lType $= "custom"){
+       %header = $dtStats::gtNameLong[%game] SPC "Stats" SPC %mon;   
    }
    %hsize = getTextLengthInPixels(%header, "RC", 30);//30
    schedule(%callTime * %callCount++,0,"addGLText",%header, mFloor(%mainXSize / 2) - mFloor(%hsize / 2), 50, "11 239 231", "RC", 30, 500);//30
@@ -16372,6 +16958,7 @@ function dumpTest(){
       deleteVariables("$textColor*");
    addGLText("abcdefghijklmnop", 0, 30, "3 213 151", 15, 500);
    new fileObject(img);
+   RootGroup.add(img);
    img.openForWrite("serverStats/statsImg/test.ppm");
    img.x = 256;
    img.y = 256;
@@ -16574,6 +17161,12 @@ function compileGameImage(%gameIndex){
    }
 }
 
+function hasValueS(%val, %return){
+   if(%val $= ""){
+     return %return;
+   }
+   return %val;
+}
 
 function hasValueC(%val,%return,%return2,%x){
    if(%val $= ""){
