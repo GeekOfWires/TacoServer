@@ -15,7 +15,7 @@
 // Note See bottom of file for full log
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //-----------Settings-----------
-$dtStats::version = 10.55;
+$dtStats::version = 10.57;
 //disable stats system
 $dtStats::Enable = $Host::dtStatsEnable $= "" ? ($Host::dtStatsEnable = 1) : $Host::dtStatsEnable;
 if(!$dtStats::Enable){ return;}// so it disables with a restart
@@ -30,7 +30,7 @@ $dtStats::midAirHeight = 10;
 $dtStats::midAirMessage =  $Host::dtStatsMidAirMessage $= "" ? ($Host::dtStatsMidAirMessage = 1) : $Host::dtStatsMidAirMessage;
 
 //capture best cap times restart required if changed
-//only enable if evo system is not available 
+//only enable if evo system is not available  
 $dtStats::ctfTimes =  $Host::dtStatsCTFTimes $= "" ? ($Host::dtStatsCTFTimes = 1) : $Host::dtStatsCTFTimes;
 //number of players before it starts counting captimes
 $dtStats::ctfTimesPlayerLimit =  $Host::dtStatsCTFTimesPlayerLimit $= "" ? ($Host::dtStatsCTFTimesPlayerLimit = 8) : $Host::dtStatsCTFTimesPlayerLimit;
@@ -66,7 +66,7 @@ $dtStats::sortSpeed = 64;
 
 //To rebuild the leaderboards manually type lStatsCycle(1) into the console;
 //This time marks the end of day and to rebuild the leaderboards, best set this time when the server is normally empty or low numbers
-$dtStats::buildSetTime = $Host::dtStatsBuildSetTime $= "" ? ($Host::dtStatsBuildSetTime = "8\t00\tam") : $Host::dtStatsBuildSetTime;
+$dtStats::buildSetTime = $Host::dtStatsBuildSetTime $= "" ? ($Host::dtStatsBuildSetTime = "5\t00\tam") : $Host::dtStatsBuildSetTime;
 
 // top 15 players per cat, best not to change
 $dtStats::topAmount = 15;
@@ -1768,7 +1768,7 @@ $statsName["scoreMax"] = "Highest Score" TAB "Kmh";
 $statsName["grabSpeedMax"] = "Max Grab Speed" TAB "Kmh";
 $statsName["flagCatchSpeedMax"] = "Flag Catch Speed" TAB "Khm";
 $statsName["maFlagCatchSpeedMax"] = "MidAir Flag Speed" TAB "Kmh";
-$statsName["interceptSpeedMax"] = "Flag Intercept Speed" TAB "Kmh";
+$statsName["interceptSpeedMax"] = "Intercept Speed" TAB "Kmh";
 $statsName["interceptFlagSpeedMax"] = "Flag Speed Grab" TAB "Kmh";
 $statsName["maHitDistMax"] = "Midair Distance" TAB "Meter";
 $statsName["maHitHeightMax"] = "Highest  MidAir" TAB "Meter";
@@ -3400,8 +3400,15 @@ package dtStats{
             else				%othertotdistance = mFloor(%cl.totalDistance);
             if(%cl.totalShockHits == 0) %shockhits = 0;
             else				%shockhits = mFloor(%cl.totalShockHits);
-            messageClient( %client, 'MsgDebriefAddLine', "", '<lmargin:0><clip%%:18> %1</clip><lmargin%%:23>%2<lmargin%%:34>%3<lmargin%%:44>%4<lmargin%%:52>%5<lmargin%%:62>%6<lmargin%%:70>%7<lmargin%%:80>%8%%<lmargin%%:90>%9',
-               %cl.name, %score, %kills, %mas, %avgSpeed, %avgDistance, %othertotdistance, %shockPercent, %shockhits);
+            
+            if(%client == %cl){
+               messageClient( %client, 'MsgDebriefAddLine', "", '<color:ffff00><lmargin:0><clip%%:18> %1</clip><lmargin%%:23>%2<lmargin%%:34>%3<lmargin%%:44>%4<lmargin%%:52>%5<lmargin%%:62>%6<lmargin%%:70>%7<lmargin%%:80>%8%%<lmargin%%:90>%9',
+                  StripMLControlChars(getTaggedString(%cl.name)), %score, %kills, %mas, %avgSpeed, %avgDistance, %othertotdistance, %shockPercent, %shockhits);
+            }
+            else{
+                messageClient( %client, 'MsgDebriefAddLine', "", '<color:c8c8c8><lmargin:0><clip%%:18> %1</clip><lmargin%%:23>%2<lmargin%%:34>%3<lmargin%%:44>%4<lmargin%%:52>%5<lmargin%%:62>%6<lmargin%%:70>%7<lmargin%%:80>%8%%<lmargin%%:90>%9',
+                  StripMLControlChars(getTaggedString(%cl.name)), %score, %kills, %mas, %avgSpeed, %avgDistance, %othertotdistance, %shockPercent, %shockhits);   
+            }
 
             if(%score)		%totscore		+= %score;
             if(%kills)		%totkills		+= %kills;
@@ -3415,7 +3422,6 @@ package dtStats{
             if(%shockhits){			%totshockhits			+= %shockhits;  }
 
          }
-
          messageClient( %client, 'MsgDebriefAddLine', "", '<spush><lmargin:0><Font:Arial:15><color:00FF7F>%1<lmargin%%:23>%2<lmargin%%:34>%3<lmargin%%:44>%4<lmargin%%:52>%5<lmargin%%:62>%6<lmargin%%:70>%7<lmargin%%:80>%8%%<lmargin%%:90>%9<spop>\n',
             "   Totals:", %totscore, %totkills, %totmas, mFloor(%totspeed/%speeds), mFloor(%totdistance/%dists), %alltotdistance, mFloor(%totshockpercent/%shocks), %totshockhits);
       extendedDebrief(%game, %client);
@@ -4620,7 +4626,7 @@ function DMHud(%game, %client, %tag){// note in this game type the score hud can
          messageClient( %client, 'SetLineHud', "", %tag, %index, '%5<tab:20, 450>\t<clip:115>%1</clip><rmargin:225><just:right>%2<rmargin:300><just:right>%3<rmargin:390><just:right>%4<rmargin:490>%6',
          %cl.name, %clScore, %clKills, %clDeaths, %clStyle, %clBonus);
       }
-      //else for observers, create an anchor around the player name so they can be observed
+      //else for observers, create an anchor around the player name so they can be observed 
       else
       {
          messageClient( %client, 'SetLineHud', "", %tag, %index, '%5<tab:20, 450>\t<clip:115><a:gamelink\t%6>%1</a></clip><rmargin:225><just:right>%2<rmargin:300><just:right>%3<rmargin:390><just:right>%4<rmargin:490>%7',
@@ -4980,7 +4986,7 @@ function CTFHud(%game, %client, %tag){// defaultGame/evo
                messageClient(%client, 'SetLineHud', "", %tag, %index, '<tab:11,295>\t<spush>%5<clip:200>%1</clip><rmargin:260><just:right>%2<spop><rmargin:555><just:left>\t%6<clip:200>%3</clip><just:right>%4', %team1Client.name, %team1ClientScore, %team2Client.name, %team2ClientScore, %col1Style, %col2Style);
             }
             else{ //else for observers, create an anchor around the player name so they can be observed
-               messageClient(%client, 'SetLineHud', "", %tag, %index, '<tab:11,295>\t<spush>%5<clip:200><a:gamelink\t%7>%1</a></clip><rmargin:260><just:right>%2<spop><rmargin:555><just:left>\t%6<clip:200><a:gamelink\t%8>%3</a></clip><just:right>%4', %team1Client.name, %team1ClientScore, %team2Client.name, %team2ClientScore, %col1Style, %col2Style);
+               messageClient(%client, 'SetLineHud', "", %tag, %index, '<tab:11,295>\t<spush>%5<clip:200><a:gamelink\t%7>%1</a></clip><rmargin:260><just:right>%2<spop><rmargin:555><just:left>\t%6<clip:200><a:gamelink\t%8>%3</a></clip><just:right>%4', %team1Client.name, %team1ClientScore, %team2Client.name, %team2ClientScore, %col1Style, %col2Style,%team1Client,%team2Client);
             }
             %index++;
          }
@@ -18875,7 +18881,7 @@ function renderCTFMapTextTM(%id){
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeft2, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500); 
    %line = hasValueC(getField($pugMapData[1,"name","flagCatchTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 130);    
-   %line = hasValueC(getField($pugMapData[1,"data","flagCatchTG"],0),%noValue," Sec",2);  
+   %line = hasValueC(getField($pugMapData[1,"data","flagCatchTG"],0),%noValue,"",2);  
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCount*20), "11 239 231", "RC", 15, 500);
    %lineCount++;
    
@@ -19112,7 +19118,7 @@ function renderCTFMapTextTM(%id){
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v = %justLeftTeam2, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500); 
    %line = hasValueC(getField($pugMapData[2,"name","flagCatchTG"],0),%noValue,"",-1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %nameOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 130);    
-   %line = hasValueC(getField($pugMapData[2,"data","flagCatchTG"],0),%noValue," Sec",1);    
+   %line = hasValueC(getField($pugMapData[2,"data","flagCatchTG"],0),%noValue,"",1);    
    schedule(%callTime * %callCount++,0,"addGLText",%line, %v += %dataOffset, 150 + (%lineCountTeam2*20), "11 239 231", "RC", 15, 500);
    %lineCountTeam2++;
    
