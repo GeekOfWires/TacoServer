@@ -15,7 +15,7 @@
 // Note See bottom of file for full log
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //-----------Settings-----------
-$dtStats::version = 10.53;
+$dtStats::version = 10.55;
 //disable stats system
 $dtStats::Enable = $Host::dtStatsEnable $= "" ? ($Host::dtStatsEnable = 1) : $Host::dtStatsEnable;
 if(!$dtStats::Enable){ return;}// so it disables with a restart
@@ -31,7 +31,7 @@ $dtStats::midAirMessage =  $Host::dtStatsMidAirMessage $= "" ? ($Host::dtStatsMi
 
 //capture best cap times restart required if changed
 //only enable if evo system is not available 
-$dtStats::ctfTimes =  $Host::dtStatsCTFTimes $= "" ? ($Host::dtStatsCTFTimes = 0) : $Host::dtStatsCTFTimes;
+$dtStats::ctfTimes =  $Host::dtStatsCTFTimes $= "" ? ($Host::dtStatsCTFTimes = 1) : $Host::dtStatsCTFTimes;
 //number of players before it starts counting captimes
 $dtStats::ctfTimesPlayerLimit =  $Host::dtStatsCTFTimesPlayerLimit $= "" ? ($Host::dtStatsCTFTimesPlayerLimit = 8) : $Host::dtStatsCTFTimesPlayerLimit;
 
@@ -66,7 +66,7 @@ $dtStats::sortSpeed = 64;
 
 //To rebuild the leaderboards manually type lStatsCycle(1) into the console;
 //This time marks the end of day and to rebuild the leaderboards, best set this time when the server is normally empty or low numbers
-$dtStats::buildSetTime = $Host::dtStatsBuildSetTime $= "" ? ($Host::dtStatsBuildSetTime = "5\t00\tam") : $Host::dtStatsBuildSetTime;
+$dtStats::buildSetTime = $Host::dtStatsBuildSetTime $= "" ? ($Host::dtStatsBuildSetTime = "8\t00\tam") : $Host::dtStatsBuildSetTime;
 
 // top 15 players per cat, best not to change
 $dtStats::topAmount = 15;
@@ -7034,11 +7034,11 @@ function dtMinMax(%statName,%group,%minMax,%value,%client){
                   dtGameStat.name[%statName] =  getTaggedString(%client.name);
                   dtGameStat.client[%statName] = %client;
                }
-            case 3:
+            case 3://value counter;
                dtGameStat.statTrack[%statName, %client] += %value;
-               %minMax = dtGameStat.statTrack[%statName, %client];
-               if(dtGameStat.stat[%statName] < %value || dtGameStat.stat[%statName] $= ""){
-                  dtGameStat.stat[%statName] = %value;
+               %curValue = dtGameStat.statTrack[%statName, %client];
+               if(dtGameStat.stat[%statName] < %curValue || dtGameStat.stat[%statName] $= ""){
+                  dtGameStat.stat[%statName] = %curValue;
                   dtGameStat.name[%statName] =  getTaggedString(%client.name);
                   dtGameStat.client[%statName] = %client;
                }
@@ -10471,7 +10471,7 @@ function statsMenu(%client,%game){
             %mon = $lData::mon[%lType, %client.lgame, %page];
             if(%build $= "Build" && !$dtStatsImgBuild){
                genBigStats(%client.lgame, %lType, getField(%mon,0),getField(%mon,1));
-               messageAll('MsgStats', '\c3Stats build started, server performance may degrade for a few minutes~wfx/misc/hunters_greed.wav');
+               messageAll('MsgStats', '\c3Stats image build started, server performance may degrade for a few minutes~wfx/misc/hunters_greed.wav');
                $dtStatsImgBuild = 1;            
             }
          }
@@ -12236,7 +12236,7 @@ function lStatsCycle(%build,%runReset){ // starts and manages the build/sort cyc
          $dtStats::hostTimeLimit = $Host::TimeLimit;
          if(isGameRun()){//if for some reason the game is running extend the time limit untill done
             Game.voteChangeTimeLimit(1,$Host::TimeLimit+120);
-            messageAll('MsgStats', '\c3Stats build started, adjusting time limit temporarily');
+            messageAll('MsgStats', '\c3Stats build started, adjusting time limit temporarily~wfx/misc/hunters_horde.wav');
             $dtStats::timeChange =1;
          }
       }
@@ -16665,10 +16665,11 @@ function genBigMapStats(%count){
       else{
          genBigMapStats(%count++);   
       }
-   }
+   } 
    else{
       $dtStats::tmCompile = 0;
       error("map stats compile done");
+      messageAll('MsgStats', '\c3Map stats image build has finished~wfx/misc/hunters_greed.wav');
    }
 }
 
@@ -16954,21 +16955,21 @@ function imgCycle3(%img, %count){
    }
 }
 
-function dumpTest(){
-      deleteVariables("$textColor*");
-   addGLText("abcdefghijklmnop", 0, 30, "3 213 151", 15, 500);
-   new fileObject(img);
-   RootGroup.add(img);
-   img.openForWrite("serverStats/statsImg/test.ppm");
-   img.x = 256;
-   img.y = 256;
-   img.writeLine("P3");
-   img.writeLine(img.x SPC img.y);
-   img.writeLine("255");
-   img.yc = 0;
-   img.py = 0;
-   imgCycle(img);
-}
+//function dumpTest(){
+      //deleteVariables("$textColor*");
+   //addGLText("abcdefghijklmnop", 0, 30, "3 213 151", 15, 500);
+   //new fileObject(img);
+   //RootGroup.add(img);
+   //img.openForWrite("serverStats/statsImg/test.ppm");
+   //img.x = 256;
+   //img.y = 256;
+   //img.writeLine("P3");
+   //img.writeLine(img.x SPC img.y);
+   //img.writeLine("255");
+   //img.yc = 0;
+   //img.py = 0;
+   //imgCycle(img);
+//}
 
 
 function isInsideBorder(%img,%x, %y) {
@@ -17086,6 +17087,7 @@ function imgCycle(%img){
      %img.delete();  
      deleteVariables("$textColor*");
      error("Stats Image Done");
+     messageAll('MsgStats', '\c3Stats image build has finished~wfx/misc/hunters_greed.wav');
      $dtStatsImgBuild = 0;
    }
 }
