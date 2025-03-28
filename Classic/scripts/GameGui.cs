@@ -878,6 +878,12 @@ function buildMissionList()
 
          for( %word = 0; ( %misType = getWord( %typeList, %word ) ) !$= ""; %word++ )
          {
+            //---------------------------------------------------------------------------------
+            // z0dd - ZOD - Founder(founder@mechina.com): Append Tribe Practice to CTF missions
+            if(%misType $= "CTF")
+               %typeList = rtrim(%typeList) @ " PracticeCTF SCtF Hybrid LCTF";
+            //---------------------------------------------------------------------------------
+
             // Eolk - remove gametype skip code
             // -------------------------------------------------------------------
             // z0dd - ZOD, 01/02/03. Don't include TR2 gametype if it's turned off
