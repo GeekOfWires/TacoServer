@@ -4,7 +4,7 @@
 //
 //------------------------------------------------------------------------------
 
-// z0dd - ZOD: Execute the mission and game type skip lists so that 
+// z0dd - ZOD: Execute the mission and game type skip lists so that
 // arrays are put into memory for function buildMissionList.
 exec("prefs/MissionSkip.cs", true);
 exec("prefs/GameTypeSkip.cs", true);
@@ -57,12 +57,12 @@ function GameGui::onSleep( %this )
    %ctrl = "GM_" @ %this.pane @ "Pane";
    if ( isObject( %ctrl ) )
       %ctrl.onDeactivate();
-      
+
 //   if( isObject( $dummySeq ) )
-//   {   
+//   {
 //      $dummySeq.delete();
 //   }
-         
+
 	Canvas.popDialog(LaunchToolbarDlg);
 }
 
@@ -124,7 +124,7 @@ function GM_JoinPane::onActivate( %this )
       GMJ_Browser.lastQuery = $PlayingOnline ? "Master" : "LanServers";
       GMJ_Browser.runQuery();
    }
-   
+
    if ( isObject( BrowserMap ) )
    {
       BrowserMap.pop();
@@ -151,7 +151,7 @@ function GM_JoinPane::onDeactivate( %this )
       BrowserMap.pop();
       BrowserMap.delete();
    }
-   
+
    GM_VersionText.setVisible( false );
 
    $pref::ServerBrowser::InfoWindowOpen = GMJ_Browser.infoWindowOpen;
@@ -324,15 +324,15 @@ function GMJ_Browser::runQuery( %this )
             if ( %regionMask $= "" )
                %regionMask = 4294967295;
 
-            queryMasterServer( 
-                  $JoinGamePort, 
-                  0,                         // Flags 
-                  %rulesSet,                 // Rules Set 
-                  %missionType,              // Mission Type 
-                  getField( %filter, 3 ),    // Min Players 
+            queryMasterServer(
+                  $JoinGamePort,
+                  0,                         // Flags
+                  %rulesSet,                 // Rules Set
+                  %missionType,              // Mission Type
+                  getField( %filter, 3 ),    // Min Players
                   %maxPlayers,               // Max Players
-                  %maxBots,                  // Max Bots 
-                  %regionMask,               // Region Mask 
+                  %maxBots,                  // Max Bots
+                  %regionMask,               // Region Mask
                   getField( %filter, 6 ),    // Max Ping
                   getField( %filter, 8 ),    // Min CPU Speed
                   getField( %filter, 9 ) );  // Filter flags
@@ -379,15 +379,15 @@ function GMJ_Browser::onDatabaseRow( %this, %row, %isLastRow, %key )
    if ( %isLastRow )
    {
       GMJ_StatusText.setValue( "Querying the master server..." );
-      queryMasterServer( 
-            $JoinGamePort,    // Port 
-            0,                // Flags 
-            "Any",            // Rules Set 
-            "Any",            // Mission Type  
-            0,                // Min Players 
+      queryMasterServer(
+            $JoinGamePort,    // Port
+            0,                // Flags
+            "Any",            // Rules Set
+            "Any",            // Mission Type
+            0,                // Min Players
             255,              // Max Players
-            32,               // Max Bots 
-            0xFFFFFFFF,       // Region Mask 
+            32,               // Max Bots
+            0xFFFFFFFF,       // Region Mask
             0,                // Max Ping
             0,                // Min CPU Speed
             0,                // Filter flags
@@ -479,7 +479,7 @@ function GMJ_Browser::insertIPAddress( %this )
       alxPlay( InputDeniedSound, 0, 0, 0 );
       return;
    }
-   
+
    IPEntry.setText( "IP:" );
    Canvas.pushDialog( EnterIPDlg );
 }
@@ -493,8 +493,8 @@ function EnterIPDlg::onDone( %this )
       %address = "IP:" @ %address;
    if ( strpos( %address, ":", 3 ) == -1 )
       %address = %address @ ":28000";
-   
-   echo( "Starting ping to server " @ %address @ "..." );   
+
+   echo( "Starting ping to server " @ %address @ "..." );
    pushServerAddress( %address );
    GMJ_Browser.selectRowByAddress( %address, true );
 }
@@ -652,8 +652,8 @@ function SI_ContentWindow::fill( %this, %content )
       %string = %string NL "\n<lmargin:0><spush>" @ ServerInfoDlg.headerStyle @ "PLAYERS<lmargin%:40>TEAM<lmargin%:75>SCORE<spop>";
       for ( %i = 0; %i < %playerCount; %i++ )
       {
-         %playerEntry = getRecord( %content, %record ); 
-         %string = %string NL "<lmargin:0><clip%:40>" SPC getField( %playerEntry, 0 ) @ "</clip><lmargin%:40><clip%:35>" 
+         %playerEntry = getRecord( %content, %record );
+         %string = %string NL "<lmargin:0><clip%:40>" SPC getField( %playerEntry, 0 ) @ "</clip><lmargin%:40><clip%:35>"
                SPC getField( %playerEntry, 1 ) @ "</clip><lmargin%:75><clip%:25>" SPC getField( %playerEntry, 2 ) @ "</clip>";
          %record++;
       }
@@ -666,7 +666,7 @@ function SI_ContentWindow::fill( %this, %content )
       %string = "<spush>" @ ServerInfoDlg.headerStyle @ "PLAYERS<lmargin%:60>SCORE<spop>";
       for ( %i = 0; %i < %playerCount; %i++ )
       {
-         %playerEntry = getRecord( %content, %record ); 
+         %playerEntry = getRecord( %content, %record );
          %string = %string NL "<lmargin:0><clip%:60>" SPC getField( %playerEntry, 0 ) @ "</clip><lmargin%:60>" SPC getField( %playerEntry, 2 );
          %record++;
       }
@@ -684,7 +684,7 @@ function ServerInfoDlg::onSleep( %this )
    $pref::ServerBrowser::InfoWindowPos = SI_Window.getPosition();
    $pref::ServerBrowser::InfoWindowExtent = SI_Window.getExtent();
    $pref::ServerBrowser::InfoWindowBarPos = getWord( SI_InfoScroll.getExtent(), 1 );
-   
+
    GMJ_InfoBtn.setActive( true );
 }
 
@@ -733,7 +733,7 @@ function GM_HostPane::onActivate( %this )
    GameGui.pane = "Host";
 
    $HostGameType = $PlayingOnline ? "Online" : "LAN";
-   
+
    buildMissionTypePopup( GMH_MissionType );
    // ---------------------------------------------------
    // z0dd - ZOD, 9/29/02. Removed T2 demo code from here
@@ -794,7 +794,7 @@ function buildMissionTypePopup( %popup )
    %popup.clear();
    for( %type = 0; %type < $HostTypeCount; %type++ )
       %popup.add( $HostTypeDisplayName[%type], %type );
-   %popup.sort( true );   
+   %popup.sort( true );
 }
 
 //------------------------------------------------------------------------------
@@ -972,7 +972,7 @@ function addRotationMap(%missionFile, %gameType, %freeForAll, %cycle, %minPlayer
       $HostMissionFile[%mis] = %missionFile;
       $HostMissionName[%mis] = %missionFile;
       $BotEnabled[%mis] = isFile("terrains/" @ %missionFile @".nav");
-    
+
 
       // Load custom display name
       %f = new FileObject();
@@ -1281,7 +1281,7 @@ function getNextMission(%missionName, %gameType)
       deleteVariables("$MapPlayed*");
    if($Host::botsEnabled && $BotMissionCount[%type] >= $MapPlayedCount)
       deleteVariables("$MapPlayed*");
-      
+
    %length = 0;
    %index = -1;
    // Build array of missions
@@ -1311,7 +1311,7 @@ function getNextMission(%missionName, %gameType)
    // Randomize if set by pref or if the mission played was not on the cycle
    // TODO: Actually make it go on to the next mission in the list instead of randomize when a mission not in the cycle is played?
 //   error("LENGTH: "@%length);
-   if ($Host::ClassicRandomMissions || !%list[%index])// { 
+   if ($Host::ClassicRandomMissions || !%list[%index])// {
       %index = getRandom(1, %length);// error("INDEX: "@%index); }
    // Otherwise, on to the next mission
    else
@@ -1400,8 +1400,8 @@ function StartHostedGame()
 
    if ( $Host::Dedicated )
    {
-      MessageBoxYesNo( "WARNING", 
-            "You are about to launch a dedicated server and quit Tribes 2.  Do you want to continue?", 
+      MessageBoxYesNo( "WARNING",
+            "You are about to launch a dedicated server and quit Tribes 2.  Do you want to continue?",
             "tryToLaunchDedicatedServer(" @ $Host::PureServer @ ");" );
       return;
    }
@@ -1454,7 +1454,7 @@ function GMH_BotsEnabledTgl::onAction( %this )
          %id = GMH_MissionList.getRowId( %i );
          GMH_MissionList.setRowActive( %id, $BotEnabled[%id] );
       }
-      
+
       GMH_EnableBotsGroup.setVisible(true);
       %misId = GMH_MissionList.getSelectedId();
       GMH_StartGameBtn.setActive( $BotEnabled[%misId] );
@@ -1501,7 +1501,7 @@ function GMH_BotsEnabledTgl::onAction( %this )
          %id = GMH_MissionList.getRowId( %i );
          GMH_MissionList.setRowActive( %id, $BotEnabled[%id] );
       }
-      
+
       GMH_EnableBotsGroup.setVisible(true);
       %misId = GMH_MissionList.getSelectedId();
       GMH_StartGameBtn.setActive( $BotEnabled[%misId] );
@@ -1534,7 +1534,7 @@ function validateMaxPlayers()
 
    // ---------------------------------------------------
    // z0dd - ZOD, 9/29/02. Removed T2 demo code from here
-   
+
    //and make sure the bot sliders reflect the changes..
    setBotCountSlider();
    // ---------------------------------------------------
@@ -1576,7 +1576,7 @@ function AdvancedHostDlg::onWake( %this )
    if ( $Host::HiVisibility )
       AH_HiVisibilityRdo.setValue( true );
    else
-      AH_HiFPSRdo.setValue( true );   
+      AH_HiFPSRdo.setValue( true );
    AH_DedicatedTgl.setValue( $Host::Dedicated );
    AH_DedicatedTgl.onAction();
    AH_TeamDamageTgl.setValue( $Host::TeamDamageOn );
@@ -1601,7 +1601,7 @@ function AdvancedHostDlg::accept( %this )
    $Host::Dedicated = AH_DedicatedTgl.getValue();
    if ( $Host::Dedicated )
       $Host::PureServer = AH_PureServerTgl.getValue();
-   $Host::TeamDamageOn = AH_TeamDamageTgl.getValue();   
+   $Host::TeamDamageOn = AH_TeamDamageTgl.getValue();
    $Host::TournamentMode = AH_TournamentTgl.getValue();
    $Host::allowAdminPlayerVotes = AH_AdminVoteTgl.getValue();
    $Host::NoSmurfs = !AH_AllowSmurfTgl.getValue();
@@ -1696,7 +1696,7 @@ function GM_WarriorPane::onActivate( %this )
 			{
 				%name = stripTrailingSpaces( strToPlayerName( getField( $pref::Player[%count], 0 ) ) );
 				GMW_WarriorPopup.add( %name, %count );
-			} 
+			}
 		}
 
 		// Fill the static menus:
@@ -1777,10 +1777,10 @@ function GMW_PlayerModel::update( %this )
       %armor = "medium";
    else
       %armor = "light";
-      
+
    switch ( GMW_RaceGenderPopup.getSelected() )
    {
-      case 1: 
+      case 1:
          if ( %armor $= "heavy" )
             %shape = %armor @ "_male";
          else
@@ -1788,20 +1788,20 @@ function GMW_PlayerModel::update( %this )
       case 2: %shape = "bioderm_" @ %armor;
       default: %shape = %armor @ "_male";
    }
-   
+
 	%skin = getField( $pref::Player[$pref::Player::Current], 2 );
-   
+
 //   if( isObject( $dummySeq ) )
-//   {   
+//   {
 //      $dummySeq.delete();
 //   }
-//   
+//
 //   $dummySeq = new TSShapeConstructor()
 //   {
 //      baseShape = %shape @ ".dts";
 //      sequence0 = %shape @ "_forward.dsq dummyRun";
 //   };
-   
+
    %this.setModel( %shape, %skin );
 }
 
@@ -1831,7 +1831,7 @@ function GMW_WarriorPopup::onSelect( %this, %id, %text )
    %baseSkin = isDynamixSkin( %skin );
    GMW_SkinPrefPopup.setSelected( !%baseSkin );
 	GMW_SkinPopup.fillList( %selId );
-   
+
    %selId = -1;
    for ( %i = 0; %i < GMW_SkinPopup.size(); %i++ )
    {
@@ -1868,7 +1868,7 @@ function GMW_RaceGenderPopup::fillList( %this )
 {
    if ( %this.size() )
       return;
-      
+
 	%this.add( "Human Male", 0 );
 	%this.add( "Human Female", 1 );
 	%this.add( "Bioderm", 2 );
@@ -1905,7 +1905,7 @@ function GMW_SkinPrefPopup::fillList( %this )
 {
    if ( %this.size() )
       return;
-      
+
    %this.add( "Dynamix Skins", 0 );
    %this.add( "Custom Skins", 1 );
 }
@@ -1914,15 +1914,15 @@ function GMW_SkinPrefPopup::fillList( %this )
 function GMW_SkinPrefPopup::onSelect( %this, %id, %text )
 {
    %curSkin = GMW_SkinPopup.getText();
-   GMW_SkinPopup.fillList( GMW_RaceGenderPopup.getSelected() ); 
+   GMW_SkinPopup.fillList( GMW_RaceGenderPopup.getSelected() );
    %selId = GMW_SkinPopup.findText( %curSkin );
    if ( %selId == -1 )
       %selId = 0;
-   
+
    if ( GMW_SkinPopup.size() )
-   {   
+   {
       GMW_SkinPopup.setSelected( %selId );
-      GMW_SkinPopup.onSelect( %selId, GMW_SkinPopup.getTextById( %selId ) );   
+      GMW_SkinPopup.onSelect( %selId, GMW_SkinPopup.getTextById( %selId ) );
    }
 }
 
@@ -1958,7 +1958,7 @@ function isDynamixSkin( %skin )
       if ( %skin $= $Skin[%i, code] )
          return( true );
    }
-   
+
    return( false );
 }
 
@@ -1993,7 +1993,7 @@ function GMW_SkinPopup::fillList( %this, %raceGender )
          %baseSkin = false;
          for ( %i = 0; %i < $SkinCount; %i++ )
          {
-            if ( %skin $= $Skin[%i, code] ) 
+            if ( %skin $= $Skin[%i, code] )
             {
                %baseSkin = true;
                %skin = $Skin[%i, name];
@@ -2010,7 +2010,7 @@ function GMW_SkinPopup::fillList( %this, %raceGender )
          }
       }
    }
-   
+
    %this.sort( true );
 }
 
@@ -2066,7 +2066,7 @@ function GMW_VoicePopup::fillList( %this, %raceGender )
 {
 	%this.clear();
 
-	switch ( %raceGender )	
+	switch ( %raceGender )
 	{
 		case 0: // Human Male
 			for ( %i = 0; %i < $MaleVoiceCount; %i++ )
