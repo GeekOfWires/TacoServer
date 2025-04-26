@@ -133,6 +133,7 @@ $Host::PUGPassword = "pickup"; 					//PUG password, Auto or enable/disable thru 
 $Host::PUGpasswordAlwaysOn = 0;					//If you want the pug password Always on
 $Host::DMSLOnlyMode = 0;						//Shocklance Only Mode for Deathmatch
 $Host::LCTFProMode = 0;							//Pro mode for LCTF
+$Host::LCTFOneMine = 0;							//Limit mine inventory to one if enabled
 $Host::LoadingScreenUseDebrief = 1;				//Enable Debrief Style Loading screen; Gives you more lines and MOTD
 $Host::LoadScreenColor1 = "05edad";				//Loading Screen color; First Column
 $Host::LoadScreenColor2 = "29DEE7";				//Loading Screen color; Second Column
