@@ -771,7 +771,7 @@ function getAmmoStationLovin(%client)
 
    // grenades
    for(%i = 0; $InvGrenade[%i] !$= ""; %i++) // z0dd - ZOD, 5/27/03. Clear them all in one pass
-      %player.setInventory($NameToInv[$InvGrenade[%i]], 0);
+      %client.player.setInventory($NameToInv[$InvGrenade[%i]], 0);
 
    for ( %i = 0; %i < getFieldCount( %client.grenadeIndex ); %i++ )
    {
@@ -798,7 +798,7 @@ function getAmmoStationLovin(%client)
 
    // Mines
    for(%i = 0; $InvMine[%i] !$= ""; %i++) // z0dd - ZOD, 5/27/03. Clear them all in one pass
-      %player.setInventory($NameToInv[$InvMine[%i]], 0);
+      %client.player.setInventory($NameToInv[$InvMine[%i]], 0);
 
    for ( %i = 0; %i < getFieldCount( %client.mineIndex ); %i++ )
    {
