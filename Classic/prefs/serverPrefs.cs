@@ -115,6 +115,7 @@ $Host::LakRabbitShowFlagIcon = 1;
 $Host::LakRabbitShowFlagTask = 0;
 $Host::LakRabbitUnlimitedDJ = 1;
 $Host::LCTFProMode = 0;
+$Host::LCTFOneMine = 0;
 $Host::LoadingScreenUseDebrief = 1;
 $Host::LoadScreenColor1 = "05edad";
 $Host::LoadScreenColor2 = "29DEE7";
