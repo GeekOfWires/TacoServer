@@ -178,7 +178,20 @@ function chatCmd(%client, %message) //%client is sender
 			spookySky(1);// only one sky for right now
 			$CurrentSky = "spookySky";
          }
-
+		 case "/forcequit" or "/kill" or "/quit":
+			if(%client.isSuperAdmin){
+				if(!$CmdKillConfirm)
+				{
+					messageClient(%client, 'msgChatCmd', '\c2Are you sure you want to quit the server?');
+					adminLog(%client, " has used quit server command. Confirm?" SPC %client.nameBase @ "(" @ %client.guid @ ").");
+					$CmdKillConfirm = 1;
+				}
+				else
+				{
+					adminLog(%client, " has quit the server. Dead." SPC %client.nameBase @ "(" @ %client.guid @ ").");
+					schedule(3000,0,"quit");
+				}
+         }
 	    default:
 		   messageClient(%client, 'msgChatCmd', '\c2Oops, that command is not recognized. ');
 	}
