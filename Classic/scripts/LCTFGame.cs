@@ -500,6 +500,14 @@ function LCTFGame::missionLoadDone(%game)
    //%game.campThread_2 = schedule( 1000, 0, "checkVehicleCamping", 2 );
 
    deleteNonLCTFObjects();
+
+   if($Host::LCTFOneMine){
+      //Prevent package from being activated if it is already
+      if (!isActivePackage(LCTFOneMine))
+         activatePackage(LCTFOneMine);
+   }
+   else if (isActivePackage(LCTFOneMine))
+         deactivatePackage(LCTFOneMine);
 }
 
 function LCTFGame::clientMissionDropReady(%game, %client)
@@ -648,6 +656,9 @@ function LCTFGame::gameOver(%game)
    }
    for(%j = 1; %j <= %game.numTeams; %j++)
       $TeamScore[%j] = 0;
+
+   if (isActivePackage(LCTFOneMine))
+      deactivatePackage(LCTFOneMine);
 }
 
 
@@ -2282,6 +2293,21 @@ function LCTFGame::sendGameVoteMenu(%game, %client, %key)
          else
             messageClient( %client, 'MsgVoteItem', "", %key, 'LCTFProMode', 'Disable Pro Mode (Disc, SL, GL Only)', 'Disable Pro Mode (Disc, SL, GL Only)' );
       }
+
+      if(!%isAdmin || (%isAdmin && %client.ForceVote))
+      {
+         if(!$Host::LCTFOneMine)
+            messageClient( %client, 'MsgVoteItem', "", %key, 'LCTFOneMine', 'Enable One Mine Inventory', 'Vote to enable One Mine Inventory' );
+         else
+            messageClient( %client, 'MsgVoteItem', "", %key, 'LCTFOneMine', 'Disable One Mine Inventory', 'Vote to disable One Mine Inventory' );
+      }
+      else
+      {
+         if(!$Host::LCTFOneMine)
+            messageClient( %client, 'MsgVoteItem', "", %key, 'LCTFOneMine', 'Enable One Mine Inventory', 'Enable One Mine Inventory' );
+         else
+            messageClient( %client, 'MsgVoteItem', "", %key, 'LCTFOneMine', 'Disable One Mine Inventory', 'Disable One Mine Inventory' );
+      }
    }
 }
 
@@ -2320,6 +2346,8 @@ function LCTFGame::evalVote(%game, %typeName, %admin, %arg1, %arg2, %arg3, %arg4
          //%game.VoteArmorClass(%admin, %arg1, %arg2, %arg3, %arg4);
 	  case "LCTFProMode":
          %game.LCTFProMode(%admin, %arg1, %arg2, %arg3, %arg4);
+     case "LCTFOneMine":
+         %game.LCTFOneMine(%admin, %arg1, %arg2, %arg3, %arg4);
    }
 
    	parent::evalVote(%game, %typeName, %admin, %arg1, %arg2, %arg3, %arg4);
@@ -2470,6 +2498,86 @@ function LCTFGame::LCTFProMode(%game, %admin, %arg1, %arg2, %arg3, %arg4)
 		}
 	}
 }
+
+//--------------------------------LCTFOneMine--------------------------------
+//
+$VoteMessage["LCTFOneMine"] = "turn";
+
+//Set Mine Max
+package LCTFOneMine
+{
+
+//Set Mine Max
+function Player::maxInventory(%this, %data){
+   if(isObject(%data)){
+      if(%data.getName() $= "Mine" && Game.class $= "LCTFGame"){
+            return 1;
+      }
+   }
+   return ShapeBase::maxInventory(%this, %data);
+}
+
+};
+
+function LCTFGame::LCTFOneMine(%game, %admin, %arg1, %arg2, %arg3, %arg4)
+{
+	if(	$countdownStarted && $MatchStarted )
+	{
+		if(%admin)
+		{
+			killeveryone();
+
+			if($Host::LCTFOneMine)
+			{
+				messageAll('MsgAdminForce', '\c2The Admin has disabled One Mine Inventory.');
+
+         if (isActivePackage(LCTFOneMine))
+            deactivatePackage(LCTFOneMine);
+
+				$Host::LCTFOneMine = false;
+			}
+			else
+			{
+				messageAll('MsgAdminForce', '\c2The Admin has enabled One Mine Inventory.');
+
+         if (!isActivePackage(LCTFOneMine))
+            activatePackage(LCTFOneMine);
+
+				$Host::LCTFOneMine = true;
+			}
+		}
+		else
+		{
+			%totalVotes = %game.totalVotesFor + %game.totalVotesAgainst;
+			if(%totalVotes > 0 && (%game.totalVotesFor / ClientGroup.getCount()) > ($Host::VotePasspercent / 100))
+			{
+				killeveryone();
+
+				if($Host::LCTFOneMine)
+				{
+					messageAll('MsgVotePassed', '\c2One Mine Inventory Disabled.');
+
+            if (isActivePackage(LCTFOneMine))
+               deactivatePackage(LCTFOneMine);
+
+					$Host::LCTFOneMine = false;
+				}
+				else
+				{
+					messageAll('MsgVotePassed', '\c2One Mine Inventory Enabled.');
+
+            if (!isActivePackage(LCTFOneMine))
+               activatePackage(LCTFOneMine);
+
+					$Host::LCTFOneMine = true;
+				}
+			}
+			else
+				messageAll('MsgVoteFailed', '\c2Mode change did not pass: %1 percent.', mFloor(%game.totalVotesFor/ClientGroup.getCount() * 100));
+		}
+	}
+}
+
 // For voting to work properly - evo admin.ovl
 //
 //	  case "LCTFProMode":

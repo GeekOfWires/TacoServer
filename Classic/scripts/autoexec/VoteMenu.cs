@@ -51,10 +51,12 @@ function DefaultGame::sendGameVoteMenu(%game, %client, %key)
    {
       if(!$Host::TournamentMode)
          messageClient(%client, 'MsgVoteItem', "", %key, 'VoteTournamentMode', 'change server to Tournament.', 'Vote Tournament Mode');
-         messageClient(%client, 'MsgVoteItem', "", %key, 'VoteChangeMission', 'change the mission to', 'Vote to Change the Mission');
-         messageClient(%client, 'MsgVoteItem', "", %key, 'VoteNextMission', 'set next mission to', 'Vote to Set the Next Mission');
-         messageClient(%client, 'MsgVoteItem', "", %key, 'VoteChangeTimeLimit', 'change the time limit', 'Vote to Change the Time Limit');
-         messageClient(%client, 'MsgVoteItem', "", %key, 'VoteSkipMission', 'skip the mission to', 'Vote to Skip Mission' );
+      if(!$MatchStarted && !$CountdownStarted && $Host::TournamentMode)
+         messageClient(%client, 'MsgVoteItem', "", %key, 'VoteMatchStart', 'Start Match', 'Vote to Start the Match');
+      messageClient(%client, 'MsgVoteItem', "", %key, 'VoteChangeMission', 'change the mission to', 'Vote to Change the Mission');
+      messageClient(%client, 'MsgVoteItem', "", %key, 'VoteNextMission', 'set next mission to', 'Vote to Set the Next Mission');
+      messageClient(%client, 'MsgVoteItem', "", %key, 'VoteChangeTimeLimit', 'change the time limit', 'Vote to Change the Time Limit');
+      messageClient(%client, 'MsgVoteItem', "", %key, 'VoteSkipMission', 'skip the mission to', 'Vote to Skip Mission' );
       if(%multipleTeams)
       {
          if($teamDamage)
@@ -86,23 +88,26 @@ function DefaultGame::sendGameVoteMenu(%game, %client, %key)
    //Mission Info Header - Mission Name, Type, Caps to Win
    if(%client.canVote && %game.scheduleVote $= "")
    {
+      if($voteNext)
+            %showNM = " - Next Map:" SPC $HostMissionName[$voteNextMap] SPC "(" @ $HostTypeName[$voteNextType] @ ")";
+
       switch$($CurrentMissionType)
       {
-			case CTF or SCtF or LCTF:
-				if($Host::TournamentMode)
-               %showTL = " - Time Limit:" SPC $Host::TimeLimit SPC "Minutes";
-            if($voteNext)
-               %showNM = " - Next Map:" SPC $HostMissionName[$voteNextMap] SPC "(" @ $HostTypeName[$voteNextType] @ ")";
+         case CTF or SCtF or LCTF:
+            %showTL = " - Time Limit:" SPC $Host::TimeLimit SPC "Minutes";
             messageClient(%client, 'MsgVoteItem', "", %key, '', $MissionDisplayName SPC "(" @ $MissionTypeDisplayName @ "):" SPC MissionGroup.CTF_scoreLimit SPC "Caps to Win",
             $MissionDisplayName SPC "(" @ $MissionTypeDisplayName @ "):" SPC MissionGroup.CTF_scoreLimit SPC "Caps to Win" @ %showTL @ %showNM);
          case LakRabbit:
             %cap = "2000 Points to Win";
             messageClient(%client, 'MsgVoteItem', "", %key, '', $MissionDisplayName SPC "(" @ $MissionTypeDisplayName @ "):" SPC %cap,
-            $MissionDisplayName SPC "(" @ $MissionTypeDisplayName @ "):" SPC %cap);
+            $MissionDisplayName SPC "(" @ $MissionTypeDisplayName @ "):" SPC %cap @ %showNM);
          case DM:
             %cap = "25 Points to Win";
             messageClient(%client, 'MsgVoteItem', "", %key, '', $MissionDisplayName SPC "(" @ $MissionTypeDisplayName @ "):" SPC %cap,
-            $MissionDisplayName SPC "(" @ $MissionTypeDisplayName @ "):" SPC %cap);
+            $MissionDisplayName SPC "(" @ $MissionTypeDisplayName @ "):" SPC %cap @ %showNM);
+         default:
+            messageClient(%client, 'MsgVoteItem', "", %key, '', $MissionDisplayName SPC "(" @ $MissionTypeDisplayName @ "):" SPC %cap,
+            $MissionDisplayName SPC "(" @ $MissionTypeDisplayName @ ")" @ %showNM);
       }
    }
 
@@ -515,7 +520,7 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 			}
 
 		case "VoteMatchStart":
-			if(!%isAdmin)
+			if(!%isAdmin || (%isAdmin && %client.ForceVote))
 			{
 				if($MatchStarted || $CountdownStarted)
 					return;
@@ -864,6 +869,13 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 
 			if(!%isAdmin || (%isAdmin && %client.ForceVote))
 				%msg = %client.nameBase @ " initiated a vote to " @ (Game.LCTFProMode == 0 ? "enable" : "disable") @ " pro mode.";
+
+      case "LCTFOneMine":
+            if(!$CurrentMissionType $= "LCTF")
+               return;
+
+            if(!%isAdmin || (%isAdmin && %client.ForceVote))
+               %msg = %client.nameBase @ " initiated a vote to " @ (Game.LCTFOneMine == 0 ? "enable" : "disable") @ " one mine mode.";
 
 		case "showServerRules":
 			if (($Host::ServerRules[1] !$= "") && (!%client.CantView))
