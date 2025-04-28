@@ -51,9 +51,9 @@ function serverCmd(%client)
 
 //Disable UE box on crash
 //Used if a clean crash is desired
-//memPatch("7dc7fc","90");
+memPatch("7dc7fc","90");
 //Loops Crash patch (Prevent the Uncaught Exception dialog from appearing)
-//memPatch("006ff376", "909090909090");
+memPatch("006ff376", "909090909090");
 
 //Show Linux Icon in server list
 //memPatch("5C9628","80CB05");
