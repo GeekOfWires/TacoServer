@@ -44,7 +44,12 @@ function loadMissionStage2()
 
 	//Tournament Mode specifics
 	if($Host::TournamentMode)
-		$Host::TimeLimit = 30; //TimeLimit Always 30 minutes in Tourney Mode
+	{
+		if(!$CurrentMissionType $= "LCTF")
+			$Host::TimeLimit = 30; //TimeLimit Always 30 minutes in Tourney Mode
+		else //LCTF 20 Minutes
+			$Host::TimeLimit = 20; //TimeLimit Always 20 minutes in LCTF Tourney Mode
+	}
 	else
 	{
 		//Disable if active

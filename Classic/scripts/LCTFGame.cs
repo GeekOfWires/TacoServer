@@ -132,7 +132,7 @@ function LCTFGame::initGameVars(%game)
    %game.SCORE_PER_REPAIR_DEP_TUR     = 3;
    %game.SCORE_PER_REPAIR_DEP_INV     = 2;
 
-   %game.FLAG_RETURN_DELAY = 45 * 1000;
+   %game.FLAG_RETURN_DELAY = 25 * 1000;
 
    %game.TIME_CONSIDERED_FLAGCARRIER_THREAT = 3 * 1000;
    %game.RADIUS_GEN_DEFENSE = 20;
@@ -2521,61 +2521,58 @@ function Player::maxInventory(%this, %data){
 
 function LCTFGame::LCTFOneMine(%game, %admin, %arg1, %arg2, %arg3, %arg4)
 {
-	if(	$countdownStarted && $MatchStarted )
-	{
-		if(%admin)
-		{
-			killeveryone();
+   if(%admin)
+   {
+      killeveryone();
 
-			if($Host::LCTFOneMine)
-			{
-				messageAll('MsgAdminForce', '\c2The Admin has disabled One Mine Inventory.');
+      if($Host::LCTFOneMine)
+      {
+         messageAll('MsgAdminForce', '\c2The Admin has disabled One Mine Inventory.');
+
+      if (isActivePackage(LCTFOneMine))
+         deactivatePackage(LCTFOneMine);
+
+         $Host::LCTFOneMine = false;
+      }
+      else
+      {
+         messageAll('MsgAdminForce', '\c2The Admin has enabled One Mine Inventory.');
+
+      if (!isActivePackage(LCTFOneMine))
+         activatePackage(LCTFOneMine);
+
+         $Host::LCTFOneMine = true;
+      }
+   }
+   else
+   {
+      %totalVotes = %game.totalVotesFor + %game.totalVotesAgainst;
+      if(%totalVotes > 0 && (%game.totalVotesFor / ClientGroup.getCount()) > ($Host::VotePasspercent / 100))
+      {
+         killeveryone();
+
+         if($Host::LCTFOneMine)
+         {
+            messageAll('MsgVotePassed', '\c2One Mine Inventory Disabled.');
 
          if (isActivePackage(LCTFOneMine))
             deactivatePackage(LCTFOneMine);
 
-				$Host::LCTFOneMine = false;
-			}
-			else
-			{
-				messageAll('MsgAdminForce', '\c2The Admin has enabled One Mine Inventory.');
+            $Host::LCTFOneMine = false;
+         }
+         else
+         {
+            messageAll('MsgVotePassed', '\c2One Mine Inventory Enabled.');
 
          if (!isActivePackage(LCTFOneMine))
             activatePackage(LCTFOneMine);
 
-				$Host::LCTFOneMine = true;
-			}
-		}
-		else
-		{
-			%totalVotes = %game.totalVotesFor + %game.totalVotesAgainst;
-			if(%totalVotes > 0 && (%game.totalVotesFor / ClientGroup.getCount()) > ($Host::VotePasspercent / 100))
-			{
-				killeveryone();
-
-				if($Host::LCTFOneMine)
-				{
-					messageAll('MsgVotePassed', '\c2One Mine Inventory Disabled.');
-
-            if (isActivePackage(LCTFOneMine))
-               deactivatePackage(LCTFOneMine);
-
-					$Host::LCTFOneMine = false;
-				}
-				else
-				{
-					messageAll('MsgVotePassed', '\c2One Mine Inventory Enabled.');
-
-            if (!isActivePackage(LCTFOneMine))
-               activatePackage(LCTFOneMine);
-
-					$Host::LCTFOneMine = true;
-				}
-			}
-			else
-				messageAll('MsgVoteFailed', '\c2Mode change did not pass: %1 percent.', mFloor(%game.totalVotesFor/ClientGroup.getCount() * 100));
-		}
-	}
+            $Host::LCTFOneMine = true;
+         }
+      }
+      else
+         messageAll('MsgVoteFailed', '\c2Mode change did not pass: %1 percent.', mFloor(%game.totalVotesFor/ClientGroup.getCount() * 100));
+   }
 }
 
 // For voting to work properly - evo admin.ovl
