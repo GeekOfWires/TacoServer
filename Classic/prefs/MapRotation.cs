@@ -387,10 +387,10 @@ addRotationMap("SignalDX",						"CTF",1,0,8,24);
 //In Rotation
 /////////////////////////////////////////////////////////////////////
 
-addRotationMap("VaubanLak",						"Lakrabbit",1,0,8,-1);
+addRotationMap("VaubanLak",						"Lakrabbit",1,1,8,-1);
 addRotationMap("MiniSunDried",					"Lakrabbit",1,1,-1,12);
 addRotationMap("Sundance",						"Lakrabbit",1,1,-1,-1);
-addRotationMap("TWL_BeachBlitzLak",				"Lakrabbit",1,0,-1,-1);
+addRotationMap("TWL_BeachBlitzLak",				"Lakrabbit",1,1,-1,-1);
 addRotationMap("DesertofDeathLak",				"Lakrabbit",1,1,-1,-1);
 addRotationMap("Raindance_nefLak",				"Lakrabbit",1,1,-1,-1);
 addRotationMap("SunDriedLak",					"Lakrabbit",1,1,-1,-1);
@@ -402,11 +402,11 @@ addRotationMap("BoxLak",						"Lakrabbit",1,1,-1,10);
 addRotationMap("TitaniaLak",					"Lakrabbit",1,0,8,-1);
 addRotationMap("TibbawLak",						"Lakrabbit",1,1,-1,-1);
 addRotationMap("InfernusLak",					"Lakrabbit",1,1,-1,-1);
-addRotationMap("S8_GeothermalLak",				"Lakrabbit",1,1,-1,-1);
+addRotationMap("S8_GeothermalLak",				"Lakrabbit",1,0,-1,-1);
 addRotationMap("CankerLak",						"Lakrabbit",1,1,-1,-1);
 addRotationMap("DustRunLak",					"Lakrabbit",1,1,-1,-1);
 addRotationMap("CrossfiredLak",					"Lakrabbit",1,1,-1,-1);
-addRotationMap("CloakofLak",					"Lakrabbit",1,1,-1,-1);
+addRotationMap("CloakofLak",					"Lakrabbit",1,0,-1,-1);
 addRotationMap("SpectreLak",					"Lakrabbit",1,1,-1,-1);
 
 //Voteable, But not in rotation
