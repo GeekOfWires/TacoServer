@@ -34,7 +34,7 @@ $flagBoxSize = "0.796666 0.139717 2.46029";
 //1 = new OBB method uses perfect box intersection
 //2 = AABB method but uses boundbox can make the player larger then it is given there direction
 //3 = AABB fixed sizes  uses  $playerSizeBox and $flagBoxSize to do the box checking
-$boxCollision = 1;// off is the old AABB method aka the old method
+$boxCollision = 0; // off is the old AABB method aka the old method
 
 package flagFix{
    function ShapeBase::throwObject(%this,%obj){
