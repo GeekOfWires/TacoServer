@@ -1,5 +1,6 @@
 //Fixes for collision tunneling and other issues, note only tested in classic
 //Script By:DarkTiger
+//v3.8 - removed sweep optimization/ bug fix in old method
 //v3.7 - removed bypass code
 //v3.6 - lctf and SCtFGame
 //v3.5 - tweaks
@@ -32,9 +33,6 @@ $flagBoxSize = "0.796666 0.139717 2.46029";
 
 //0 = old AABB method uses fixed box size makes the player bit narrow
 //1 = new OBB method uses perfect box intersection
-//2 = AABB method but uses boundbox can make the player larger then it is given there direction
-//3 = AABB fixed sizes  uses  $playerSizeBox and $flagBoxSize to do the box checking
-$boxCollision = 0; // off is the old AABB method aka the old method
 
 package flagFix{
    function ShapeBase::throwObject(%this,%obj){
@@ -282,7 +280,7 @@ function DefaultGame::flagColTest(%game, %flag, %rsTeam, %ext){
             //%fdot = vectorDot(vectorNormalize(%player.getVelocity()),vectorNormalize(VectorSub(%flagPos, %playerPos)));
             // %tickDist = vectorLen(%player.getVelocity()) * ($flagSimTime/1000);
             %sweepCount = mFloor(vectorDist(%playerPos, %player.oldPos) + 1.5);
-            if((getSimTime() - %player.lastSim) <= 128 && %flagDist-2 <  %sweepCount){//make sure are last position is valid
+            if((getSimTime() - %player.lastSim) <= 128){//make sure are last position is valid
                //schedule(1000,0,"drawBeamItem", %player.oldPos,%playerPos,15000);
                for(%i = 0; %i < %sweepCount; %i++){// sweep behind us to see if  we should have hit something
                   %lerpPos = vectorLerp(%playerPos, %player.oldPos, %i/(%sweepCount-1));//back sweep
@@ -294,7 +292,7 @@ function DefaultGame::flagColTest(%game, %flag, %rsTeam, %ext){
                      %flag.getDataBlock().onCollision(%flag, %player);
                      break;
                   }
-                  else if($boxCollision > 1 && boxIntersectAABB(%player, %flag, %lerpPos)){
+                  else if(!$boxCollision && boxIntersectAABB(%player, %flag, %lerpPos)){
                      %flag.getDataBlock().onCollision(%flag, %player);
                      break;
                   }
