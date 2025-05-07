@@ -475,7 +475,7 @@ addRotationMap("Blink",							"LCTF",1,0,-1,-1);
 addRotationMap("HillSideLT",					"LCTF",1,1,-1,10);
 addRotationMap("IcePick",						"LCTF",1,1,-1,16);
 addRotationMap("OsIrisLT",						"LCTF",1,0,-1,-1);
-addRotationMap("GrassyKnoll",					"LCTF",1,1,-1,-1);
+addRotationMap("GrassyKnollLT",					"LCTF",1,1,-1,-1);
 addRotationMap("TWL2_MuddySwamp",				"LCTF",1,0,8,-1);
 addRotationMap("SandyRunLT",					"LCTF",1,0,-1,12);
 addRotationMap("Sentry",						"LCTF",1,1,-1,-1);
@@ -533,6 +533,7 @@ addRotationMap("FrozenForgeLT",					"LCTF",1,1,-1,20);
 addRotationMap("TWL2_CelerityLT",				"LCTF",1,1,-1,20);
 addRotationMap("El_FinLT",					    "LCTF",1,1,-1,14);
 addRotationMap("CapriLT",					    "LCTF",1,1,-1,14);
+addRotationMap("RunenmachtLT",					"LCTF",1,1,-1,14);
 
 
 //  _____             _   _                     _       _
