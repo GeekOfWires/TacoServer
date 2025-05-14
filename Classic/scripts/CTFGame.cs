@@ -9,6 +9,8 @@
 
 //exec the AI scripts
 exec("scripts/aiCTF.cs");
+//Time for auto overtime sudden-death mode
+$CTF::Overtime = 5; //5 Minutes, 0 to disable
 
 //-- tracking  ---
 function CTFGame::initGameVars(%game)
@@ -376,8 +378,8 @@ function CTFGame::playerTouchFlag(%game, %player, %flag)
    if ((%flag.carrier $= "") && (%player.getState() !$= "Dead"))
    {
       // z0dd - ZOD, 5/07/04. Cancel the lava return.
-      if(isEventPending(%obj.lavaEnterThread))
-         cancel(%obj.lavaEnterThread);
+      if(isEventPending(%flag.lavaEnterThread))
+         cancel(%flag.lavaEnterThread);
 
       //flag isn't held and has been touched by a live player
       if (%client.team == %flag.team)
@@ -1245,14 +1247,77 @@ function CTFGame::resetDontScoreTimer(%game, %team)
    $dontScoreTimer[%team] = false;
 }
 
+function CTFGame::checkTimeLimit(%game, %forced)
+{
+   // Don't add extra checks:
+   if ( %forced )
+      cancel( %game.timeCheck );
+
+   // if there is no time limit, check back in a minute to see if it's been set
+   if(($Host::TimeLimit $= "") || $Host::TimeLimit == 0)
+   {
+      %game.timeCheck = %game.schedule(20000, "checkTimeLimit");
+      return;
+   }
+
+   %curTimeLeftMS = ($Host::TimeLimit * 60 * 1000) + $missionStartTime - getSimTime();
+
+   if (%curTimeLeftMS <= 0)
+   {
+      %teamOneCaps = mFloor($TeamScore[1] / %game.SCORE_PER_TEAM_FLAG_CAP);
+      %teamTwoCaps = mFloor($TeamScore[2] / %game.SCORE_PER_TEAM_FLAG_CAP);
+      if(%teamOneCaps == %teamTwoCaps && $CTF::Overtime && $Host::TournamentMode){ //Setting exists
+         if(!%game.overtime){
+            %game.overtime = 1;
+            if($CTF::Overtime > 1){ %s = "s"; }
+            messageAll('MsgOvertime', '\c2Sudden-Death Overtime Initiated: %1 Minute%2 Remaining~wfx/powered/turret_heavy_activate.wav', $CTF::Overtime, %s);
+            echo("Sudden-Death Overtime Initiated");
+            UpdateClientTimes($CTF::Overtime * 60 * 1000);
+            EndCountdown($CTF::Overtime * 60 * 1000);
+            %game.timeCheck = %game.schedule($CTF::Overtime * 60 * 1000, "timeLimitReached");
+         }
+      }
+      else{
+         if(%game.scheduleVote !$= ""){
+            if(!%game.voteOT){
+                    messageAll('MsgOvertime', '\c2Vote Overtime Initiated.~wfx/powered/turret_heavy_activate.wav');
+                    %game.voteOT = 1;
+                }
+         }
+         else{
+            %game.timeLimitReached();
+         }
+      }
+   }
+   else
+   {
+      if(%curTimeLeftMS >= 20000)
+         %game.timeCheck = %game.schedule(20000, "checkTimeLimit");
+      else
+         %game.timeCheck = %game.schedule(%curTimeLeftMS + 1, "checkTimeLimit");
+
+      //now synchronize everyone's clock
+      messageAll('MsgSystemClock', "", $Host::TimeLimit, %curTimeLeftMS);
+   }
+}
+
 function CTFGame::checkScoreLimit(%game, %team)
 {
    %scoreLimit = MissionGroup.CTF_scoreLimit * %game.SCORE_PER_TEAM_FLAG_CAP;
    // default of 5 if scoreLimit not defined
    if(%scoreLimit $= "")
       %scoreLimit = 5 * %game.SCORE_PER_TEAM_FLAG_CAP;
-   if($TeamScore[%team] >= %scoreLimit)
-      %game.scoreLimitReached();
+   if(%game.overtime){
+      %teamOneCaps = mFloor($TeamScore[1] / %game.SCORE_PER_TEAM_FLAG_CAP);
+      %teamTwoCaps = mFloor($TeamScore[2] / %game.SCORE_PER_TEAM_FLAG_CAP);
+      if(%teamOneCaps !=  %teamTwoCaps){
+         %game.scoreLimitReached();
+      }
+   }
+   else{
+      if($TeamScore[%team] >= %scoreLimit)
+         %game.scoreLimitReached();
+      }
 }
 
 function CTFGame::awardScoreFlagReturn(%game, %cl, %perc)

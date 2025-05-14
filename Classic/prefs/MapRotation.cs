@@ -525,7 +525,7 @@ addRotationMap("Bridgepoint",				    "LCTF",1,1,-1,14);
 addRotationMap("NarcolepsyLT",				    "LCTF",1,1,-1,14);
 addRotationMap("WhiteDwarfDeluxeLT",		    "LCTF",1,0,-1,14);
 addRotationMap("ClusterUnFuct",					"LCTF",1,1,8,-1);
-addRotationMap("OuterWilds",					"LCTF",1,1,-1,12);
+addRotationMap("OuterWildsLT",					"LCTF",1,1,-1,12);
 addRotationMap("Drafts",						"LCTF",1,1,-1,12);
 addRotationMap("DermCrossingDeluxeLT",			"LCTF",1,1,-1,-1);
 addRotationMap("SuperiorWaterworks",			"LCTF",1,0,-1,12);

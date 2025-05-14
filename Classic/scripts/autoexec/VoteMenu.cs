@@ -486,19 +486,8 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
             }
             else //is an admin
             {
-               if($Host::TournamentMode) //Admins still have the option to set the time to 30 minutes in Tourney Mode
-               {
-                  if(%arg1 !$= "30") //30 minutes only
-                  {
-                     messageClient(%client, "", "\c2Invalid time selection.");
-                     return;
-                  }
-               }
-               else
-               {
-                  messageClient(%client, "", "\c2Invalid time selection.");
-                  return;
-               }
+               messageClient(%client, "", "\c2Invalid time selection.");
+               return;
             }
          }
 
@@ -834,21 +823,21 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 
 		// LakRabbit Stuff
 		case "VoteDuelMode":
-			if(!$CurrentMissionType $= "LakRabbit")
+			if($CurrentMissionType !$= "LakRabbit")
 				return;
 
 			if(!%isAdmin || (%isAdmin && %client.ForceVote))
 				%msg = %client.nameBase @ " initiated a vote to " @ (Game.duelMode == 0 ? "enable" : "disable") @ " duel mode.";
 
 		case "VoteSplashDamage":
-			if(!$CurrentMissionType $= "LakRabbit")
+			if($CurrentMissionType !$= "LakRabbit")
 				return;
 
 			if(!%isAdmin || (%isAdmin && %client.ForceVote))
 				%msg = %client.nameBase @ " initiated a vote to " @ (Game.noSplashDamage == 1 ? "enable" : "disable") @ " splash damage.";
 
 		case "VotePro":
-			if(!$CurrentMissionType $= "LakRabbit")
+			if($CurrentMissionType !$= "LakRabbit")
 				return;
 
 			if(!%isAdmin || (%isAdmin && %client.ForceVote))
@@ -856,7 +845,7 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 
       //Deathmatch Stuff
 		case "DMSLOnlyMode":
-			if(!$CurrentMissionType $= "DM")
+			if($CurrentMissionType !$= "DM")
 				return;
 
 			if(!%isAdmin || (%isAdmin && %client.ForceVote))
@@ -864,18 +853,21 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 
       //LCTF Stuff
 		case "LCTFProMode":
-			if(!$CurrentMissionType $= "LCTF")
+			if($CurrentMissionType !$= "LCTF")
 				return;
 
 			if(!%isAdmin || (%isAdmin && %client.ForceVote))
 				%msg = %client.nameBase @ " initiated a vote to " @ (Game.LCTFProMode == 0 ? "enable" : "disable") @ " pro mode.";
 
       case "LCTFOneMine":
-            if(!$CurrentMissionType $= "LCTF")
-               return;
+         if($CurrentMissionType !$= "LCTF")
+            return;
 
-            if(!%isAdmin || (%isAdmin && %client.ForceVote))
-               %msg = %client.nameBase @ " initiated a vote to " @ (Game.LCTFOneMine == 0 ? "enable" : "disable") @ " one mine mode.";
+         if($InvBanList[LCTF, "Mine"])
+            messageClient(%client, "", "\c2Mines are disabled at this time.");
+
+         if(!%isAdmin || (%isAdmin && %client.ForceVote))
+            %msg = %client.nameBase @ " initiated a vote to " @ (Game.LCTFOneMine == 0 ? "enable" : "disable") @ " one mine mode.";
 
 		case "showServerRules":
 			if (($Host::ServerRules[1] !$= "") && (!%client.CantView))
@@ -1220,7 +1212,8 @@ function DefaultGame::voteChangeTimeLimit( %game, %admin, %newLimit )
    {
       messageAll( 'MsgAdminForce', '\c2The Admin %2 changed the mission time limit to %1 minutes.', %display, %admin.name );
       $Host::TimeLimit = %newLimit;
-	  adminLog(%admin, " has changed the mission time limit to " @ %display @ " minutes.");
+	   adminLog(%admin, " has changed the mission time limit to " @ %display @ " minutes.");
+      $TimeLimitChanged = 1;
    }
    else
    {
@@ -1230,9 +1223,9 @@ function DefaultGame::voteChangeTimeLimit( %game, %admin, %newLimit )
       {
          messageAll('MsgVotePassed', '\c2The mission time limit was set to %1 minutes by vote.', %display);
          $Host::TimeLimit = %newLimit;
-		 // VoteOvertime
-		 ResetVOTimeChanged(%game);
-		 // Reset the voted time limit when changing mission
+         // VoteOvertime
+         ResetVOTimeChanged(%game);
+		   // Reset the voted time limit when changing mission
          $TimeLimitChanged = 1;
 
 		 //Log Vote %

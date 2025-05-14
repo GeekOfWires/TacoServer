@@ -279,7 +279,7 @@ function DefaultGame::flagColTest(%game, %flag, %rsTeam, %ext){
          if(%player.lastSim > 0 && (%player.getState() !$= "Dead")){// only check at speed
             //%fdot = vectorDot(vectorNormalize(%player.getVelocity()),vectorNormalize(VectorSub(%flagPos, %playerPos)));
             // %tickDist = vectorLen(%player.getVelocity()) * ($flagSimTime/1000);
-            %sweepCount = mFloor(vectorDist(%playerPos, %player.oldPos) + 1.5);
+            %sweepCount = mFloor(vectorDist(%playerPos, %player.oldPos) + 2);
             if((getSimTime() - %player.lastSim) <= 128){//make sure are last position is valid
                //schedule(1000,0,"drawBeamItem", %player.oldPos,%playerPos,15000);
                for(%i = 0; %i < %sweepCount; %i++){// sweep behind us to see if  we should have hit something

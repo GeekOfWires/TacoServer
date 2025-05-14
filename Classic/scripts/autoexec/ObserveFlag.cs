@@ -142,7 +142,7 @@ if (!isActivePackage(PizzaThings))
 
 function serverCmdObserveFirstFlag(%client)
 {
-  if(Game.class !$= CTFGame && Game.class !$= SCtFGame)
+   if(Game.class !$= CTFGame && Game.class !$= SCtFGame && Game.class !$= LCTFGame )
     return;
 
   // client must be an observer
@@ -160,7 +160,7 @@ function serverCmdObserveFirstFlag(%client)
 
 function serverCmdObserveSecondFlag(%client)
 {
-  if(Game.class !$= CTFGame && Game.class !$= SCtFGame)
+   if(Game.class !$= CTFGame && Game.class !$= SCtFGame && Game.class !$= LCTFGame )
     return;
 
   // client must be an observer
@@ -184,7 +184,7 @@ function observeFlag(%client, %target, %type, %flagTeam)
    if(!isObject(%client) || !isObject(%target) || !isObject(%client.camera))
      return;
 
-   if(Game.class !$= CTFGame && Game.class !$= SCtFGame)
+   if(Game.class !$= CTFGame && Game.class !$= SCtFGame && Game.class !$= LCTFGame )
      return;
 
    if(%client.team > 0)

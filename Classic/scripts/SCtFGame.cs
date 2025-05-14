@@ -427,8 +427,8 @@ function SCtFGame::playerTouchFlag(%game, %player, %flag)
    if ((%flag.carrier $= "") && (%player.getState() !$= "Dead"))
    {
       // z0dd - ZOD, 5/07/04. Cancel the lava return.
-      if(isEventPending(%obj.lavaEnterThread))
-         cancel(%obj.lavaEnterThread);
+      if(isEventPending(%flag.lavaEnterThread))
+         cancel(%flag.lavaEnterThread);
 
       //flag isn't held and has been touched by a live player
       if (%client.team == %flag.team)
