@@ -13383,7 +13383,6 @@ function dtPingStats(){
             %cl.dtStats.stat["idleTime"] += ($dtStats::prefTestTime/1000)/60;
          if(!%cl.isAIControlled()){
             %ping = %cl.getPing();
-            %cl.lastPing = %ping;
             %cl.pingTotal += %ping;
             %cl.pingCount++;
             %cl.dtStats.stat["pingAvg"] = %cl.pingTotal / %cl.pingCount;
