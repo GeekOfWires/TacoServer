@@ -23,6 +23,15 @@ exec("scripts/aiLCTF.cs");
 //exec the prefs
 //exec("prefs/LCTFPrefs.cs");
 
+//Time for auto overtime sudden-death mode
+$LCTF::Overtime = 5; //5 Minutes, 0 to disable
+//Damage scales for Chaingun and Grenade Launcher
+//1 = 100%, 0.85 = 85%, 0 = OFF, etc
+$LCTF::CGDamageScale = "0";
+$LCTF::GLDamageScale = "0";
+//Ban Mines
+$LCTF::BanMines = 0;
+
 function setArmorDefaults(%armor)
 {
    switch$ ( %armor )
@@ -57,7 +66,7 @@ function setArmorDefaults(%armor)
       $InvBanList[LCTF, "Mortar"] = 1;
       $InvBanList[LCTF, "SniperRifle"] = 1;
       // Misc
-      $InvBanList[LCTF, "Mine"] = 0;
+      $InvBanList[LCTF, "Mine"] = $LCTF::BanMines;
       $InvBanList[LCTF, "ConcussionGrenade"] = 0;
       $InvBanList[LCTF, "CameraGrenade"] = 1;
       $InvBanList[LCTF, "FlareGrenade"] = 1;
@@ -368,7 +377,22 @@ package LCTFGame
     //Take out anything vehicle related
 	function Armor::damageObject(%data, %targetObject, %sourceObject, %position, %amount, %damageType, %momVec, %mineSC)
 	{
-	   //error("Armor::damageObject( "@%data@", "@%targetObject@", "@%sourceObject@", "@%position@", "@%amount@", "@%damageType@", "@%momVec@" )");
+      //CG and GL Damage Scales
+      if($LCTF::CGDamageScale){
+         if(Game.class $= "LCTFGame" && %damageType $= $DamageType::Bullet){
+            %amount *= $LCTF::CGDamageScale;
+         }
+      }
+      if($LCTF::GLDamageScale){
+         if(isObject($LCTFLastExploded)){
+            %name = $LCTFLastExploded.getName();// find what what exploded last
+            if(Game.class $= "LCTFGame" && %name $= "BasicGrenade"){// BasicGrenade is the nade launcher
+               %amount *= $LCTF::GLDamageScale;
+            }
+         }
+      }
+
+      //error("Armor::damageObject( "@%data@", "@%targetObject@", "@%sourceObject@", "@%position@", "@%amount@", "@%damageType@", "@%momVec@" )");
 	   if(%targetObject.invincible || %targetObject.getState() $= "Dead")
 		  return;
 
@@ -474,6 +498,12 @@ package LCTFGame
 			playPain( %targetObject );
 		}
 	}
+
+   //Needed for Grenade Launcher type detection
+   function ProjectileData::onExplode(%data, %proj, %pos, %mod){
+      $LCTFLastExploded = %data;// record what exploded
+      parent::onExplode(%data, %proj, %pos, %mod);
+   }
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -672,8 +702,8 @@ function LCTFGame::playerTouchFlag(%game, %player, %flag)
    if ((%flag.carrier $= "") && (%player.getState() !$= "Dead"))
    {
       // z0dd - ZOD, 5/07/04. Cancel the lava return.
-      if(isEventPending(%obj.lavaEnterThread))
-         cancel(%obj.lavaEnterThread);
+      if(isEventPending(%flag.lavaEnterThread))
+         cancel(%flag.lavaEnterThread);
 
       //flag isn't held and has been touched by a live player
       if (%client.team == %flag.team)
@@ -683,6 +713,12 @@ function LCTFGame::playerTouchFlag(%game, %player, %flag)
    }
    // toggle visibility of the flag
    setTargetRenderMask(%flag.waypoint.getTarget(), %flag.isHome ? 0 : 1);
+
+   if( %player > 0 )
+   {
+      %player.setInvincibleMode(0 ,0.00);
+      %player.setInvincible( false ); // fire your weapon and your invincibility goes away.
+   }
 }
 
 function LCTFGame::playerTouchOwnFlag(%game, %player, %flag)
@@ -1511,14 +1547,77 @@ function LCTFGame::resetDontScoreTimer(%game, %team)
    $dontScoreTimer[%team] = false;
 }
 
+function LCTFGame::checkTimeLimit(%game, %forced)
+{
+   // Don't add extra checks:
+   if ( %forced )
+      cancel( %game.timeCheck );
+
+   // if there is no time limit, check back in a minute to see if it's been set
+   if(($Host::TimeLimit $= "") || $Host::TimeLimit == 0)
+   {
+      %game.timeCheck = %game.schedule(20000, "checkTimeLimit");
+      return;
+   }
+
+   %curTimeLeftMS = ($Host::TimeLimit * 60 * 1000) + $missionStartTime - getSimTime();
+
+   if (%curTimeLeftMS <= 0)
+   {
+      %teamOneCaps = mFloor($TeamScore[1] / %game.SCORE_PER_TEAM_FLAG_CAP);
+      %teamTwoCaps = mFloor($TeamScore[2] / %game.SCORE_PER_TEAM_FLAG_CAP);
+      if(%teamOneCaps == %teamTwoCaps && $LCTF::Overtime && $Host::TournamentMode){ //Setting exists
+         if(!%game.overtime){
+            %game.overtime = 1;
+            if($LCTF::Overtime > 1){ %s = "s"; }
+            messageAll('MsgOvertime', '\c2Sudden-Death Overtime Initiated: %1 Minute%2 Remaining~wfx/powered/turret_heavy_activate.wav', $LCTF::Overtime, %s);
+            echo("Sudden-Death Overtime Initiated");
+            UpdateClientTimes($LCTF::Overtime * 60 * 1000);
+            EndCountdown($LCTF::Overtime * 60 * 1000);
+            %game.timeCheck = %game.schedule($LCTF::Overtime * 60 * 1000, "timeLimitReached");
+         }
+      }
+      else{
+         if(%game.scheduleVote !$= ""){
+            if(!%game.voteOT){
+                    messageAll('MsgOvertime', '\c2Vote Overtime Initiated.~wfx/powered/turret_heavy_activate.wav');
+                    %game.voteOT = 1;
+                }
+         }
+         else{
+            %game.timeLimitReached();
+         }
+      }
+   }
+   else
+   {
+      if(%curTimeLeftMS >= 20000)
+         %game.timeCheck = %game.schedule(20000, "checkTimeLimit");
+      else
+         %game.timeCheck = %game.schedule(%curTimeLeftMS + 1, "checkTimeLimit");
+
+      //now synchronize everyone's clock
+      messageAll('MsgSystemClock', "", $Host::TimeLimit, %curTimeLeftMS);
+   }
+}
+
 function LCTFGame::checkScoreLimit(%game, %team)
 {
    %scoreLimit = MissionGroup.CTF_scoreLimit * %game.SCORE_PER_TEAM_FLAG_CAP;
    // default of 5 if scoreLimit not defined
    if(%scoreLimit $= "")
       %scoreLimit = 5 * %game.SCORE_PER_TEAM_FLAG_CAP;
-   if($TeamScore[%team] >= %scoreLimit)
-      %game.scoreLimitReached();
+   if(%game.overtime){
+      %teamOneCaps = mFloor($TeamScore[1] / %game.SCORE_PER_TEAM_FLAG_CAP);
+      %teamTwoCaps = mFloor($TeamScore[2] / %game.SCORE_PER_TEAM_FLAG_CAP);
+      if(%teamOneCaps !=  %teamTwoCaps){
+         %game.scoreLimitReached();
+      }
+   }
+   else{
+      if($TeamScore[%team] >= %scoreLimit)
+         %game.scoreLimitReached();
+      }
 }
 
 function LCTFGame::awardScoreFlagReturn(%game, %cl, %perc)
