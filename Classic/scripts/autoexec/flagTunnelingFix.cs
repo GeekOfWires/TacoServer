@@ -1,5 +1,6 @@
 //Fixes for collision tunneling and other issues, note only tested in classic
 //Script By:DarkTiger
+//v4.3   - logic rework remove any skips in the checks
 //v3.8 - removed sweep optimization/ bug fix in old method
 //v3.7 - removed bypass code
 //v3.6 - lctf and SCtFGame
@@ -31,6 +32,7 @@ $flagCheckRadius = 50;
 $playerSizeBox = "1.2 1.2 2.3";
 $flagBoxSize = "0.796666 0.139717 2.46029";
 
+$boxCollision = 0;
 //0 = old AABB method uses fixed box size makes the player bit narrow
 //1 = new OBB method uses perfect box intersection
 
@@ -189,43 +191,16 @@ package flagFix{
 };
 activatePackage(flagFix);
 
-function vectorMul(%a,%b){
-   %x = getWords(%a,0) * getWords(%b,0);
-   %y = getWords(%a,1) * getWords(%b,1);
-   %z = getWords(%a,2) * getWords(%b,2);
- return %x SPC %y SPC %z;
-}
-
 function generateBoxData(){
+   %halfSize = vectorScale($playerSizeBox, 0.5);
+   $plrBoxMin = getWords(VectorSub("0 0 0", %halfSize),0,1) SPC 0;
+   $plrBoxMax =  getWords(%halfSize,0,1) SPC getWord($playerSizeBox,2);
+   $plrBox = $plrBoxMin SPC $plrBoxMax;
 
-   %playerSize = $playerSizeBox; //"1.2 1.2 2.3";
-   %halfSize = vectorMul(%playerSize, "0.5 0.5 0");
-   $plrBoxMin = %minA = VectorSub("0 0 0", %halfSize);
-   $plrBoxMax = %maxA = getWords(%halfSize,0,1) SPC getWord(%playerSize,2);
-   $plrBox = %minA SPC %maxA;
-   %vSubA = vectorSub(%maxA, %minA);
-
-   %flagSize = $flagBoxSize;
-   %halfSize = vectorMul(%flagSize, "0.5 0.5 0");
-   $flagBoxMin = %minB = VectorSub("0 0 -0.1", %halfSize);
-   $flagBoxMax = %maxB = getWords(%halfSize,0,1) SPC getWord(%flagSize,2);
-   $flagBox = %minB SPC %maxB;
-   %vSubB = vectorSub(%maxB, %minB);
-
-   %box[0] = "0 0 0";
-   %box[1] = "1 0 0";
-   %box[2] = "0 1 0";
-   %box[3] = "1 1 0";
-   %box[4] = "0 0 1";
-   %box[5] = "1 0 1";
-   %box[6] = "0 1 1";
-   %box[7] = "1 1 1";
-
-   for(%i = 0; %i < 8; %i++){
-      $playerBoxData[%i] = vectorAdd(%minA, vectorMul(%vSubA, %box[%i]));
-      $flagBoxData[%i] =   vectorAdd(%minB, vectorMul(%vSubB, %box[%i]));
-   }
-
+   %halfSize = vectorScale($flagBoxSize, 0.5);
+   $flagBoxMin = getWords(VectorSub("0 0 0", %halfSize),0,1) SPC 0;
+   $flagBoxMax = getWords(%halfSize,0,1) SPC getWord($flagBoxSize,2);
+   $flagBox = $flagBoxMin SPC $flagBoxMax;
 }generateBoxData();
 
 function vectorLerp(%point1, %point2, %t) {
@@ -233,7 +208,8 @@ function vectorLerp(%point1, %point2, %t) {
 }
 
 function boxIntersectAABB(%plr, %flg, %lerpPos){
-   if($boxCollision == 2){
+   %testMode = 0;
+   if(%testMode == 1){
       %fpos = %flg.getPosition();
 
       %a = vectorAdd($plrBoxMin, %lerpPos) SPC vectorAdd($plrBoxMax, %lerpPos);
@@ -250,7 +226,7 @@ function boxIntersectAABB(%plr, %flg, %lerpPos){
          (getWord(%a, 2)<= getWord(%b, 5) && getWord(%a, 5) >= getWord(%b, 2));
 }
 
-function DefaultGame::flagColTest(%game, %flag, %rsTeam, %ext){
+function DefaultGame::flagColTest(%game, %flag, %rsTeam,%fc){
 ////////////////////////////////////////////////////////////////////////////////
 //obj tunneling check
    %flagPos = %flag.getPosition();
@@ -273,37 +249,32 @@ function DefaultGame::flagColTest(%game, %flag, %rsTeam, %ext){
    InitContainerRadiusSearch( %flagPos, $flagCheckRadius, $TypeMasks::PlayerObjectType);
    while((%player = containerSearchNext()) != 0){
       %playerPos = %player.getPosition();
-      //%rot = getWords(%player.getTransform(),3,6);
-      if((%rsTeam && %flag.team != %player.team) || !%rsTeam || %player == %ext){
-         %flagDist = vectorDist(%flagPos, %playerPos);
-         if(%player.lastSim > 0 && (%player.getState() !$= "Dead")){// only check at speed
-            //%fdot = vectorDot(vectorNormalize(%player.getVelocity()),vectorNormalize(VectorSub(%flagPos, %playerPos)));
-            // %tickDist = vectorLen(%player.getVelocity()) * ($flagSimTime/1000);
-            %sweepCount = mFloor(vectorDist(%playerPos, %player.oldPos) + 2);
-            if((getSimTime() - %player.lastSim) <= 128){//make sure are last position is valid
-               //schedule(1000,0,"drawBeamItem", %player.oldPos,%playerPos,15000);
-               for(%i = 0; %i < %sweepCount; %i++){// sweep behind us to see if  we should have hit something
-                  %lerpPos = vectorLerp(%playerPos, %player.oldPos, %i/(%sweepCount-1));//back sweep
-                  //%point = MatrixMulPoint(%lerpPos SPC %rot, "-0.6 -0.6 0");
-                  //schedule(1000+(%i*128), 0, "drawBoxItemC", %point, %rot, "1.2 1.2 2.3", 15000);
-                  if($boxCollision == 1 && boxIntersect(%player, %flag, %lerpPos)){
-                    // %point = MatrixMulPoint(%flagPos SPC %rot,"-0.398 -0.069 0");
-                    // schedule(1000+(%i*128), 0, "drawBoxItemC", %point, %rot, "0.796666 0.139717 4", 15000);
-                     %flag.getDataBlock().onCollision(%flag, %player);
-                     break;
-                  }
-                  else if(!$boxCollision && boxIntersectAABB(%player, %flag, %lerpPos)){
-                     %flag.getDataBlock().onCollision(%flag, %player);
-                     break;
-                  }
-               }
+      //%toPlayer = vectorNormalize(vectorSub(%flagPos,%playerPos));
+      //%moveDir = vectorNormalize(%player.getVelocity());
+      //%d = vectorDot( %toPlayer, %moveDir );
+      if(((%flag.team != %player.team) || !%rsTeam || %fc == %player) && %player.getState() !$= "Dead"){
+         //%futurePos = vectorAdd(%playerPos, vectorScale(%player.getVelocity(), $flagSimTime / 1000));
+         if(%player.lastSim[%flag] $= "" || (getSimTime() - %player.lastSim[%flag]) >= 128){
+            %lastPos = vectorSub(%playerPos, vectorScale(%player.getVelocity(), $flagSimTime / 1000));
+            %player.oldPos[%flag] = %lastPos;// old data so lets do it velocity based
+         }
+         %sweepCount = mFloor(vectorDist(%playerPos, %player.oldPos[%flag]) + 1);// min of 2
+         for(%i = 0; %i < %sweepCount; %i++){// sweep behind us to see if  we should have hit something
+            %lerpPos = vectorLerp(%playerPos, %player.oldPos[%flag], %i/(%sweepCount-1));//back sweep
+            if($boxCollision == 1 &&  boxIntersect(%player, %flag, %lerpPos)){
+               %flag.getDataBlock().onCollision(%flag, %player);
+               break;
+            }
+            else if(!$boxCollision && boxIntersectAABB(%player, %flag, %lerpPos)){
+               %flag.getDataBlock().onCollision(%flag, %player);
+               //error("hit" SPC %player.count++);
+               break;
             }
          }
       }
-      %player.oldPos = %playerPos;
-      %player.lastSim = getSimTime();
+      %player.oldPos[%flag] = %playerPos;
+      %player.lastSim[%flag] = getSimTime();
    }
-   //error("scan count" SPC %scanCount SPC %scanPlrCount);
 }
 
 function DefaultGame::atHomeFlagLoop(%game){
@@ -321,13 +292,16 @@ function DefaultGame::atHomeFlagLoop(%game){
          %game.flagResetTime += $flagSimTime;
       }
 
+      //%game.flagColTest($TeamFlag[1]);
+      //%game.flagColTest($TeamFlag[2]);
+
       if($TeamFlag[1].isHome && $TeamFlag[2].isHome){//11
          %game.flagColTest($TeamFlag[1],1,0);// only look at the other team
          %game.flagColTest($TeamFlag[2],1,0);// only look at the other team
       }
       else if(!$TeamFlag[1].isHome && $TeamFlag[2].isHome){//01
          if(isObject($TeamFlag[1].carrier)){// flag has been dropped
-            %game.flagColTest($TeamFlag[2],1, $TeamFlag[1].carrier); //scan for other team expect for are carrier
+            %game.flagColTest($TeamFlag[2],1,$TeamFlag[1].carrier); //scan for other team expect for are carrier
          }
          else{
             %game.flagColTest($TeamFlag[1],0,0);// scan for everyone can touch it
@@ -336,7 +310,7 @@ function DefaultGame::atHomeFlagLoop(%game){
       }
       else if($TeamFlag[1].isHome && !$TeamFlag[2].isHome){//10
          if(isObject($TeamFlag[2].carrier)){// flag has been dropped
-            %game.flagColTest($TeamFlag[1],1, $TeamFlag[2].carrier); //scan for other team expect for are carrier
+            %game.flagColTest($TeamFlag[1],1,$TeamFlag[2].carrier); //scan for other team expect for are carrier
          }
          else{
             %game.flagColTest($TeamFlag[1],1,0);// team 1 flag is still at home so  only scan for the other team
@@ -345,10 +319,10 @@ function DefaultGame::atHomeFlagLoop(%game){
       }
       else if(!$TeamFlag[1].isHome && !$TeamFlag[2].isHome){//00
          if(!isObject($TeamFlag[1].carrier)){// flag has been dropped
-            %game.flagColTest($TeamFlag[1],0,0);// scan for everyone can touch it
+            %game.flagColTest($TeamFlag[1],0);// scan for everyone can touch it
          }
          if(!isObject($TeamFlag[2].carrier)){// flag has been dropped
-            %game.flagColTest($TeamFlag[2],0,0);// scan for everyone can touch it
+            %game.flagColTest($TeamFlag[2],0);// scan for everyone can touch it
          }
       }
    }
