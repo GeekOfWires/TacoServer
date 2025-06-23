@@ -1266,8 +1266,9 @@ function CTFGame::checkTimeLimit(%game, %forced)
    {
       %teamOneCaps = mFloor($TeamScore[1] / %game.SCORE_PER_TEAM_FLAG_CAP);
       %teamTwoCaps = mFloor($TeamScore[2] / %game.SCORE_PER_TEAM_FLAG_CAP);
-      if(%teamOneCaps == %teamTwoCaps && $CTF::Overtime && $Host::TournamentMode){ //Setting exists
-         if(!%game.overtime){
+      if(%teamOneCaps == %teamTwoCaps && $CTF::Overtime && (($TeamRank[1, count] + $TeamRank[2, count]) > 6)){
+         if(!%game.overtime)
+         {
             %game.overtime = 1;
             if($CTF::Overtime > 1){ %s = "s"; }
             messageAll('MsgOvertime', '\c2Sudden-Death Overtime Initiated: %1 Minute%2 Remaining~wfx/powered/turret_heavy_activate.wav', $CTF::Overtime, %s);
@@ -1277,14 +1278,15 @@ function CTFGame::checkTimeLimit(%game, %forced)
             %game.timeCheck = %game.schedule($CTF::Overtime * 60 * 1000, "timeLimitReached");
          }
       }
-      else{
-         if(%game.scheduleVote !$= ""){
-            if(!%game.voteOT){
-                    messageAll('MsgOvertime', '\c2Vote Overtime Initiated.~wfx/powered/turret_heavy_activate.wav');
-                    %game.voteOT = 1;
-                }
+      else
+      {
+         if(%game.scheduleVote !$= "" && !%game.voteOT)
+         {
+            messageAll('MsgOvertime', '\c2Vote Overtime Initiated.~wfx/powered/turret_heavy_activate.wav');
+            %game.voteOT = 1;
          }
-         else{
+         else
+         {
             %game.timeLimitReached();
          }
       }
