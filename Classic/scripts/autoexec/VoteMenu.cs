@@ -867,7 +867,7 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
             messageClient(%client, "", "\c2Mines are disabled at this time.");
 
          if(!%isAdmin || (%isAdmin && %client.ForceVote))
-            %msg = %client.nameBase @ " initiated a vote to " @ (Game.LCTFOneMine == 0 ? "enable" : "disable") @ " one mine mode.";
+            %msg = %client.nameBase @ " initiated a vote to " @ (Game.LCTFOneMine == 1 ? "enable" : "disable") @ " one mine mode.";
 
 		case "showServerRules":
 			if (($Host::ServerRules[1] !$= "") && (!%client.CantView))
