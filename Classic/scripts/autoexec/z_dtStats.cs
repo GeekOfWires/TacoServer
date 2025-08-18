@@ -1,4 +1,5 @@
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	Stats system for classic and base
 //	Script BY: DarkTiger
@@ -15,7 +16,7 @@
 // Note See bottom of file for full log
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //-----------Settings-----------
-$dtStats::version = 10.58;
+$dtStats::version = 10.59;
 //disable stats system
 $dtStats::Enable = $Host::dtStatsEnable $= "" ? ($Host::dtStatsEnable = 1) : $Host::dtStatsEnable;
 if(!$dtStats::Enable){ return;}// so it disables with a restart
@@ -1862,6 +1863,8 @@ $statsName["discKillGroundTG"] = "Ground Disc Kills" TAB "Total";
 $statsName["WLRAvg"] = "Win Loss Ratio" TAB "Average";
 $statsName["roundsWonTG"] = "Rounds Won"  TAB "Total";
 $statsName["hatTricksTG"] = "Hat Tricks"  TAB "Total";
+$statsName["OffKillsTG"] = "Offensive Kills" TAB "Total";
+$statsName["DefKillsTG"] = "Defensive Kills" TAB "Total";
 
 $panelCount = 0;
 $upperWepPanel[$panelCount, "CTFGame"] = "discMAHitDistMax";     $upperWepPanel[$panelCount++, "CTFGame"] = "plasmaMAHitDistMax";$upperWepPanel[$panelCount++, "CTFGame"] = "blasterMAHitDistMax";
@@ -16456,7 +16459,7 @@ function genBigStats(%game, %lType, %mon, %year){
       %year = 2024;
    }
    %callCount = 0;
-   %callTime = 16;
+   %callTime = 32;
    deleteVariables("$textColor*");
    %mainXSize =1860;
    %mainySize = 1115;
@@ -16688,7 +16691,7 @@ function genMapStatsImg(%game,%count){
       return;
    }
    %callCount = 0;
-   %callTime = 16;
+   %callTime = 32;
    deleteVariables("$textColor*");
    %mainXSize =1860;
    %mainySize = 1115;
@@ -16955,12 +16958,12 @@ function imgCycle3(%img, %count){
    }
    %img.yc++;
    if(%img.yc < %img.y)
-      schedule(32,0,"imgCycle3",%img);
+      schedule(32,0,"imgCycle3",%img, %count);
    else{
      %img.close();
      %img.delete();
      deleteVariables("$textColor*");
-     error("Stats Image Done");
+     error("Stats Image Done" SPC %count);
      genBigMapStats(%count++);
    }
 }
@@ -17202,7 +17205,7 @@ function renderArenaMapTextTM(%id){
    %sizeX = 1280+20;
    %sizeY = 810;
 
-   %callTime = 8;
+   %callTime = 32;
    %spaceing = 20;
    %justLeft = 355;
    %justLeft2 = 55;
@@ -17979,7 +17982,7 @@ function renderLCTFMapTextTM(%id){
    %sizeX = 1280+20;
    %sizeY = 810;
 
-   %callTime = 8;
+   %callTime = 32;
    %spaceing = 20;
    %justLeft = 355;
    %justLeft2 = 55;
@@ -18756,7 +18759,7 @@ function renderCTFMapTextTM(%id){
    %sizeX = 1280+20;
    %sizeY = 1115;
 
-   %callTime = 8;
+   %callTime = 32;
    %spaceing = 20;
    %justLeft = 355;
    %justLeft2 = 55;
@@ -19804,6 +19807,12 @@ function dtBuildMissionList(%reset){
             }
             else if ( getSubStr( %line, 0, 18 ) $= "// MissionTypes = " ){
                %typeList = getSubStr( %line, 18, 1000 );
+               if(strstr(%typeList,"CTF") != -1 && strstr(%typeList,"LCTF") == -1){
+                  %typeList = %typeList SPC "LCTF";
+               }
+               if(strstr(%typeList,"CTF") != -1 && strstr(%typeList,"SCtF") == -1){
+                  %typeList = %typeList SPC "SCtF";
+               }
                break;
             }
          }
