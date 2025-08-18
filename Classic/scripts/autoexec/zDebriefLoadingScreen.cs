@@ -51,7 +51,7 @@
 
 // First Screen loading time (Map Screen)
 // If this is set too low the second screen wont show at all
-$dtLoadingScreen::FirstScreen = 5500;
+$dtLoadingScreen::FirstScreen = 3000;
 // Second Screen Delay
 $dtLoadingScreen::Delay = 0;
 
@@ -149,6 +149,10 @@ if (!isActivePackage(LoadScreenPackage) && $Host::LoadingScreenUseDebrief)
 // Just make our own
 function ALTsendModInfoToClient(%client)
 {
+	if(%client.isReady){
+		return;
+	}
+
 	// Wont allow Debrief on consecutive map loads
 	if(%client.loaded)
 	{
