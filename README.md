@@ -45,19 +45,20 @@ Discord: [Tribes 2 Discord](https://playt2.com/discord)
 ---
 
 ### Important Gameplay Changes over stock classic
- - OG blaster buffed for Heavy Armors
- - No Vehicle Zone around flag is bigger 5 >> 15
- - Heavy Shield Nerfed (54 to block 1 DMG, is now 60)
+ - OG blaster buffed against Heavy Armors (Not Tournament Mode Only)
  - Max FOV 120 >> 138 (For Wide Screens)
- - Item respawn time can be changed (default 30)
- - Cloak Sound 50m >> 55m
- - Bigger ground dust puffs (For cloak) 0.4 larger
- - Sensor Jammer jam radius is buffed to jam cloaks 30 >> 45
- - Sensor Jammer can passively see cloaker's triangle
- - Mortor reload rework (Player can throw, but must wait until reload time has passed)
- - Tank Shield Nerf (135 to block 1 DMG, is now 142)
- - Whiteout grenades are less seizurely (Due to spamming) 0.9 >> 0.78
- - All water viscosity follows a global preset
+ - Item respawn time can be changed (Optional)
+ - All water viscosity follows a global preset (3)
+ - <del>No Vehicle Zone around flag is bigger 5 >> 15</del>
+ - <del>Heavy Shield Nerfed (54 to block 1 DMG, is now 60)</del>
+ - <del>Cloak Sound 50m >> 55m</del>
+ - <del>Bigger ground dust puffs (For cloak) 0.4 larger</del>
+ - <del>Sensor Jammer jam radius is buffed to jam cloaks 30 >> 45</del>
+ - <del>Sensor Jammer can passively see cloaker's triangle</del>
+ - <del>Mortor reload rework (Player can throw, but must wait until reload time has passed)</del>
+ - <del>Tank Shield Nerf (135 to block 1 DMG, is now 142)</del>
+ - <del>Whiteout grenades are less seizurely (Due to spamming) 0.9 >> 0.78</del>
+ - <del>Spawn fade-in effect</del>
 
 ---
 

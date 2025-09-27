@@ -64,7 +64,7 @@ datablock ItemData(SensorJammerPack)
 };
 
 
-datablock SensorData(JammerSensorObjectPassive)		//v2 was commented out...
+datablock SensorData(JammerSensorObjectPassive)
 {
 	// same detection info as 'PlayerObject' sensorData
 	detects = true;
@@ -76,7 +76,7 @@ datablock SensorData(JammerSensorObjectPassive)		//v2 was commented out...
 	detectFOVPercent = 1.3;
 	useObjectFOV = true;
 
-	detectscloaked = 1;			//v2
+	//detectscloaked = 1;			//v2
 
 	jams = true;
 	jamsOnlyGroup = true;
@@ -96,52 +96,55 @@ datablock SensorData(JammerSensorObjectActive)
    detectFOVPercent = 1.3;
    useObjectFOV = true;
 
-   detectscloaked = 1;			//v2
+   //detectscloaked = 1;			//v2
 
    jams = true;
    jamsOnlyGroup = true;
    jamsUsingLOS = true;
-   jamRadius = 45; //was 30
+   jamRadius = 30;
 };
 
 function SensorJammerPackImage::onMount(%data, %obj, %slot)
 {
-   setTargetSensorData(%obj.client.target, JammerSensorObjectPassive);		//v2
-   %obj.setImageTrigger(%slot, false);
-   commandToClient( %obj.client, 'setSenJamIconOff' );
-   %obj.setJammerFX(false);
+    setTargetSensorData(%obj.client.target, JammerSensorObjectPassive);
 }
 
-function deactivateJammer(%data, %obj, %slot)
+function SensorJammerPackImage::onUnmount(%data, %obj, %slot)
 {
-	SensorJammerPackImage::onDeactivate(%data, %obj, %slot);
-}
-
-function SensorJammerPackImage::onUnmount(%data, %obj, %slot)	//v2
-{
-    %obj.setImageTrigger(%slot, false);
     setTargetSensorData(%obj.client.target, PlayerSensor);
+    %obj.setImageTrigger(%slot, false);
 }
 
 function SensorJammerPackImage::onActivate(%data, %obj, %slot)
 {
    messageClient(%obj.client, 'MsgSensorJammerPackOn', '\c2Sensor jammer pack on.');
    setTargetSensorData(%obj.client.target, JammerSensorObjectActive);
+   // z0dd - ZOD, 9/29/02. Removed T2 demo code from here
    commandToClient( %obj.client, 'setSenJamIconOn' );
+
    %obj.setJammerFX( true );
 }
 
 function SensorJammerPackImage::onDeactivate(%data, %obj, %slot)
 {
    messageClient(%obj.client, 'MsgSensorJammerPackOff', '\c2Sensor jammer pack off.');
-   setTargetSensorData(%obj.client.target, PlayerSensor);		//v2 H bug fix
    %obj.setImageTrigger(%slot, false);
-   setTargetSensorData(%obj.client.target, JammerSensorObjectPassive);		//v2 was PlayerSensor
+
+   // ----------------------------------------------------------------------
+   // z0dd - ZOD, 4/25/02. This function is actually getting called AFTER 
+   // ::onUnmount. We must check to see what the players current sensor data
+   // is, then if it is NOT PlayerSensor, set to passive jam, bug fix.
+   if(getTargetSensorData(%obj.client.target).getName() !$= "PlayerSensor")
+      setTargetSensorData(%obj.client.target, JammerSensorObjectPassive);
+   // ----------------------------------------------------------------------
+
+   // z0dd - ZOD, 9/29/02. Removed T2 demo code from here
    commandToClient( %obj.client, 'setSenJamIconOff' );
+
    %obj.setJammerFX( false );
 }
-
-function SensorJammerPack::onPickup(%this, %obj, %shape, %amount)
-{
-//Nope
-}
+// z0dd - ZOD, 5/18/03. Removed functions, created parent. Streamline.
+//function SensorJammerPack::onPickup(%this, %obj, %shape, %amount)
+//{
+   // created to prevent console errors
+//}

@@ -3,6 +3,37 @@
 //--------------------------------------
 
 //--------------------------------------------------------------------------
+// Force-Feedback Effects
+//--------------------------------------
+datablock EffectProfile(MissileSwitchEffect)
+{
+   effectname = "weapons/missile_launcher_activate";
+   minDistance = 2.5;
+   maxDistance = 2.5;
+};
+
+datablock EffectProfile(MissileFireEffect)
+{
+   effectname = "weapons/missile_fire";
+   minDistance = 2.5;
+   maxDistance = 5.0;
+};
+
+datablock EffectProfile(MissileDryFireEffect)
+{
+   effectname = "weapons/missile_launcher_dryfire";
+   minDistance = 2.5;
+   maxDistance = 2.5;
+};
+
+datablock EffectProfile(MissileExplosionEffect)
+{
+   effectname = "explosions/explosion.xpl23";
+   minDistance = 10;
+   maxDistance = 30;
+};
+
+//--------------------------------------------------------------------------
 // Sounds
 //--------------------------------------
 datablock AudioProfile(MissileSwitchSound)
@@ -10,6 +41,7 @@ datablock AudioProfile(MissileSwitchSound)
    filename    = "fx/weapons/missile_launcher_activate.wav";
    description = AudioClosest3d;
    preload = true;
+   effect = MissileSwitchEffect;
 };
 
 datablock AudioProfile(MissileFireSound)
@@ -17,6 +49,7 @@ datablock AudioProfile(MissileFireSound)
    filename    = "fx/weapons/missile_fire.WAV";
    description = AudioDefault3d;
    preload = true;
+   effect = MissileFireEffect;
 };
 
 datablock AudioProfile(MissileProjectileSound)
@@ -45,6 +78,7 @@ datablock AudioProfile(MissileExplosionSound)
    filename    = "fx/explosions/explosion.xpl23.wav";
    description = AudioBIGExplosion3d;
    preload = true;
+   effect = MissileExplosionEffect;
 };
 
 datablock AudioProfile(MissileDryFireSound)
@@ -52,6 +86,7 @@ datablock AudioProfile(MissileDryFireSound)
    filename    = "fx/weapons/missile_launcher_dryfire.wav";
    description = AudioClose3d;
    preload = true;
+   effect = MissileDryFireEffect;
 };
 
 
@@ -727,9 +762,9 @@ datablock ShapeBaseImageData(MissileLauncherImage)
    stateSequence[0]                 = "Activate";
    stateSound[0]                    = MissileSwitchSound;
 
-   stateName[1] = "ActivateReady";
-   stateTransitionOnAmmo[1] = "Ready";
-   stateTransitionOnNoAmmo[1] = "FirstLoad";
+   stateName[1]                     = "ActivateReady";
+   stateTransitionOnLoaded[1]       = "Ready";
+   stateTransitionOnNoAmmo[1]       = "NoAmmo";
 
    stateName[2]                     = "Ready";
    stateTransitionOnNoAmmo[2]       = "NoAmmo";
@@ -792,9 +827,6 @@ datablock ShapeBaseImageData(MissileLauncherImage)
    stateSequence[10]                = "Fire";
    stateScript[10]                  = "onDumbFire";
    stateSound[10]                   = MissileFireSound;
-   
-   stateName[11] = "FirstLoad";
-   stateTransitionOnAmmo[11] = "Ready";
 };
 
 function MissileLauncherImage::onDumbFire(%data,%obj,%slot)
@@ -814,43 +846,4 @@ function MissileLauncherImage::onDumbFire(%data,%obj,%slot)
 
    %obj.decInventory(%data.ammo, 1);
    return %p;
-}
-function MissileLauncherImage::onUnmount(%this,%obj,%slot){
-   parent::onUnmount(%this,%obj,%slot);
-   if(isEventPending(%obj.reloadDelaySch))
-      cancel(%obj.reloadDelaySch);  
-}
-function MissileLauncherImage::onMount(%this,%obj,%slot){
-      
-   if(%obj.getClassName() !$= "Player")
-      return;
-
-   if (%this.armthread $= "")
-      %obj.setArmThread(look);
-   else
-      %obj.setArmThread(%this.armThread);
-
-   if(%obj.getMountedImage($WeaponSlot).ammo !$= ""){
-      if (%obj.getInventory(%this.ammo)){
-         
-         %fireAndReloadTime = mFloor((%this.stateTimeoutValue[4] + %this.stateTimeoutValue[3]) * 1000);
-         
-         if(%obj.lfireTime[%this.getName()] && (getSimTime() - %obj.lfireTime[%this.getName()]) < %fireAndReloadTime){
-            if(isEventPending(%obj.reloadDelaySch)){
-              cancel(%obj.reloadDelaySch);  
-            }
-            %time = mFloor(%fireAndReloadTime - (getSimTime() - %obj.lfireTime[%this.getName()]));
-            %obj.reloadDelaySch = schedule(%time, 0, "ammoStateDelay", %obj, %slot, true);
-         }
-         else{
-            %obj.setImageAmmo(%slot,true);
-         }
-      }
-   }
-   
-   %obj.client.setWeaponsHudActive(%this.item);
-   if(%obj.getMountedImage($WeaponSlot).ammo !$= "")
-      %obj.client.setAmmoHudCount(%obj.getInventory(%this.ammo));
-   else
-      %obj.client.setAmmoHudCount(-1);  
 }

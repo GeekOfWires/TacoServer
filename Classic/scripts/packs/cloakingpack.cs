@@ -34,7 +34,7 @@ datablock AudioDescription(CloakLooping3d)
 
    is3D     = true;
    minDistance= 10.0;
-   MaxDistance= 55.0; //Was 50
+   MaxDistance= 50.0;
    type     = $EffectAudioType;
    environmentLevel = 1.0;
 };
