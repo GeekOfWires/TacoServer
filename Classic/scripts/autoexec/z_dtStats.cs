@@ -16,7 +16,7 @@
 // Note See bottom of file for full log
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //-----------Settings-----------
-$dtStats::version = 10.59;
+$dtStats::version = 10.60;
 //disable stats system
 $dtStats::Enable = $Host::dtStatsEnable $= "" ? ($Host::dtStatsEnable = 1) : $Host::dtStatsEnable;
 if(!$dtStats::Enable){ return;}// so it disables with a restart
@@ -13981,8 +13981,10 @@ package dtBanSys{
 
    //Reapply the gag
    function GameConnection::onConnect( %client, %name, %raceGender, %skin, %voice, %voicePitch ){
+      if (banList_checkClient(%client, getField(%client.t2csri_authInfo, 3))){
+         return 0;
+      }
       parent::onConnect( %client, %name, %raceGender, %skin, %voice, %voicePitch );
-
       %client.isGagged = ($chatGagged[getClientCleanIP(%client)]  || $chatGagged[%client.guid]); //restore status
    }
 
@@ -13991,7 +13993,8 @@ package dtBanSys{
       %time = (%time $= "") ? 100000 : %time;
       %name = getClientBanName(%guid, %ipAddress);
       %bareIP = getCleanIP(%ipAddress);
-      if(!isObject($dtBanTemp::GUID[%guid]) && !isObject($dtBanTemp::GUID[%bareIP])){
+      //error("GUID" SPC %guid SPC "IP" SPC %bareIP);
+      if(!isObject($dtBanTemp::GUID[%guid]) && !isObject($dtBanTemp::IP[%bareIP])){
          if(!isObject(dtBanList)){
             new simGroup(dtBanList);
             RootGroup.add(dtBanList);
@@ -14001,64 +14004,20 @@ package dtBanSys{
             name = %name;
             guid = %guid;
             ip =  %bareip;
-            banDateTime = dtMarkDate();
+            banDateTime = dtMarkDate(); 
             banLengthMin = %time;
          };
          dtBanList.add(%banObj);
-         if(!%bareIP)
+         if(%bareIP !$= "0")
             $dtBanTemp::IP[%bareIP] = %banObj;
          if(%guid){
             $dtBanTemp::GUID[%guid] = %banObj;
             rmvWhiteListGuid(%guid);
          }
       }
-      if(isObject($dtBanTemp::GUID[%guid]) && !isObject($dtBanTemp::GUID[%bareIP])){
-         %obj = $dtBanTemp::GUID[%guid];
-         %obj.ip = %bareIP;
-      }
-      else if(isObject($dtBanTemp::GUID[%bareIP]) && !isObject($dtBanTemp::GUID[%guid])){
-         %obj = $dtBanTemp::GUID[%bareIP];
-         %obj.guid = %guid;
-      }
-
       saveBanList();
    }
 
-   function banList_checkIP(%client){
-      %ip = getClientCleanIP(%client);
-      %obj = $dtBanTemp::IP[%ip];
-      if(isObject(%obj) && %obj.banDateTime > 0){
-         %delta =  getTimeDelta(%obj.banDateTime);
-         if (%delta < %obj.banLengthMin){
-            pushFailJoin(%obj.name, %obj.gui, 0, "Kick/Ban" SPC %obj.banDateTime - %delta SPC "Minutes Left", 1);
-            return 1;
-         }
-         else{
-            unbanUserObj(%obj);
-         }
-      }
-      return 0;
-   }
-
-   // from tribes next did not want to override this but need to pass %client id into ban check to avoid wierd issues
-   function serverCmdt2csri_challengeResponse(%client, %serverChallenge){
-      if (%client.doneAuthenticating)
-         return;
-
-      if (%client.t2csri_serverChallenge $= %serverChallenge){
-         // check to see if the client is GUID banned, now that we verified their certificate
-         if (banList_checkClientGUID(%client, getField(%client.t2csri_authInfo, 3))){
-            return;
-         }
-
-         // client checks out... continue loading sequence
-         %client.onConnect(%client.tname, %client.trgen, %client.tskin, %client.tvoic, %client.tvopi);
-      }
-      else{
-         %client.setDisconnectReason("Invalid server challenge. Check your account key for corruption.");
-         %client.delete();
-      }
-   }
 };
 
 function dtIsAdmin(%client,%guid){
@@ -14082,10 +14041,12 @@ function dtIsAdmin(%client,%guid){
    return false;
 }
 
-
-
-function banList_checkClientGUID(%client, %guid){// only one we care about in whitelist mode
-   %obj = $dtBanTemp::GUID[%guid];
+function banList_checkClient(%client, %guid){// only one we care about in whitelist mode
+   //error("banlist check" SPC "client" SPC  %client SPC "Guid" SPC %guid);
+   %objA = $dtBanTemp::GUID[%guid];
+   %ip = getClientCleanIP(%client);
+   %objB = $dtBanTemp::IP[%ip];
+   %obj = (isObject(%objA) ==  1) ? %objA : %objB;
    if (isObject(%obj) && %obj.banDateTime > 0){
       %delta =  getTimeDelta(%obj.banDateTime);
       if (%delta < %obj.banLengthMin){
@@ -14099,29 +14060,30 @@ function banList_checkClientGUID(%client, %guid){// only one we care about in wh
          unbanUserObj(%obj);
       }
    }
+   if(isObject(%objA)){
+      %realName = getField(%client.t2csri_authInfo, 0 );
+      if(%realName !$= "")
+         %name = trim(%realName);
+      else
+         %name = trim(stripChars( detag( getTaggedString( %fc.name ) ), "\cp\co\c6\c7\c8\c9\c0" ));
 
-   %realName = getField(%client.t2csri_authInfo, 0 );
-   if(%realName !$= "")
-      %name = trim(%realName);
-   else
-      %name = trim(stripChars( detag( getTaggedString( %fc.name ) ), "\cp\co\c6\c7\c8\c9\c0" ));
+      %safe = ( dtIsAdmin(%client,%guid) || isObject($dtWhtList::WhiteList[%guid]));
+      if(!%safe){
+         pushFailJoin(%name, %guid, 0, "Not Whitelisted", 0);
+         if($dtServerVars::WhiteListMode){
+            %client.setDisconnectReason("Server is locked, please message admin or wait for approval");
+            %client.delete();
+            return 1;
+         }
+      }
 
-   %safe = ( dtIsAdmin(%client,%guid) || isObject($dtWhtList::WhiteList[%guid]));
-   if(!%safe){
-      pushFailJoin(%name, %guid, 0, "Not Whitelisted", 0);
-      if($dtServerVars::WhiteListMode){
-         %client.setDisconnectReason("Server is locked, please message admin or wait for approval");
+     // this is here in case of banned ip is a whitelisted account
+      if($dtServerVars::IPBanListMode && $dtIPList[%ip] && !isObject($dtWhtList::WhiteList[%guid])){
+         pushFailJoin(%name, %client.guid, %ip, "IP Ban List", 2);
+         %client.setDisconnectReason("You are not allowed to play on this server.");
          %client.delete();
          return 1;
       }
-   }
-
-   %ip = getClientCleanIP(%client);// this is here in case of banned ip is a whitelisted account
-   if($dtServerVars::IPBanListMode && $dtIPList[%ip] && !isObject($dtWhtList::WhiteList[%guid])){
-      pushFailJoin(%name, %client.guid, %ip, "IP Ban List", 2);
-      %client.setDisconnectReason("You are not allowed to play on this server.");
-      %client.delete();
-      return 1;
    }
    return 0;
 }
@@ -20571,16 +20533,17 @@ function mapCyleTest(){
 //    Added custom two team debrief as well as a evo style extended stats
 //    Reworked enable disable, only disables stats saving and stats access, do to systems relying on systems
 //
-//    10.1 - 10.2 - 10.3
+//    10.1 - 10.2 - 10.3 - 10.6
 //    Ban system changes
 //    Fix bad loop in ban system
 //    Misc arena things
 //    Added LCTF Naming
 //    serverPrefs Support
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////Storage/////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+//    bansystem rework doto new tribes next changes 
 
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 function testVarsRandomAll(%max){
    %game = Game.class;
    for(%q = 0; %q < $statsVars::count[%game]; %q++){
