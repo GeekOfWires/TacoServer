@@ -3,6 +3,44 @@
 //--------------------------------------
 
 //--------------------------------------------------------------------------
+// Force-Feedback Effects
+//--------------------------------------
+datablock EffectProfile(MortarSwitchEffect)
+{
+   effectname = "weapons/mortar_activate";
+   minDistance = 2.5;
+   maxDistance = 2.5;
+};
+
+datablock EffectProfile(MortarFireEffect)
+{
+   effectname = "weapons/mortar_fire";
+   minDistance = 2.5;
+   maxDistance = 5.0;
+};
+
+datablock EffectProfile(MortarReloadEffect)
+{
+   effectname = "weapons/mortar_reload";
+   minDistance = 2.5;
+   maxDistance = 2.5;
+};
+
+datablock EffectProfile(MortarDryFireEffect)
+{
+   effectname = "weapons/mortar_dryfire";
+   minDistance = 2.5;
+   maxDistance = 2.5;
+};
+
+datablock EffectProfile(MortarExplosionEffect)
+{
+   effectname = "explosions/explosion.xpl03";
+   minDistance = 30;
+   maxDistance = 65;
+};
+
+//--------------------------------------------------------------------------
 // Sounds
 //--------------------------------------
 datablock AudioProfile(MortarSwitchSound)
@@ -10,6 +48,7 @@ datablock AudioProfile(MortarSwitchSound)
    filename    = "fx/weapons/mortar_activate.wav";
    description = AudioClosest3d;
    preload = true;
+   effect = MortarSwitchEffect;
 };
 
 datablock AudioProfile(MortarReloadSound)
@@ -17,6 +56,7 @@ datablock AudioProfile(MortarReloadSound)
    filename    = "fx/weapons/mortar_reload.wav";
    description = AudioClosest3d;
    preload = true;
+   effect = MortarReloadEffect;
 };
 
 datablock AudioProfile(MortarIdleSound)
@@ -25,6 +65,7 @@ datablock AudioProfile(MortarIdleSound)
    filename = "fx/weapons/plasma_rifle_idle.wav";
    description = ClosestLooping3d;
    preload = true;
+   effect = PlasmaIdleEffect;
 };
 
 datablock AudioProfile(MortarFireSound)
@@ -32,6 +73,7 @@ datablock AudioProfile(MortarFireSound)
    filename    = "fx/weapons/mortar_fire.wav";
    description = AudioDefault3d;
    preload = true;
+   effect = MortarFireEffect;
 };
 
 datablock AudioProfile(MortarProjectileSound)
@@ -46,6 +88,7 @@ datablock AudioProfile(MortarExplosionSound)
    filename    = "fx/weapons/mortar_explode.wav";
    description = AudioBIGExplosion3d;
    preload = true;
+   effect = MortarExplosionEffect;
 };
 
 datablock AudioProfile(UnderwaterMortarExplosionSound)
@@ -53,6 +96,7 @@ datablock AudioProfile(UnderwaterMortarExplosionSound)
    filename    = "fx/weapons/mortar_explode_UW.wav";
    description = AudioBIGExplosion3d;
    preload = true;
+   effect = MortarExplosionEffect;
 };
 
 datablock AudioProfile(MortarDryFireSound)
@@ -60,6 +104,7 @@ datablock AudioProfile(MortarDryFireSound)
    filename    = "fx/weapons/mortar_dryfire.wav";
    description = AudioClose3d;
    preload = true;
+   effect = MortarDryFireEffect;
 };
 
 //----------------------------------------------------------------------------
@@ -740,8 +785,8 @@ datablock ShapeBaseImageData(MortarImage)
    stateSound[0] = MortarSwitchSound;
 
    stateName[1] = "ActivateReady";
-   stateTransitionOnAmmo[1] = "Ready";
-   stateTransitionOnNoAmmo[1] = "FirstLoad";
+   stateTransitionOnLoaded[1] = "Ready";
+   stateTransitionOnNoAmmo[1] = "NoAmmo";
 
    stateName[2] = "Ready";
    stateTransitionOnNoAmmo[2] = "NoAmmo";
@@ -775,50 +820,4 @@ datablock ShapeBaseImageData(MortarImage)
    stateSound[6]      = MortarDryFireSound;
    stateTimeoutValue[6]        = 1.5;
    stateTransitionOnTimeout[6] = "NoAmmo";
-   
-   stateName[7] = "FirstLoad";
-   stateTransitionOnAmmo[7] = "Ready";
 };
-
-function MortarImage::onUnmount(%this,%obj,%slot){
-   parent::onUnmount(%this,%obj,%slot);
-   if(isEventPending(%obj.reloadDelaySch))
-      cancel(%obj.reloadDelaySch);  
-}
-function MortarImage::onMount(%this,%obj,%slot){
-      
-   if(%obj.getClassName() !$= "Player")
-      return;
-
-   if (%this.armthread $= "")
-      %obj.setArmThread(look);
-   else
-      %obj.setArmThread(%this.armThread);
-
-   if(%obj.getMountedImage($WeaponSlot).ammo !$= ""){
-      if (%obj.getInventory(%this.ammo)){
-         %fireAndReloadTime = mFloor((%this.stateTimeoutValue[4] + %this.stateTimeoutValue[3]) * 1000);
-         if(%obj.lfireTime[%this.getName()] && (getSimTime() - %obj.lfireTime[%this.getName()]) < %fireAndReloadTime){
-            if(isEventPending(%obj.reloadDelaySch)){
-              cancel(%obj.reloadDelaySch);  
-            }
-            %time = mFloor(%fireAndReloadTime - (getSimTime() - %obj.lfireTime[%this.getName()]));
-            %obj.reloadDelaySch = schedule(%time, 0, "ammoStateDelay", %obj, %slot, true);
-         }
-         else{
-            %obj.setImageAmmo(%slot,true);
-         }
-      }
-   }
-   
-   %obj.client.setWeaponsHudActive(%this.item);
-   if(%obj.getMountedImage($WeaponSlot).ammo !$= "")
-      %obj.client.setAmmoHudCount(%obj.getInventory(%this.ammo));
-   else
-      %obj.client.setAmmoHudCount(-1);   
-}
-
-function ammoStateDelay(%obj, %slot, %state){
-   if(isObject(%obj) && %obj.getState() !$= "Dead")
-      %obj.setImageAmmo(%slot, %state);
-}   

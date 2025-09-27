@@ -235,7 +235,7 @@ datablock HoverVehicleData(AssaultVehicle) : TankDamageProfile
 
    isShielded = true;
    rechargeRate = 1.0;
-   energyPerDamagePoint = 142; //was 135
+   energyPerDamagePoint = 135;
    maxEnergy = 400;
    minJetEnergy = 15;
    jetEnergyDrain = 2.0;

@@ -2019,7 +2019,7 @@ function CTFGame::awardScoreKill(%game, %killerID)
 function checkVehicleCamping( %team )
 {
    %position = $flagPos[%team];
-   %radius = 15;
+   %radius = 5;
    InitContainerRadiusSearch(%position, %radius, $TypeMasks::VehicleObjectType );
 
    while ((%vehicle = containerSearchNext()) != 0)

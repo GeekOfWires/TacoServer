@@ -1085,8 +1085,8 @@ datablock ParticleData(LightPuff)
    textureName          = "particleTest";
    colors[0]     = "0.46 0.36 0.26 0.4";
    colors[1]     = "0.46 0.46 0.36 0.0";
-   sizes[0]      = 0.8; //was 0.4
-   sizes[1]      = 1.4; //was 1.0
+   sizes[0]      = 0.4;
+   sizes[1]      = 1.0;
 };
 
 datablock ParticleEmitterData(LightPuffEmitter)
@@ -1123,9 +1123,9 @@ datablock ParticleData(LiftoffDust)
    colors[0]     = "0.46 0.36 0.26 0.0";
    colors[1]     = "0.46 0.46 0.36 0.4";
    colors[2]     = "0.46 0.46 0.36 0.0";
-   sizes[0]      = 0.6; //was 0.2
-   sizes[1]      = 1.0; //was 0.6
-   sizes[2]      = 1.4; //was 1.0
+   sizes[0]      = 0.2;
+   sizes[1]      = 0.6;
+   sizes[2]      = 1.0;
    times[0]      = 0.0;
    times[1]      = 0.5;
    times[2]      = 1.0;
@@ -1765,7 +1765,7 @@ datablock PlayerData(HeavyMaleHumanArmor) : HeavyPlayerDamageProfile
    //Value changed halfway between base and classic.
    //Classic is 54, Base is 75
    //Shield breaks right at two mine-disc
-   energyPerDamagePoint = 60.0; // shield energy required to block one point of damage
+   energyPerDamagePoint = 54.0; // shield energy required to block one point of damage
 
    rechargeRate = 0.256;
    jetForce = 29.58 * 180;
