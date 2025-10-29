@@ -2017,6 +2017,45 @@ function LakRabbitGame::resetFlag(%game, %flag)
    cancel(%game.updateFlagThread[%flag]); // z0dd - ZOD, 8/4/02. Cancel this flag's thread to KineticPoet's flag updater
 }
 
+function LakRabbitGame::checkTimeLimit(%game, %forced)
+{
+   // Don't add extra checks:
+   if ( %forced )
+      cancel( %game.timeCheck );
+
+   // if there is no time limit, check back in a minute to see if it's been set
+   if(($Host::TimeLimit $= "") || $Host::TimeLimit == 0)
+   {
+      %game.timeCheck = %game.schedule(20000, "checkTimeLimit");
+      return;
+   }
+
+   %curTimeLeftMS = ($Host::TimeLimit * 60 * 1000) + $missionStartTime - getSimTime();
+
+   if (%curTimeLeftMS <= 0)
+   {
+      if(%game.scheduleVote !$= "" && !%game.voteOT && !$Host::TournamentMode)
+      {
+         messageAll('MsgOvertime', '\c2Vote Overtime Initiated.~wfx/powered/turret_heavy_activate.wav');
+         %game.voteOT = 1;
+      }
+      else
+      {
+         %game.timeLimitReached();
+      }
+   }
+   else
+   {
+      if(%curTimeLeftMS >= 20000)
+         %game.timeCheck = %game.schedule(20000, "checkTimeLimit");
+      else
+         %game.timeCheck = %game.schedule(%curTimeLeftMS + 1, "checkTimeLimit");
+
+      //now synchronize everyone's clock
+      messageAll('MsgSystemClock', "", $Host::TimeLimit, %curTimeLeftMS);
+   }
+}
+
 // ----- These functions are native to Rabbit
 
 function LakRabbitGame::timeLimitReached(%game)

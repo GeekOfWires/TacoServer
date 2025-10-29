@@ -502,8 +502,6 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 			{
 				if(%arg1 $= "999") %time = "unlimited"; else %time = %arg1;
 				%msg = %client.nameBase @ " initiated a vote to change the time limit to " @ %time SPC "minutes.";
-				// VoteOvertime
-				StartVOTimeVote(%game);
 
 				$CMHasVoted[%client.guid]++;
 			}
@@ -583,7 +581,8 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 		case "stopRunningVote":
          if(%client.isSuperAdmin || (%client.isAdmin && $Host::AllowAdminStopVote))
          {
-            if($VOStatus $="InProgress") //Dont allow a stop vote after time has expired, then no new time is set - VoteOverTime
+            %curTimeLeftMS = ($Host::TimeLimit * 60 * 1000) + $missionStartTime - getSimTime();
+            if(%curTimeLeftMS <= 0) //Dont allow a stop vote after time has expired, then no new time is set - VoteOverTime
             {
                messageClient(%client, "", "\c2Can't stop time vote after time has expired.");
                return;
@@ -1223,8 +1222,6 @@ function DefaultGame::voteChangeTimeLimit( %game, %admin, %newLimit )
       {
          messageAll('MsgVotePassed', '\c2The mission time limit was set to %1 minutes by vote.', %display);
          $Host::TimeLimit = %newLimit;
-         // VoteOvertime
-         ResetVOTimeChanged(%game);
 		   // Reset the voted time limit when changing mission
          $TimeLimitChanged = 1;
 
@@ -1243,9 +1240,6 @@ function DefaultGame::voteChangeTimeLimit( %game, %admin, %newLimit )
 	     votePercentLog(%newLimit, %typeName, %key, %game.totalVotesFor, %game.totalVotesAgainst, %totalVotes, %game.totalVotesNone);
 		 //Show Vote %
 		 messageAll('', '\c1Vote %6: \c0Yea: %1 Nay: %2 Abstain: %7 Total: %3 [%4%5]', %game.totalVotesFor, %game.totalVotesAgainst, %totalVotes, mfloor((%game.totalVotesFor/(ClientGroup.getCount() - %game.totalVotesNone)) * 100), "%", %key, %game.totalVotesNone);
-
-		 // VoteOvertime
-		 ResetVOall(%game);
 	  }
    }
 
