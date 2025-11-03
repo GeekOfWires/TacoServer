@@ -952,6 +952,9 @@ function CTFGame::gameOver(%game)
    }
    for(%j = 1; %j <= %game.numTeams; %j++)
       $TeamScore[%j] = 0;
+
+	%game.voteOT = 0;
+	%game.overtime = 0;
 }
 
 function CTFGame::onClientDamaged(%game, %clVictim, %clAttacker, %damageType, %implement, %damageLoc)

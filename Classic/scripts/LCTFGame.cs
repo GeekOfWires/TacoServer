@@ -689,6 +689,9 @@ function LCTFGame::gameOver(%game)
 
    if (isActivePackage(LCTFOneMine))
       deactivatePackage(LCTFOneMine);
+
+   %game.voteOT = 0;
+	%game.overtime = 0;
 }
 
 
