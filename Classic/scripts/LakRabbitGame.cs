@@ -166,6 +166,23 @@
 //   1 - Players get 999 or unlimited DiscJumps
 //
 
+datablock ItemData(LakFakeFlag2) : flag
+{
+	lightColor = "0.1 0.1 0.9 1.0";
+	className = LakFakeFlag;
+	lightTime = "100";
+	lightRadius = "5";
+};
+
+datablock ItemData(LakFakeFlag4) : LakFakeFlag2
+{
+	lightColor = "0.9 0.9 0.1 1.0";
+};
+
+datablock ItemData(LakFakeFlag8) : LakFakeFlag2
+{
+	lightColor = "0.1 0.9 0.1 1.0";
+};
 
 package LakRabbitGame {
 
@@ -417,7 +434,12 @@ function Armor::damageObject(%data, %targetObject, %sourceObject, %position, %am
 
 		// no splash damage vote
 		if(Game.noSplashDamage && %percentDam < 98 && $lastObjExplode && !$lastObjExplode.isHandNade && %damageType != $DamageType::Mine)
-			%amount = 0.0;
+		{
+			if(!%targetObject.holdingFlag)
+				%amount = 0.0;
+			else if(((getSimTime() - %targetObject.client.rabbitSplash) < 15000)) //Turn on splash for rabbit after not making a shot for an alotted time
+				%amount = 0.0;
+		}
 
 		switch$(%damageType)
 		{
@@ -434,6 +456,10 @@ function Armor::damageObject(%data, %targetObject, %sourceObject, %position, %am
 					%long = 1;
 					%sound = %defaultSound;
 				}
+
+				%tgPos = %targetObject.getPosition();
+				%terrHeight = getTerrainHeight(getWords(%tgPos,0,1));
+				%playerHeight = mAbs(getWord(%tgPos,2) - %terrHeight); 
 
 				// special knockback if you hit too close, max 15% chance (point blank).. 5% at 30meters, 1% chance for any MA
 
@@ -482,6 +508,42 @@ function Armor::damageObject(%data, %targetObject, %sourceObject, %position, %am
 						case 3:
 							messageAll('msgSlapmessage','\c0%1 is taking a short tour around the map.', %targetObject.client.name );
 					}
+				}
+				else if(%ma && getRandom(1,35) <= %chance && %playerHeight >= 100 && %targetObject.holdingFlag)
+				{
+
+						Game.playerDroppedFlag(%targetObject);
+
+						%position = %targetObject.getPosition();
+						%count = 40;
+						%ttl = 60000;
+						%player = %targetObject;
+						if( %position $= "" )
+						{
+							error("No position passed!");
+							return 0;
+						}
+						if( %count <= 0 )
+						{
+							error("Number of flags to spew must be greater than 0!");
+							return 0;
+						}
+
+						%flagArr[0] = LakFakeFlag8;
+						%flagArr[1] = LakFakeFlag2;
+						%flagArr[2] = LakFakeFlag4;
+
+						while( %count > 0 )
+						{
+							%index = mFloor(getRandom() * 3);
+							// throwDummyFlag(location, Datablock);
+							LakRabbitGame::throwDummyFlag(%position, %flagArr[%index], %player, %ttl);
+							%count--;
+						}
+
+						%targetObject.blowup();
+						%targetObject.scriptKill($DamageType::Explosion);
+						%sound = '~wfx/misc/MA1.wav';
 				}
 				%weapon = "Disc";
 			case $DamageType::Grenade:
@@ -746,10 +808,15 @@ function Armor::damageObject(%data, %targetObject, %sourceObject, %position, %am
 	}
 
 	// borlak -- make a sound when you hit someone
-	if(%sound $= "" && %sourceObject.client.team != %targetObject.client.team)
-		messageClient(%sourceObject.client,'MsgHitSound','~wfx/misc/diagnostic_beep.wav');
-	else if(%sound !$= "")
+	// if(%sound $= "" && %sourceObject.client.team != %targetObject.client.team)
+	// 	messageClient(%sourceObject.client,'MsgHitSound','~wfx/misc/diagnostic_beep.wav');
+	// else if(%sound !$= ""){
+	if(%sound !$= ""){
 		messageAll('msgSpecialHitSound', %sound);
+		if(%sourceObject.holdingFlag){
+			%sourceObject.client.rabbitSplash = getSimTime();
+		}
+	}
 
 	// borlak -- rabbit should be able to kill heavies/mediums fast(er) in duel mode
 	if(%targetObject.client.armor $= "Heavy" || %targetObject.client.armor $= "Medium")
@@ -1905,6 +1972,7 @@ function LakRabbitGame::playerTouchFlag(%game, %player, %flag)
 	  cancel(%game.updateFlagThread[%flag]); // z0dd - ZOD, 8/4/02. Cancel this flag's thread to KineticPoet's flag updater
       %player.freeDJ = 0;
       %flag.bounced = 0;
+	  %player.client.rabbitSplash = getSimTime();
 
       %player.client.startTime = getSimTime();
       %player.holdingFlag = %flag;
@@ -2131,6 +2199,9 @@ function LakRabbitGame::gameOver(%game)
 	// borlak -- delete variables
    	deleteVariables("$LakFired*");
    	deleteVariables("$LakDamaged*");
+
+	%game.voteOT = 0;
+	%game.overtime = 0;
 }
 
 function LakRabbitGame::resetScore(%game, %client)
@@ -2656,96 +2727,41 @@ function LakRabbitGame::applyConcussion(%game, %player)
    %game.dropFlag( %player );
 }
 
-//--------------------------------Footnotes---------------------------------------
-//
-//
-//To make vote options work in evo admin mod, demonstration only below
-//
-//function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %playerVote)
-//{
-//		parent::serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %playerVote);
-//
-//	    // sonic9k 11/6/2003 - Added support for LakRabbit DuelMode option
-//      //
-//      case "VoteDuelMode":
-//         if( %isAdmin && !%client.ForceVote )
-//         {
-//            adminStartNewVote(%client, %typename, %arg1, %arg2, %arg3, %arg4);
-//			adminLog(%client, " has toggled " @ %arg1 @ " (" @ %arg2 @ ")");
-//         }
-//         else
-//         {
-//            if(Game.scheduleVote !$= "")
-//            {
-//               messageClient(%client, 'voteAlreadyRunning', '\c2A vote is already in progress.');
-//               return;
-//            }
-//			%actionMsg = ($Host::LakRabbitDuelMode ? "disable Duel mode" : "enable Duel mode");
-//            for(%idx = 0; %idx < ClientGroup.getCount(); %idx++)
-//            {
-//               %cl = ClientGroup.getObject(%idx);
-//               if(!%cl.isAIControlled())
-//               {
-//                  messageClient(%cl, 'VoteStarted', '\c2%1 initiated a vote to %2.', %client.name, %actionMsg);
-//                  %clientsVoting++;
-//               }
-//            }
-//            playerStartNewVote(%client, %typename, %arg1, %arg2, %arg3, %arg4, %clientsVoting);
-//         }
-//      //
-//      // sonic9k 11/6/2003 - Added support for LakRabbit SplashDamage option
-//      //
-//      case "VoteSplashDamage":
-//         if( %isAdmin && !%client.ForceVote )
-//         {
-//            adminStartNewVote(%client, %typename, %arg1, %arg2, %arg3, %arg4);
-//			adminLog(%client, " has toggled " @ %arg1 @ " (" @ %arg2 @ ")");
-//         }
-//         else
-//         {
-//            if(Game.scheduleVote !$= "")
-//            {
-//               messageClient(%client, 'voteAlreadyRunning', '\c2A vote is already in progress.');
-//               return;
-//            }
-//			%actionMsg = ($Host::LakRabbitNoSplashDamage ? "enable SplashDamage" : "disable SplashDamage");
-//            for(%idx = 0; %idx < ClientGroup.getCount(); %idx++)
-//            {
-//               %cl = ClientGroup.getObject(%idx);
-//               if(!%cl.isAIControlled())
-//               {
-//                  messageClient(%cl, 'VoteStarted', '\c2%1 initiated a vote to %2.', %client.name, %actionMsg);
-//                  %clientsVoting++;
-//               }
-//            }
-//            playerStartNewVote(%client, %typename, %arg1, %arg2, %arg3, %arg4, %clientsVoting);
-//         }
-//	    //
-//      // chocotaco 8/7/2018 - Added support for LakRabbit Pro option
-//      //
-//      case "VotePro":
-//         if( %isAdmin && !%client.ForceVote )
-//         {
-//            adminStartNewVote(%client, %typename, %arg1, %arg2, %arg3, %arg4);
-//			adminLog(%client, " has toggled " @ %arg1 @ " (" @ %arg2 @ ")");
-//         }
-//         else
-//         {
-//            if(Game.scheduleVote !$= "")
-//            {
-//               messageClient(%client, 'voteAlreadyRunning', '\c2A vote is already in progress.');
-//               return;
-//            }
-//			%actionMsg = ($Host::LakRabbitPubPro ? "disable Pro mode" : "enable Pro mode");
-//            for(%idx = 0; %idx < ClientGroup.getCount(); %idx++)
-//            {
-//               %cl = ClientGroup.getObject(%idx);
-//               if(!%cl.isAIControlled())
-//               {
-//                  messageClient(%cl, 'VoteStarted', '\c2%1 initiated a vote to %2.', %client.name, %actionMsg);
-//                  %clientsVoting++;
-//               }
-//            }
-//            playerStartNewVote(%client, %typename, %arg1, %arg2, %arg3, %arg4, %clientsVoting);
-//         }
-//}
+function LakRabbitGame::throwDummyFlag(%position, %datablock, %player, %ttl)
+{
+	%client = %player.client;
+
+	// create a flag and throw it
+	%droppedflag = new Item() {
+		position = %position;
+		rotation = "0 0 1 " @ (getRandom() * 360);
+		scale = "1 1 1";
+		dataBlock = %datablock;
+		collideable = "0";
+		static = "0";
+		rotate = "1";
+		team = "0";
+		isFake = 1;
+	};
+	MissionCleanup.add(%droppedflag);
+
+	%vec = (-1.0 + getRandom() * 2.0) SPC (-1.0 + getRandom() * 2.0) SPC getRandom();
+	%vec = VectorScale(%vec, getrandom(250,1000) + (getRandom() * 300));
+
+	// Add player's velocity
+	if (%player !$= "")
+	{
+		%droppedflag.setCollisionTimeout(%player);
+		%vec = vectorAdd(%vec, %player.getVelocity());
+	}
+
+	%droppedflag.applyImpulse(%pos, %vec);
+
+	%droppedFlag.die = schedule(getrandom(1500,3500), 0, "removeLakFakeFlag", %droppedflag);
+}
+
+function removeLakFakeFlag(%flag)
+{
+	%flag.startFade(600, 0, true);
+	%flag.schedule(601, "delete");
+}
