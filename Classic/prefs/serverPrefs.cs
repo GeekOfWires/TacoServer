@@ -5,7 +5,6 @@ $Host::AllowAdminKick = 1;
 $Host::AllowAdminPassVote = 1;
 $Host::allowAdminPlayerVotes = "0";
 $Host::AllowAdminStopVote = 1;
-$Host::AllowAdminStopVotes = 1;
 $Host::AllowAdminVotes = 1;
 $Host::AllowMapScript = "True";
 $Host::AllowPlayerVoteChangeMission = 1;

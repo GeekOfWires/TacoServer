@@ -581,12 +581,12 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 		case "stopRunningVote":
          if(%client.isSuperAdmin || (%client.isAdmin && $Host::AllowAdminStopVote))
          {
-            %curTimeLeftMS = ($Host::TimeLimit * 60 * 1000) + $missionStartTime - getSimTime();
-            if(%curTimeLeftMS <= 0) //Dont allow a stop vote after time has expired, then no new time is set - VoteOverTime
-            {
-               messageClient(%client, "", "\c2Can't stop time vote after time has expired.");
-               return;
-            }
+            // %curTimeLeftMS = ($Host::TimeLimit * 60 * 1000) + $missionStartTime - getSimTime();
+            // if(%curTimeLeftMS <= 0) //Dont allow a stop vote after time has expired, then no new time is set - VoteOverTime
+            // {
+            //    messageClient(%client, "", "\c2Can't stop vote after time has expired.");
+            //    return;
+            // }
 
             stopCurrentVote(%client);
             adminLog(%client, " stopped the vote in progress.");
