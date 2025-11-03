@@ -952,6 +952,9 @@ function CTFGame::gameOver(%game)
    }
    for(%j = 1; %j <= %game.numTeams; %j++)
       $TeamScore[%j] = 0;
+
+	%game.voteOT = 0;
+	%game.overtime = 0;
 }
 
 function CTFGame::onClientDamaged(%game, %clVictim, %clAttacker, %damageType, %implement, %damageLoc)
@@ -1266,7 +1269,13 @@ function CTFGame::checkTimeLimit(%game, %forced)
    {
       %teamOneCaps = mFloor($TeamScore[1] / %game.SCORE_PER_TEAM_FLAG_CAP);
       %teamTwoCaps = mFloor($TeamScore[2] / %game.SCORE_PER_TEAM_FLAG_CAP);
-      if(%teamOneCaps == %teamTwoCaps && $CTF::Overtime && (($TeamRank[1, count] + $TeamRank[2, count]) > 6)){
+      if(%game.scheduleVote !$= "" && !%game.voteOT && !$Host::TournamentMode)
+      {
+         messageAll('MsgOvertime', '\c2Vote Overtime Initiated.~wfx/powered/turret_heavy_activate.wav');
+         %game.voteOT = 1;
+      }
+      else if(%teamOneCaps == %teamTwoCaps && $CTF::Overtime && (($TeamRank[1, count] + $TeamRank[2, count]) > 6))
+      {
          if(!%game.overtime)
          {
             %game.overtime = 1;
@@ -1276,19 +1285,30 @@ function CTFGame::checkTimeLimit(%game, %forced)
             UpdateClientTimes($CTF::Overtime * 60 * 1000);
             EndCountdown($CTF::Overtime * 60 * 1000);
             %game.timeCheck = %game.schedule($CTF::Overtime * 60 * 1000, "timeLimitReached");
+
+            //Cancel vote if any
+            if(%game.scheduleVote !$= "")
+            {
+               messageAll('closeVoteHud', "");
+               cancel(Game.scheduleVote);
+               Game.scheduleVote = "";
+               Game.kickClient = "";
+               clearVotes();
+
+               //Stop vote chimes
+               for(%i = 0; %i < $Host::EnableVoteSoundReminders; %i++)
+               {
+                  if(isEventPending(Game.voteReminder[%i]))
+                     cancel(Game.voteReminder[%i]);
+                  Game.voteReminder[%i] = "";
+               }
+               messageAll('MsgOvertime', "\c2Vote has been cancelled due to Sudden-Death Overtime.");
+            }
          }
       }
       else
       {
-         if(%game.scheduleVote !$= "" && !%game.voteOT)
-         {
-            messageAll('MsgOvertime', '\c2Vote Overtime Initiated.~wfx/powered/turret_heavy_activate.wav');
-            %game.voteOT = 1;
-         }
-         else
-         {
-            %game.timeLimitReached();
-         }
+         %game.timeLimitReached();
       }
    }
    else
