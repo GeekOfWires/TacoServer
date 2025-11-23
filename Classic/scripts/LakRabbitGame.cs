@@ -457,94 +457,106 @@ function Armor::damageObject(%data, %targetObject, %sourceObject, %position, %am
 					%sound = %defaultSound;
 				}
 
-				%tgPos = %targetObject.getPosition();
-				%terrHeight = getTerrainHeight(getWords(%tgPos,0,1));
-				%playerHeight = mAbs(getWord(%tgPos,2) - %terrHeight); 
+		if(%targetObject.holdingFlag)
+		{
+			%tgPos = %targetObject.getPosition();
+			%terrHeight = getTerrainHeight(getWords(%tgPos,0,1));
+			%playerHeight = mAbs(getWord(%tgPos,2) - %terrHeight);
+		}
 
-				// special knockback if you hit too close, max 15% chance (point blank).. 5% at 30meters, 1% chance for any MA
+		if(%targetObject.holdingFlag && %playerHeight >= 100)
+		{
+			// tr2 style flag drop.. it does kill the rabbit
 
-				// Slap based on a Disc headshot
-				//%chance = mFloor(25 - %distance/3);
-				//if(%ma && getRandom(1,50) <= %chance && %targetObject.client.headshot)
+			%chance = mFloor(20 - %distance/%playerHeight);
+			if(%chance <= 0) %chance = 1;
 
+			if(%ma && getRandom(1,100) <= %chance)
+			{
+				Game.playerDroppedFlag(%targetObject);
 
-				//Normal Slap
-				%chance = mFloor(15 - %distance/3);
-				if(%chance <= 0) %chance = 1;
-
-				if(%ma && getRandom(1,100) <= %chance)
+				%position = %targetObject.getPosition();
+				%count = 40;
+				%ttl = 60000;
+				%player = %targetObject;
+				if( %position $= "" )
 				{
-					if(%targetObject.holdingFlag)
-					{
-						Game.playerDroppedFlag(%targetObject);
-						//Added so cloak is turned off when slapped.
-						%targetObject.setCloaked(false);
-						%targetObject.freeDJ = 1;
-					}
-					if(%sourceObject.holdingFlag && Game.duelMode)
-					{
-						duelBonus(%sourceObject.client);
-						$LakDamaged[%targetObject.client] = 0;
-					}
-
-					// lower damage and make invincible to ground damage to make it a little more fun
-					%amount = 0.01;
-					%targetObject.setKnockback(true);
-					%targetObject.schedule(15000, "setKnockback", false);
-
-					%p = %targetObject.getWorldBoxCenter();
-					%muzzleVec = %sourceObject.getMuzzleVector(0);
-					%impulseVec = VectorScale(%muzzleVec, 25000);
-					%targetObject.applyImpulse(%p, %impulseVec);
-					%sound = '~wfx/misc/slapshot.wav';
-
-					%slapmsg = getRandom(1,3);
-					switch$(%slapmsg)
-					{
-						case 1:
-							messageAll('msgSlapmessage','\c0%1 wonders what the five fingers said to the face.', %targetObject.client.name );
-						case 2:
-							messageAll('msgSlapmessage','\c0%1 gets slapped the heck out!', %targetObject.client.name );
-						case 3:
-							messageAll('msgSlapmessage','\c0%1 is taking a short tour around the map.', %targetObject.client.name );
-					}
+					error("No position passed!");
+					return 0;
 				}
-				else if(%ma && getRandom(1,35) <= %chance && %playerHeight >= 100 && %targetObject.holdingFlag)
+				if( %count <= 0 )
 				{
-
-						Game.playerDroppedFlag(%targetObject);
-
-						%position = %targetObject.getPosition();
-						%count = 40;
-						%ttl = 60000;
-						%player = %targetObject;
-						if( %position $= "" )
-						{
-							error("No position passed!");
-							return 0;
-						}
-						if( %count <= 0 )
-						{
-							error("Number of flags to spew must be greater than 0!");
-							return 0;
-						}
-
-						%flagArr[0] = LakFakeFlag8;
-						%flagArr[1] = LakFakeFlag2;
-						%flagArr[2] = LakFakeFlag4;
-
-						while( %count > 0 )
-						{
-							%index = mFloor(getRandom() * 3);
-							// throwDummyFlag(location, Datablock);
-							LakRabbitGame::throwDummyFlag(%position, %flagArr[%index], %player, %ttl);
-							%count--;
-						}
-
-						%targetObject.blowup();
-						%targetObject.scriptKill($DamageType::Explosion);
-						%sound = '~wfx/misc/MA1.wav';
+					error("Number of flags to spew must be greater than 0!");
+					return 0;
 				}
+
+				%flagArr[0] = LakFakeFlag8;
+				%flagArr[1] = LakFakeFlag2;
+				%flagArr[2] = LakFakeFlag4;
+
+				while( %count > 0 )
+				{
+					%index = mFloor(getRandom() * 3);
+					// throwDummyFlag(location, Datablock);
+					LakRabbitGame::throwDummyFlag(%position, %flagArr[%index], %player, %ttl);
+					%count--;
+				}
+
+				%targetObject.blowup();
+				%targetObject.scriptKill($DamageType::Explosion);
+				%sound = '~wfx/misc/MA1.wav';
+			}
+		}
+		else
+		{
+			// special knockback if you hit too close, max 15% chance (point blank).. 5% at 30meters, 1% chance for any MA
+
+			// Slap based on a Disc headshot
+			//%chance = mFloor(25 - %distance/3);
+			//if(%ma && getRandom(1,50) <= %chance && %targetObject.client.headshot)
+
+			//Normal Slap
+			%chance = mFloor(15 - %distance/3);
+			if(%chance <= 0) %chance = 1;
+
+			if(%ma && getRandom(1,100) <= %chance)
+			{
+				if(%targetObject.holdingFlag)
+				{
+					Game.playerDroppedFlag(%targetObject);
+					//Added so cloak is turned off when slapped.
+					%targetObject.setCloaked(false);
+					%targetObject.freeDJ = 1;
+				}
+				if(%sourceObject.holdingFlag && Game.duelMode)
+				{
+					duelBonus(%sourceObject.client);
+					$LakDamaged[%targetObject.client] = 0;
+				}
+
+				// lower damage and make invincible to ground damage to make it a little more fun
+				%amount = 0.01;
+				%targetObject.setKnockback(true);
+				%targetObject.schedule(15000, "setKnockback", false);
+
+				%p = %targetObject.getWorldBoxCenter();
+				%muzzleVec = %sourceObject.getMuzzleVector(0);
+				%impulseVec = VectorScale(%muzzleVec, 25000);
+				%targetObject.applyImpulse(%p, %impulseVec);
+				%sound = '~wfx/misc/slapshot.wav';
+
+				%slapmsg = getRandom(1,3);
+				switch$(%slapmsg)
+				{
+					case 1:
+						messageAll('msgSlapmessage','\c0%1 wonders what the five fingers said to the face.', %targetObject.client.name );
+					case 2:
+						messageAll('msgSlapmessage','\c0%1 gets slapped the heck out!', %targetObject.client.name );
+					case 3:
+						messageAll('msgSlapmessage','\c0%1 is taking a short tour around the map.', %targetObject.client.name );
+				}
+			}
+		}
 				%weapon = "Disc";
 			case $DamageType::Grenade:
 				if($lastObjExplode.isHandNade) //Hand grenades
@@ -2757,7 +2769,7 @@ function LakRabbitGame::throwDummyFlag(%position, %datablock, %player, %ttl)
 
 	%droppedflag.applyImpulse(%pos, %vec);
 
-	%droppedFlag.die = schedule(getrandom(1500,3500), 0, "removeLakFakeFlag", %droppedflag);
+	%droppedFlag.die = schedule(getrandom(1500,5500), 0, "removeLakFakeFlag", %droppedflag);
 }
 
 function removeLakFakeFlag(%flag)
