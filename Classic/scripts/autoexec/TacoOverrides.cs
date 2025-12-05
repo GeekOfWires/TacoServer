@@ -57,7 +57,7 @@ function VehicleData::onDestroyed(%data, %obj, %prevState)
          %zVel = (getRandom() * 100.0) + 50.0;
          %flingVel = %xVel @ " " @ %yVel @ " " @ %zVel;
          %flingee.applyImpulse(%flingee.getTransform(), %flingVel);
-         echo("got player..." @ %flingee.getClassName());
+         //echo("got player..." @ %flingee.getClassName());
          %flingee.damage(0, %obj.getPosition(), 0.4, $DamageType::Crash);
       }
    }
@@ -70,29 +70,13 @@ function VehicleData::onDestroyed(%data, %obj, %prevState)
    %data.deleteAllMounted(%obj);
    // -----------------------------------------------------------------------------------------
    // z0dd - ZOD - Czar, 6/24/02. Move this vehicle out of the way so nothing collides with it.
-   if(%data.getName() $="AssaultVehicle")
-   {
-      // %obj.setFrozenState(true);
-      %obj.schedule(500, "delete"); //was 2000
-      //%data.schedule(500, 'onAvoidCollisions', %obj);
+   %obj.setFrozenState(true);
+   %obj.schedule(2000, "delete"); //was 500
+   %data.schedule(500, 'onAvoidCollisions', %obj);
 
-	  //Transfer the vehicle far away
-      %obj.schedule(128, "setPosition", vectorAdd(%obj.getPosition(), "40 -27 10000")); //Lowered: was 500
-   }
-   else if(%data.getName() $="BomberFlyer" || %data.getName() $="MobileBaseVehicle")
-   {
-      // %obj.setFrozenState(true);
-      %obj.schedule(2000, "delete"); //was 2000
-      //%data.schedule(500, 'onAvoidCollisions', %obj);
+   //Transfer the vehicle far away
+   %obj.schedule(128, "setPosition", vectorAdd(%obj.getPosition(), "40 -27 10000")); //Lowered: was 500
 
-	  //Transfer the vehicle far away
-      %obj.schedule(128, "setPosition", vectorAdd(%obj.getPosition(), "40 -27 10000")); //Lowered: was 500
-   }
-   else
-   {
-      %obj.setFrozenState(true);
-      %obj.schedule(500, "delete"); //was 500
-   }
    // -----------------------------------------------------------------------------------------
 }
 
