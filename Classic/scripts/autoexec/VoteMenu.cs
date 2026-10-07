@@ -331,7 +331,7 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 					return;
 				}
 
-				if(%arg1.team != %client.team)
+				if(%arg1.team != %client.team && Game.class !$= "DuelModGame") //DuelMod: every dueler has their own team
 				{
 					messageClient(%client, "MsgClient", "\c2Kick votes must be team based.");
 					return;
@@ -356,7 +356,7 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 				$CMHasVoted[%client.guid]++;
 			}
 
-			if(%arg1.team != 0)
+			if(%arg1.team != 0 && Game.class !$= "DuelModGame") //DuelMod: the whole server votes (see DuelModGame::voteKickPlayer)
 				%teamSpecific = 1;
 
 			Game.kickClient = %arg1;
@@ -867,6 +867,18 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 
          if(!%isAdmin || (%isAdmin && %client.ForceVote))
             %msg = %client.nameBase @ " initiated a vote to " @ (Game.LCTFOneMine == 1 ? "enable" : "disable") @ " one mine mode.";
+
+      //DuelMod Stuff
+		case "VoteDuelRuleset":
+			if($CurrentMissionType !$= "DuelMod")
+				return;
+
+			if(!%isAdmin || (%isAdmin && %client.ForceVote))
+				%msg = %client.nameBase @ " initiated a vote to switch to the " @ ($Duel_RulesetActive $= "MA" ? "Duel" : "MA") @ " ruleset (restarts the map).";
+
+		case "DuelMAMode": //Admin only
+			if($CurrentMissionType !$= "DuelMod" || !%isAdmin || %client.ForceVote)
+				return;
 
 		case "showServerRules":
 			if (($Host::ServerRules[1] !$= "") && (!%client.CantView))
