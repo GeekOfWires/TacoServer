@@ -43,6 +43,8 @@ function GetTeamCounts(%game)
 		{
 			//Variables
 			$TotalTeamPlayerCount = (Game.class $= "LakRabbitGame" || Game.class $= "DMGame") ? $TeamRank[0, count] : ($TeamRank[1, count] + $TeamRank[2, count]);
+			if(Game.class $= "DuelModGame") //Everyone is in the game; players only spawn while dueling
+				$TotalTeamPlayerCount = $HostGamePlayerCount - $HostGameBotCount;
 			$AllPlayerCount = $HostGamePlayerCount;
 
 			//Observers

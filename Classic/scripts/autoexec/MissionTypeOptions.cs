@@ -23,7 +23,7 @@ package MissionTypeOptions
 function loadMissionStage2()
 {
 	//Disable Tournament Mode for Lak
-	if($CurrentMissionType $= "Lakrabbit" || $CurrentMissionType $= "DM" || $CurrentMissionType $= "PracticeCTF")
+	if($CurrentMissionType $= "Lakrabbit" || $CurrentMissionType $= "DM" || $CurrentMissionType $= "PracticeCTF" || $CurrentMissionType $= "DuelMod")
 	{
 		if($Host::TournamentMode)
 			$Host::TournamentMode = 0;
