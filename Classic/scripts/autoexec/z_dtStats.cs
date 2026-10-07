@@ -100,6 +100,8 @@ $dtStats::expireFactor["DMGame"] = 6;
 $dtStats::expireFactor["LCTFGame"] = 1.2;
 $dtStats::expireFactor["SCtFGame"] = 1.2;
 $dtStats::expireFactor["ArenaGame"] = 2;
+$dtStats::expireFactor["DuelModGame"] = 10;
+$dtStats::expireFactor["DuelModMAGame"] = 10;
 $dtStats::expireFactor["SiegeGame"] = 10;
 
 //debug stuff
@@ -160,8 +162,10 @@ $dtStats::gameType[2] = "DMGame";
 $dtStats::gameType[3] = "LCTFGame";
 $dtStats::gameType[4] = "SCtFGame";
 $dtStats::gameType[5] = "ArenaGame";
+$dtStats::gameType[6] = "DuelModGame";   // DuelMod, Duel ruleset
+$dtStats::gameType[7] = "DuelModMAGame"; // DuelMod, MA ruleset (see dtGameKey)
 //$dtStats::gameType[5] = "SiegeGame";
-$dtStats::gameTypeCount = 6;
+$dtStats::gameTypeCount = 8;
 //short hand name
 $dtStats::gtNameShort["CTFGame"] = "CTF";
 $dtStats::gtNameShort["LakRabbitGame"] = "LakRabbit";
@@ -169,6 +173,8 @@ $dtStats::gtNameShort["DMGame"] = "DM";
 $dtStats::gtNameShort["LCTFGame"] = "LCTF";
 $dtStats::gtNameShort["SCtFGame"] = "LCTF";
 $dtStats::gtNameShort["ArenaGame"] = "Arena";
+$dtStats::gtNameShort["DuelModGame"] = "Duel";
+$dtStats::gtNameShort["DuelModMAGame"] = "MADuel";
 //$dtStats::gtNameShort["SiegeGame"] = "Siege";
 
 $dtStats::gtNameType["CTF"] = "CTFGame";
@@ -181,6 +187,18 @@ $dtStats::gtNameLong["DMGame"] = "Deathmatch";
 $dtStats::gtNameLong["LCTFGame"] = "Light CTF";
 $dtStats::gtNameLong["SCtFGame"] = "Light CTF";
 $dtStats::gtNameLong["ArenaGame"] = "Arena";
+$dtStats::gtNameLong["DuelModGame"] = "Duel MOD";
+$dtStats::gtNameLong["DuelModMAGame"] = "Duel MOD (MA)";
+
+// Stats key (stats folder, $statsVars bucket, leaderboard) for a running game. DuelMod keeps
+// separate stats per ruleset; the ruleset is fixed for the whole map.
+function dtGameKey(%game){
+   if(!isObject(%game))
+      return "";
+   if(%game.class $= "DuelModGame" && $Duel_RulesetActive $= "MA")
+      return "DuelModMAGame";
+   return %game.class;
+}
 //$dtStats::gtNameLong["SiegeGame"] = "Siege";
 
 //varTypes
@@ -608,6 +626,21 @@ $dtStats::FV[$dtStats::FC["ArenaGame","AVG"]++,"ArenaGame","AVG"] = "laserMARati
 $dtStats::FV[$dtStats::FC["ArenaGame","AVG"]++,"ArenaGame","AVG"] = "grenadeMARatio";
 $dtStats::FV[$dtStats::FC["ArenaGame","AVG"]++,"ArenaGame","AVG"] = "shockMARatio";
 $dtStats::FV[$dtStats::FC["ArenaGame","AVG"]++,"ArenaGame","AVG"] = "blasterMARatio";
+
+///////////////////////////////////////////////////////////////////////////////
+//                            	 DuelModGame (Duel ruleset) / DuelModMAGame (MA ruleset)
+///////////////////////////////////////////////////////////////////////////////
+$dtStats::FVG[$dtStats::FCG["DuelModGame","TG"]++,"DuelModGame","TG"] = "score"; // win %
+$dtStats::FVG[$dtStats::FCG["DuelModGame","Avg"]++,"DuelModGame","Avg"] = "score";
+$dtStats::FVG[$dtStats::FCG["DuelModGame","Max"]++,"DuelModGame","Max"] = "score";
+$dtStats::FVG[$dtStats::FCG["DuelModGame","TG"]++,"DuelModGame","TG"] = "kills"; // duels won
+$dtStats::FVG[$dtStats::FCG["DuelModGame","TG"]++,"DuelModGame","TG"] = "deaths"; // duels lost
+
+$dtStats::FVG[$dtStats::FCG["DuelModMAGame","TG"]++,"DuelModMAGame","TG"] = "score";
+$dtStats::FVG[$dtStats::FCG["DuelModMAGame","Avg"]++,"DuelModMAGame","Avg"] = "score";
+$dtStats::FVG[$dtStats::FCG["DuelModMAGame","Max"]++,"DuelModMAGame","Max"] = "score";
+$dtStats::FVG[$dtStats::FCG["DuelModMAGame","TG"]++,"DuelModMAGame","TG"] = "kills";
+$dtStats::FVG[$dtStats::FCG["DuelModMAGame","TG"]++,"DuelModMAGame","TG"] = "deaths";
 
 ///////////////////////////////////////////////////////////////////////////////
 //                            	 SiegeGame
@@ -2560,6 +2593,50 @@ package dtStats{
          parent::updateScoreHud(%game, %client, %tag);
    }
    ////////////////////////////////////////////////////////////////////////////////
+   function DuelModGame::onClientKilled(%game, %clVictim, %clKiller, %damageType, %implement, %damageLocation){
+      clientKillStats(%game,%clVictim, %clKiller, %damageType, %implement, %damageLocation);//for stats collection
+      // Every duel ends with the player going to observer, which bypasses DefaultGame::forceObserver:
+      // stop the air/ground timers and distance tracking so observer time is not counted next duel
+      %clVictim.gt = %clVictim.at = 0;
+      %clVictim.lp = "";
+      parent::onClientKilled(%game, %clVictim, %clKiller, %damageType, %implement, %damageLocation);
+   }
+   function DuelModGame::clientMissionDropReady(%game, %client){ // called when client has finished loading
+      parent::clientMissionDropReady(%game, %client);
+      dtStatsMissionDropReady(%game, %client);
+   }
+   function DuelModGame::gameOver( %game ){
+      dtStatsGameOver(%game);
+      parent::gameOver(%game);
+   }
+   function DuelModGame::recalcScore(%game, %client){
+      parent::recalcScore(%game, %client);
+      if(!$missionRunning || !isObject(%client.dtStats))
+         return; // keep values between gameOver and the scheduled saves
+      %client.dtStats.stat["score"] = %client.score; // win %
+      %client.dtStats.stat["kills"] = %client.kills; // duels won
+      %client.dtStats.stat["deaths"] = %client.deaths; // duels lost
+   }
+   function DuelModGame::processGameLink(%game, %client, %arg1, %arg2, %arg3, %arg4, %arg5){
+      if(%arg1 $= "S") // stats menu; everything else is the duel score screen
+         dtGameLink(%game, %client, %arg1, %arg2, %arg3, %arg4, %arg5);
+      else
+         parent::processGameLink(%game, %client, %arg1, %arg2, %arg3, %arg4, %arg5);
+   }
+   function DuelModGame::updateScoreHud(%game, %client, %tag){
+      if(%client.viewStats){ // browsing the stats menu
+         if($dtStats::enableRefresh)
+            statsMenu(%client, dtGameKey(%game));
+         return;
+      }
+      %index = parent::updateScoreHud(%game, %client, %tag); // the duel score screen returns its last line
+      if(%index !$= ""){
+         messageClient(%client, 'SetLineHud', "", %tag, %index, "");
+         messageClient(%client, 'SetLineHud', "", %tag, %index++, '<tab:20>\t<a:gamelink\tS\tLBOARDS\t0\tmonth-%1\t0>[View Server Stats]</a>', dtGameKey(%game));
+         messageClient(%client, 'ClearHud', "", %tag, %index++);
+      }
+   }
+   ////////////////////////////////////////////////////////////////////////////////
    function LCTFGame::clientMissionDropReady(%game, %client){
       parent::clientMissionDropReady(%game, %client);
       if($dtStats::ctfTimes){
@@ -2686,7 +2763,7 @@ package dtStats{
       %tagName = getWord(%tag, 1);
       %tag = getWord(%tag, 0);
       if(%tag $= 'scoreScreen' && %client.viewStats){
-         statsMenu(%client,Game.class);
+         statsMenu(%client,dtGameKey(Game));
       }
    }
    function chatMessageAll( %sender, %msgString, %a1, %a2, %a3, %a4, %a5, %a6, %a7, %a8, %a9, %a10 ){
@@ -4468,7 +4545,7 @@ function dtGameLink(%game, %client, %arg1, %arg2, %arg3, %arg4, %arg5){
          %client.GlArg4 = %arg4;
          %client.GlArg5 = %arg5;
          if($dtStats::debugEchos){error("dtGameLink GUID = "  SPC %client.guid SPC %arg1 SPC %arg2  SPC %arg3 SPC %arg4 SPC %arg5);}
-         statsMenu(%client, %game.class);
+         statsMenu(%client, dtGameKey(%game));
          if(%arg2 !$= "Reset"){
             return;
          }
@@ -5057,12 +5134,13 @@ function CTFHud(%game, %client, %tag){// defaultGame/evo
 }
 
 function dtStatsMissionDropReady(%game, %client){ // called when client has finished loading
+   %key = dtGameKey(%game); // stats key (DuelMod has one per ruleset)
    if($dtStats::debugEchos){error("dtStatsMissionDropReady GUID = "  SPC %client.guid);}
-   if($HostGamePlayerCount > $dtServer::maxPlayers[cleanMapName($CurrentMission),%game.class])
-      $dtServer::maxPlayers[cleanMapName($CurrentMission),%game.class] = $HostGamePlayerCount;
+   if($HostGamePlayerCount > $dtServer::maxPlayers[cleanMapName($CurrentMission),%key])
+      $dtServer::maxPlayers[cleanMapName($CurrentMission),%key] = $HostGamePlayerCount;
 
    %client.lp = "";//last position for distMove
-   %client.lgame = %game.class;
+   %client.lgame = %key;
    %foundOld = 0;
    %mrx = setGUIDName(%client);// make sure we  have a guid if not make one for this name
    %authInfo = %client.getAuthInfo();
@@ -5083,13 +5161,13 @@ function dtStatsMissionDropReady(%game, %client){ // called when client has fini
             %dtStats.stat["clientQuit"] = 0;
             %dtStats.markForDelete = 0;
             if(isGameRun() && %dtStats.misSeq == $missionSequence){
-               resGameStats(%client,%game.class); // restore stats;
+               resGameStats(%client,%key); // restore stats;
                if(%dtStats.stat["score"] != 0){
                   messageClient(%client, 'MsgClient', '\crWelcome back %1. Your score has been restored.~wfx/misc/rolechange.wav', %client.name);
                }
             }
             else{
-               resetDtStats(%dtStats,%game.class,1);
+               resetDtStats(%dtStats,%key,1);
             }
             break;
          }
@@ -5106,7 +5184,7 @@ function dtStatsMissionDropReady(%game, %client){ // called when client has fini
          %dtStats.name = %name;
          %dtStats.nameTag = %client.name;
          $dtStats::tbLookUP[%client.guid] = %dtStats;
-         resetDtStats(%dtStats,%game.class,1);
+         resetDtStats(%dtStats,%key,1);
       }
    }
    else{
@@ -5116,11 +5194,11 @@ function dtStatsMissionDropReady(%game, %client){ // called when client has fini
    %dtStats.joinPCT = (isGameRun() == 1) ? %game.getGamePct() : 0;
    updateTeamTime(%dtStats, -1);
    %dtStats.team = %client.team;// should be 0
-   if(isObject(%dtStats) && %dtStats.gameData[%game.class, $dtStats::tmMode] != 1){ // game type change
-      %dtStats.gameStats["totalGames","g",%game.class] = 0;
-      %dtStats.gameStats["statsOverWrite","g",%game.class] = -1;
-      %dtStats.gameStats["fullSet","g",%game.class] = 0;
-      %dtStats.gameData[%game.class, $dtStats::tmMode] = 0;
+   if(isObject(%dtStats) && %dtStats.gameData[%key, $dtStats::tmMode] != 1){ // game type change
+      %dtStats.gameStats["totalGames","g",%key] = 0;
+      %dtStats.gameStats["statsOverWrite","g",%key] = -1;
+      %dtStats.gameStats["fullSet","g",%key] = 0;
+      %dtStats.gameData[%key, $dtStats::tmMode] = 0;
    }
    %dtStats.mapTime = getSimTime();
 }
@@ -5129,9 +5207,9 @@ function dtStatsClientLeaveGame(%client){
    $dtServerVars::lastPlayerCount =  $HostGamePlayerCount - $HostGameBotCount;
 
    if(isGameRun()){// if they dc during game over dont count it
-      $dtServer::mapDisconnects[cleanMapName($CurrentMission),Game.class]++;
+      $dtServer::mapDisconnects[cleanMapName($CurrentMission),dtGameKey(Game)]++;
       if(%client.score != 0)
-         $dtServer::mapDisconnectsScore[cleanMapName($CurrentMission),Game.class]++;
+         $dtServer::mapDisconnectsScore[cleanMapName($CurrentMission),dtGameKey(Game)]++;
    }
 
    if(isObject(%client.dtStats)){
@@ -5153,11 +5231,12 @@ function dtStatsClientLeaveGame(%client){
    }
 }
 function dtStatsGameOver( %game ){
+   %key = dtGameKey(%game); // stats key (DuelMod has one per ruleset)
    if($dtStats::debugEchos){error("dtStatsGameOver");}
    $dtStats::serverHang = $dtStats::hostHang = 0;
    $dtStats::LastMissionDN = $MissionDisplayName;
    $dtStats::LastMissionCM = $CurrentMission;
-   $dtStats::LastGameType = %game.class;
+   $dtStats::LastGameType = %key;
    $dtStats::LastGameID = $dtStats::gameID;
 
    $dtStats::tmMode = $Host::TournamentMode;
@@ -5242,8 +5321,8 @@ function dtStatsGameOver( %game ){
    }
 
    if(%game.getGamePct() > 90){
-      $dtServer::playCount[cleanMapName($CurrentMission),%game.class]++;
-      $dtServer::lastPlay[cleanMapName($CurrentMission),%game.class] = getDayNum() TAB getYear() TAB formattimestring("mm/dd/yy hh:nn:a");
+      $dtServer::playCount[cleanMapName($CurrentMission),%key]++;
+      $dtServer::lastPlay[cleanMapName($CurrentMission),%key] = getDayNum() TAB getYear() TAB formattimestring("mm/dd/yy hh:nn:a");
       if(%game.numTeams > 1){
          if($teamScore[1] > $teamScore[2]){
             $dtServer::teamOneWin[cleanMapName($CurrentMission),%game.class]++;
@@ -5256,7 +5335,7 @@ function dtStatsGameOver( %game ){
       }
    }
    else
-      $dtServer::skipCount[cleanMapName($CurrentMission),%game.class]++;
+      $dtServer::skipCount[cleanMapName($CurrentMission),%key]++;
 
    if(!$dtStats::statsSave){//in case of admin skip map and it has not finished saving the old map
       $dtStats::statsSave = 1;
@@ -5274,18 +5353,18 @@ function dtStatsGameOver( %game ){
             %dtStats.markForDelete = 1;
             if($dtStats::Enable){
                %game.postGameStats(%dtStats);
-               if(!%dtStats.gameData[%game.class,$dtStats::tmMode]){
+               if(!%dtStats.gameData[%key,$dtStats::tmMode]){
                   %time += $dtStats::saveTime;
-                  schedule(%time,0,"loadGameStats",%dtStats,%game.class);
+                  schedule(%time,0,"loadGameStats",%dtStats,%key);
                }
                else if($dtStats::reloadTotal){
                      %time += $dtStats::saveTime;
-                   schedule(%time,0,"loadGameTotalStats",%dtStats,%game.class);
+                   schedule(%time,0,"loadGameTotalStats",%dtStats,%key);
                }
                %time += $dtStats::saveTime;
-               schedule(%time,0,"incGameStats",%dtStats,%game.class);
+               schedule(%time,0,"incGameStats",%dtStats,%key);
                %time += $dtStats::saveTime;
-               schedule(%time,0,"saveGameTotalStats",%dtStats,%game.class);
+               schedule(%time,0,"saveGameTotalStats",%dtStats,%key);
             }
          }
          else if(isObject(%dtStats.client)){// make sure client is still a thing
@@ -5296,25 +5375,25 @@ function dtStatsGameOver( %game ){
             %dtStats.nameTag = %client.name;
             if($dtStats::Enable){
                %game.postGameStats(%dtStats);
-               if(!%dtStats.gameData[%game.class, $dtStats::tmMode]){
+               if(!%dtStats.gameData[%key, $dtStats::tmMode]){
                   %time += $dtStats::saveTime;
-                  schedule(%time,0,"loadGameStats",%dtStats,%game.class);
+                  schedule(%time,0,"loadGameStats",%dtStats,%key);
                }
                 else if($dtStats::reloadTotal){
                    %time += $dtStats::saveTime;
-                   schedule(%time,0,"loadGameTotalStats",%dtStats,%game.class);
+                   schedule(%time,0,"loadGameTotalStats",%dtStats,%key);
                }
                %time += $dtStats::saveTime; // this will chain them
-               schedule(%time ,0,"incGameStats",%dtStats,%game.class); //resetDtStats after incGame
+               schedule(%time ,0,"incGameStats",%dtStats,%key); //resetDtStats after incGame
                %time += $dtStats::saveTime;
-               schedule(%time,0,"saveGameTotalStats",%dtStats,%game.class); //
+               schedule(%time,0,"saveGameTotalStats",%dtStats,%key); //
             }
             else{
-               resetDtStats(%dtStats,%game.class,0);
+               resetDtStats(%dtStats,%key,0);
             }
          }
          else{
-            error("Logic issue in dtStatsGameOver" SPC %dtStats SPC %client SPC %game.class);
+            error("Logic issue in dtStatsGameOver" SPC %dtStats SPC %client SPC %key);
             %dtStats.delete();
          }
       }
@@ -7930,7 +8009,7 @@ function clientDmgStats(%data, %position, %sourceObject, %targetObject, %damageT
 }
 
 function dtMidAirMessage(%client,%porjName,%distance, %count){
-   if($dtStats::midAirMessage && Game.class !$= "LakRabbitGame" && !%client.isAIControlled()){
+   if($dtStats::midAirMessage && Game.class !$= "LakRabbitGame" && Game.class !$= "DuelModGame" && !%client.isAIControlled()){
       bottomPrint(%client, "Midair" SPC %porjName SPC "(" @ %count @ ") Distance of " @ mFloor(%distance) @ " meters.", 4);
       messageClient(%client, 'MsgMidAir', '~wfx/misc/bounty_bonus.wav');
       if(%porjName !$= "Blaster"){
@@ -7941,14 +8020,14 @@ function dtMidAirMessage(%client,%porjName,%distance, %count){
 }
 
 function dtHeadShotMessage(%client,%distance){
-   if($dtStats::midAirMessage && Game.class !$= "LakRabbitGame" && !%client.isAIControlled()){
+   if($dtStats::midAirMessage && Game.class !$= "LakRabbitGame" && Game.class !$= "DuelModGame" && !%client.isAIControlled()){
       bottomPrint(%client, "Headshot! Distance of " @ mFloor(%distance) @ " meters.", 4);
       messageClient(%client, 'MsgMidAir', '\c0Headshot distance of [%1m]~wfx/misc/bounty_bonus.wav', mFloor(%distance));
       //messageTeamExcept(%client, 'MsgMidAir', '\c5%1 hit a head shot. [%2m, %3]', %client.name, mFloor(%distance), %porjName);
    }
 }
 function dtLaserShotMessage(%client,%distance){
-   if($dtStats::midAirMessage && Game.class !$= "LakRabbitGame" && !%client.isAIControlled()){
+   if($dtStats::midAirMessage && Game.class !$= "LakRabbitGame" && Game.class !$= "DuelModGame" && !%client.isAIControlled()){
       bottomPrint(%client, "HIT! Distance is " @ mFloor(%distance) @ " meters.", 4);
       //messageTeamExcept(%client, 'MsgMidAir', '\c5%1 hit a head shot. [%2m, %3]', %client.name, mFloor(%distance), %porjName);
    }
@@ -13330,7 +13409,7 @@ function prefTest(%time,%skip){
       if(%dif > $dtStats::prefTolerance && !%skip && %plCount > 2){
          %msg = "Server Hang" SPC dtFormatTime(getSimTime()) SPC "Delay =" SPC %dif @ "ms" SPC "Player Count =" SPC %plCount SPC $CurrentMission;
          $dtServer::serverHangTotal++;
-         $dtServer::serverHangMap[cleanMapName($CurrentMission),Game.class]++;
+         $dtServer::serverHangMap[cleanMapName($CurrentMission),dtGameKey(Game)]++;
          $dtServer::serverHangLast = formattimestring("hh:nn:a mm-dd-yy");
          $dtServer::serverHangTime = %dif;
          dtEventLog(%msg, 0);
@@ -13526,7 +13605,7 @@ function dtPingStats(){
             if(getSimTime() - $dtStats:evTime[2] > $dtStats::eventLockout){
                %msg = "Host Hang" SPC dtFormatTime(getSimTime()) SPC "Avg:" @ $dtStats::pingAvg @ "/" @ %lowAvg SPC "Min:" @ %min SPC "Max:" @ %max SPC "Counts =" SPC %hpCount  @ "/" @ %pc;
                dtEventLog(%msg, 0);
-               $dtServer::hostHangMap[cleanMapName($CurrentMission),Game.class]++;
+               $dtServer::hostHangMap[cleanMapName($CurrentMission),dtGameKey(Game)]++;
                $dtServer::hostHangTotal++;
                $dtServer::hostHangLast = formattimestring("hh:nn:a mm-dd-yy");
                $dtServer::hostHangTime = %pingT / %pc;
