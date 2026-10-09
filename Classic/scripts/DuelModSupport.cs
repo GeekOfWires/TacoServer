@@ -4,20 +4,17 @@
 // DuelMod game type is involved:
 //  - Lists the DuelMod maps from prefs/DuelPrefs.cs in the vote menu, for both map list systems
 //    (the rotation file, and dtStats' map list when an admin has enabled it).
-//  - Keeps DuelMod out of tournament mode: it can't be voted, set as the next map or changed to
-//    while the server is in tournament mode.
+//  - Keeps DuelMod out of tournament mode: hidden from the mission type list, and never loaded while
+//    in tournament mode. Votes for it are refused in VoteMenu.cs.
 //
-// Named to load after z_dtStats.cs. The game type itself is in scripts/DuelModGame.cs.
-
-if(!$Duel_PrefsLoaded)
-   exec("prefs/DuelPrefs.cs");
+// Executed by scripts/DuelModGame.cs, which CreateServer runs after every autoexec script and before
+// the first mission, so this package sits above the TacoServer and dtStats packages it wraps (each
+// override calls its parent) and below the per-mission game packages. It is deliberately not an
+// autoexec script: their load order is not alphabetical, and dtStats' own file scans during the
+// autoexec pass can make the engine skip the scripts that follow it.
 
 package DuelModSupport
 {
-
-//-----------------------------------------------------------------------------
-// Map list
-//-----------------------------------------------------------------------------
 
 function buildMissionList()
 {
@@ -42,10 +39,6 @@ function dtBuildMissionList(%reset)
    Duel_injectMapList();
 }
 
-//-----------------------------------------------------------------------------
-// No DuelMod in tournament mode
-//-----------------------------------------------------------------------------
-
 // Hide DuelMod from the mission type list while in tournament mode (indices are unchanged)
 function serverCmdGetMissionTypes(%client, %key)
 {
@@ -60,79 +53,9 @@ function serverCmdGetMissionTypes(%client, %key)
          messageClient(%client, 'MsgVoteItem', "", %key, %type, "", $HostTypeDisplayName[%type], true);
 }
 
-function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %playerVote)
-{
-   // Change mission / tournament mode votes carry the mission type index in %arg4
-   if((%typeName $= "VoteChangeMission" && $Host::TournamentMode) || %typeName $= "VoteTournamentMode")
-   {
-      if($HostTypeName[%arg4] $= "DuelMod")
-      {
-         Duel_tournamentRefused(%client);
-         return;
-      }
-   }
-
-   // "Set next mission" menu: %arg1 is the chosen mission type's display name at the second step
-   if(%typeName $= "VoteNextMission" && $Host::TournamentMode && %arg1 !$= "" && %arg1 $= Duel_typeDisplayName())
-   {
-      Duel_tournamentRefused(%client);
-      return;
-   }
-
-   parent::serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %playerVote);
-}
-
-// The checks below run when a vote passes or an admin acts, so they also catch the multi-step
-// "set next mission" menu and any vote started before the server went into tournament mode.
-
-function DefaultGame::voteChangeMission(%game, %admin, %missionDisplayName, %typeDisplayName, %missionId, %missionTypeId)
-{
-   if($Host::TournamentMode && $HostTypeName[%missionTypeId] $= "DuelMod")
-   {
-      Duel_tournamentRefused(%admin);
-      return;
-   }
-
-   parent::voteChangeMission(%game, %admin, %missionDisplayName, %typeDisplayName, %missionId, %missionTypeId);
-}
-
-function DefaultGame::voteTournamentMode(%game, %admin, %missionDisplayName, %typeDisplayName, %missionId, %missionTypeId)
-{
-   if($HostTypeName[%missionTypeId] $= "DuelMod")
-   {
-      Duel_tournamentRefused(%admin);
-      return;
-   }
-
-   parent::voteTournamentMode(%game, %admin, %missionDisplayName, %typeDisplayName, %missionId, %missionTypeId);
-}
-
-function DefaultGame::setNextMission(%game, %client, %map, %type, %mapIndex, %typeIndex)
-{
-   if($Host::TournamentMode && $HostTypeName[%typeIndex] $= "DuelMod")
-   {
-      Duel_tournamentRefused(%client);
-      return;
-   }
-
-   parent::setNextMission(%game, %client, %map, %type, %mapIndex, %typeIndex);
-}
-
-function cycleMissions()
-{
-   // A DuelMod "next mission" set before the server went into tournament mode
-   if($Host::TournamentMode && $voteNext && $HostTypeName[$voteNextType] $= "DuelMod")
-   {
-      $voteNext = 0;
-      messageAll('MsgClient', '\c2The next mission was cleared: Duel MOD is not available in Tournament Mode.');
-   }
-
-   parent::cycleMissions();
-}
-
-// Last line of defence (e.g. random mission type cycling): never load DuelMod in tournament mode
-// unless there is nothing else to load. A DuelMod map that still loads turns tournament mode off
-// (MissionTypeOptions.cs).
+// Never load DuelMod in tournament mode while another map is running (e.g. a next mission set before
+// the server went into tournament mode, or random mission type cycling): the current map is reloaded
+// instead. A DuelMod map that loads anyway (server start) turns tournament mode off (MissionTypeOptions.cs).
 function loadMission(%missionName, %missionType, %firstMission)
 {
    if($Host::TournamentMode && %missionType $= "DuelMod" && $CurrentMission !$= "" && $CurrentMissionType !$= "DuelMod")
@@ -149,22 +72,6 @@ function loadMission(%missionName, %missionType, %firstMission)
 
 if(!isActivePackage(DuelModSupport))
    activatePackage(DuelModSupport);
-
-function Duel_typeDisplayName()
-{
-   for(%type = 0; %type < $HostTypeCount; %type++)
-      if($HostTypeName[%type] $= "DuelMod")
-         return $HostTypeDisplayName[%type];
-   return "";
-}
-
-function Duel_tournamentRefused(%client)
-{
-   if(isObject(%client))
-      messageClient(%client, 'MsgClient', '\c2Duel MOD is not available in Tournament Mode.');
-   else
-      messageAll('MsgClient', '\c2Duel MOD is not available in Tournament Mode.');
-}
 
 // Is %map already listed under %gameType in the vote list?
 function Duel_isRotationMap(%map, %gameType)
@@ -259,7 +166,8 @@ function Duel_missionDisplayName(%file)
    return %displayName;
 }
 
-// z_dtStats.cs built ML before this file loaded; GameGui.cs built the first vote list before
-// any autoexec script loaded.
+// dtStats built its map list (ML) before this file ran. The vote list is rebuilt from the scheduler,
+// outside the game script loop: buildMissionList can scan missions/*.mis, which would move the
+// engine's file search out from under that loop.
 Duel_injectMapList();
-buildMissionList();
+schedule(0, 0, "buildMissionList");
