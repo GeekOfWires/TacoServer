@@ -32,6 +32,7 @@ Discord: [Tribes 2 Discord](https://playt2.com/discord)
  - AFK Timeouts and Observer Kicking
  - Improved Ban System
  - Added Deathmatch, LCTF
+ - Added DuelMod (1v1 duels with Duel and MA rulesets)
  - Support for Siege
  - Shocklance Only Deathmatch Mode
  - Various logging improvements
@@ -79,10 +80,21 @@ Discord: [Tribes 2 Discord](https://playt2.com/discord)
  - Open Classic/Prefs/Serverprefs.cs in notepad and modify to your wishes
  - Run using Classic_dedicated_server.bat
 
+### DuelMod
+ - 1v1 duels: everyone starts as an observer; open the score screen (F2) and click a name to challenge them
+ - Accept or decline a challenge with VOTE YES/NO; VOTE YES after a duel asks for a re-duel
+ - Two rulesets: Duel (any hit from your opponent counts) and MA (mid-air practice modes)
+ - Players can vote to change the ruleset (the map restarts); admins can change the MA mode
+ - Settings and the DuelMod map list are in Classic/Prefs/DuelPrefs.cs
+ - Some DuelMod maps come from map packs (see [TacoMaps](https://github.com/ChocoTaco1/TacoMaps)); missing maps are skipped
+ - Stats are tracked separately for each ruleset
+ - Not available in tournament mode
+
 ----
 
 ### Credits & Thanks
  - BattleLore for this template and help
  - The T2 community for the free testing
  - DarkTiger, Ravin, Krash
+ - Sly One, system-z and Kahlua for the original Duel MOD, and SquirrelOfDeath for MA Duel MOD
  - The TribesNext community
