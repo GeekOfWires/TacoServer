@@ -404,6 +404,12 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 			if(!checkMapExist(%arg1, %arg2))
 				return;
 
+			if($Host::TournamentMode && %arg2 $= "DuelMod") //DuelMod is not played in Tournament Mode
+			{
+				messageClient(%client, "", "\c2Duel MOD is not available in Tournament Mode.");
+				return;
+			}
+
 			// We passed the spoof check, give it the fancy label
 			%arg1 = $HostMissionName[%arg3];
 			%arg2 = $HostTypeDisplayName[%arg4];
@@ -426,6 +432,12 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
 			}
 
 		case "VoteTournamentMode":
+			if($HostTypeName[%arg4] $= "DuelMod") //DuelMod is not played in Tournament Mode
+			{
+				messageClient(%client, "", "\c2Duel MOD is not available in Tournament Mode.");
+				return;
+			}
+
 			if((!%isAdmin && $Host::AllowPlayerVoteTournamentMode) || (%isAdmin && %client.ForceVote))
 			{
 				if(getAdmin() == 0)
@@ -792,6 +804,12 @@ function serverCmdStartNewVote(%client, %typeName, %arg1, %arg2, %arg3, %arg4, %
             %arg2 = $HostTypeName[%arg4];
             if(!checkMapExist(%arg1, %arg2))
                return;
+
+            if($Host::TournamentMode && %arg2 $= "DuelMod") //DuelMod is not played in Tournament Mode
+            {
+               messageClient(%client, "", "\c2Duel MOD is not available in Tournament Mode.");
+               return;
+            }
 
             // We passed the spoof check, give it the fancy label
             %arg1 = $HostMissionName[%arg3];

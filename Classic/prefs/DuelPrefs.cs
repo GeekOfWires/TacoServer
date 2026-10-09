@@ -4,7 +4,7 @@
 // DuelMod is a 1v1 dueling game type based on the T1/T2 Duel MOD by Sly One, system-z and Kahlua,
 // with the MA ruleset from SquirrelOfDeath's MA Duel MOD.
 //
-// Loaded by scripts/autoexec/zzzDuelModSupport.cs at startup.
+// Loaded at startup by scripts/DuelModGame.cs.
 // ***************************************************************************************************
 
 $Duel_PrefsLoaded = 1;

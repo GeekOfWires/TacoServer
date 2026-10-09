@@ -13,11 +13,15 @@
 // DuelMod - 1v1 duels for TacoServer
 //
 // Everything that changes how the server behaves lives in package DuelModGame (activated only
-// while a DuelMod map is running) or in DuelModGame:: methods. Helper functions are prefixed
-// Duel_ and settings $Duel_ (see prefs/DuelPrefs.cs).
+// while a DuelMod map is running) or in DuelModGame:: methods, apart from scripts/DuelModSupport.cs
+// (map lists, tournament mode block). Helper functions are prefixed Duel_ and settings $Duel_
+// (see prefs/DuelPrefs.cs).
 
 if(!$Duel_PrefsLoaded)
    exec("prefs/DuelPrefs.cs");
+
+// Map lists and the tournament mode block, which must also work while other game types run
+exec("scripts/DuelModSupport.cs");
 
 $VoteMessage["VoteDuelRuleset"] = "change";
 $VoteMessage["DuelMAMode"] = "change";
