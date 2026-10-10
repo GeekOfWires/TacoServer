@@ -129,10 +129,10 @@ $Duel_Map[$Duel_MapCount++] = "TWL_Harvester";
 $Duel_Map[$Duel_MapCount++] = "TWL_BeachBlitz";
 $Duel_Map[$Duel_MapCount++] = "SkinnyDipLak";   // LakRabbit version of the TR2 map (no TR2 objects)
 $Duel_Map[$Duel_MapCount++] = "Crater71Lak";    // LakRabbit version of the TR2 map (no TR2 objects)
-$Duel_Map[$Duel_MapCount++] = "WalledIn";
-$Duel_Map[$Duel_MapCount++] = "SmogArena";
-$Duel_Map[$Duel_MapCount++] = "Aeroena";
-$Duel_Map[$Duel_MapCount++] = "Checkmate";
+$Duel_Map[$Duel_MapCount++] = "WalledIn";       // arenaMaps.vl2
+$Duel_Map[$Duel_MapCount++] = "Smog Arena";     // arenaMaps.vl2
+$Duel_Map[$Duel_MapCount++] = "Aeroena";        // arenaMaps.vl2
+$Duel_Map[$Duel_MapCount++] = "Checkmate";      // arenaMaps.vl2
 $Duel_MapCount++;
 
 //-------------------------------------------------------------------------------
