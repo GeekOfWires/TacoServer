@@ -67,7 +67,7 @@ Discord: [Tribes 2 Discord](https://playt2.com/discord)
  - Two rulesets: Duel (any hit from your opponent counts) and MA (mid-air practice modes)
  - Players can vote to change the ruleset (the map restarts); admins can change the MA mode
  - Settings and the DuelMod map list are in Classic/Prefs/DuelPrefs.cs
- - Some DuelMod maps come from map packs (see [TacoMaps](https://github.com/ChocoTaco1/TacoMaps)); missing maps are skipped
+ - Some DuelMod maps come from map packs ([TacoMaps](https://github.com/ChocoTaco1/TacoMaps) and arenaMaps.vl2); missing maps are skipped
  - Stats are tracked separately for each ruleset
  - Not available in tournament mode
 
