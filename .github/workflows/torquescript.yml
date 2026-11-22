@@ -1,0 +1,19 @@
+name: TorqueScript
+
+# Fails when a script would not compile in Tribes 2. Uses the engine's own
+# lexer and parser tables, so errors land on the line the game would print.
+# https://github.com/Tribes2-Community/torquescript-check
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Tribes2-Community/torquescript-check@v1
